@@ -225,7 +225,7 @@ public class RE2
             do
             {
                 head = pooled.Value;
-            } while (head != null && !pooled.compareAndSet(head, head.next));
+            } while (head != null && !pooled.CompareAndSet(head, head.next));
             return head;
         }
     }
@@ -260,7 +260,7 @@ public class RE2
                 isNew = true;
             }
             m.next = head;
-        } while (!pooled.compareAndSet(head, m));
+        } while (!pooled.CompareAndSet(head, m));
     }
 
 
@@ -370,16 +370,8 @@ public class RE2
     // This is visible for testing.
     public string ReplaceAll(string src, string repl)
     {
-        //new ReplaceFunc()
-        //{
-        //  public string replace(string orig)
-        //    {
-        //        return repl;
-        //    }
-        //}
-
         return ReplaceAllFunc(
-            src,null,
+            src,(string orig)=>repl,
         2 * src.Length + 1);
         // TODO(afrozm): Is the reasoning correct, there can be at the most 2*len +1
         // replacements. Basically [a-z]*? abc x will be xaxbcx. So should it be
@@ -394,17 +386,8 @@ public class RE2
     // This is visible for testing.
     public string ReplaceFirst(string src, string repl)
     {
-        //new ReplaceFunc()
-        //{
-
-
-        //  public string replace(string orig)
-        //    {
-        //    return repl;
-        //    }
-        //}
         return ReplaceAllFunc(
-            src, null,
+            src, (string orig) => repl,
             1);
     }
 
@@ -779,14 +762,7 @@ public class RE2
         List<byte[]> result = new();
         AllMatches(
             MachineInput.FromUTF8(b),
-            n, null
-        //        new DeliverFunc() {
-
-        //          public void deliver(int[] match)
-        //    {
-        //        result.add(Utils.subarray(b, match[0], match[1]));
-        //    }
-        //}
+            n, (int[] match)=>result.Add(Utils.Subarray(b,match[0],match[1])) 
         );
         if (result.Count==0)
         {
@@ -809,14 +785,7 @@ public class RE2
         List<int[]> result = new();
         AllMatches(
             MachineInput.FromUTF8(b),
-            n, null
-        //new DeliverFunc() {
-
-        //          public void deliver(int[] match)
-        //    {
-        //        result.add(Utils.subarray(match, 0, 2));
-        //    }
-        //}
+            n, (int[] match) => result.Add(Utils.Subarray(match, 0, 2))
         );
         if (result.Count ==0)
         {
@@ -839,14 +808,7 @@ public class RE2
         List<string> result = new();
         AllMatches(
             MachineInput.FromUTF16(s),
-            n, null
-        //new DeliverFunc() {
-
-        //          public void deliver(int[] match)
-        //    {
-        //        result.add(s.substring(match[0], match[1]));
-        //    }
-        //}
+            n, (int[] match) => result.Add(s.Substring(match[0],match[1]))
         );
         if (result.Count == 0)
         {
@@ -869,14 +831,7 @@ public class RE2
         List<int[]> result = new();
         AllMatches(
             MachineInput.FromUTF16(s),
-            n, null
-        //new DeliverFunc() {
-
-        //          public void deliver(int[] match)
-        //    {
-        //        result.add(Utils.subarray(match, 0, 2));
-        //    }
-        //}
+            n, (int[] match) => result.Add(Utils.Subarray(match,0,2))
         );
         if (result.Count == 0)
         {
@@ -899,22 +854,18 @@ public class RE2
         List<byte[][]> result = new();
         AllMatches(
             MachineInput.FromUTF8(b),
-            n, null
-        //new DeliverFunc() {
-
-        //          public void deliver(int[] match)
-        //    {
-        //        byte[][] slice = new byte[match.Length / 2][];
-        //        for (int j = 0; j < slice.Length; ++j)
-        //        {
-        //            if (match[2 * j] >= 0)
-        //            {
-        //                slice[j] = Utils.subarray(b, match[2 * j], match[2 * j + 1]);
-        //            }
-        //        }
-        //        result.add(slice);
-        //    }
-        //}
+            n, (int[] match) =>
+            {
+                var slice = new byte[match.Length / 2][];
+                for (int j = 0; j < slice.Length; ++j)
+                {
+                    if (match[2 * j] >= 0)
+                    {
+                        slice[j] = Utils.Subarray(b, match[2 * j], match[2 * j + 1]);
+                    }
+                }
+                result.Add(slice);
+            }
         );
         if (result.Count == 0)
         {
@@ -937,14 +888,7 @@ public class RE2
         List<int[]> result = new();
         AllMatches(
             MachineInput.FromUTF8(b),
-            n, null
-        //new DeliverFunc() {
-
-        //          public void deliver(int[] match)
-        //    {
-        //        result.add(match);
-        //    }
-        //}
+            n, (int[] match) => result.Add(match)
         );
         if (result.Count == 0)
         {
@@ -967,22 +911,17 @@ public class RE2
         List<string[]> result = new ();
         AllMatches(
             MachineInput.FromUTF16(s),
-            n, null
-        //        new DeliverFunc() {
-
-        //          public void deliver(int[] match)
-        //    {
-        //        string[] slice = new string[match.Length / 2];
-        //        for (int j = 0; j < slice.Length; ++j)
-        //        {
-        //            if (match[2 * j] >= 0)
-        //            {
-        //                slice[j] = s.substring(match[2 * j], match[2 * j + 1]);
-        //            }
-        //        }
-        //        result.add(slice);
-        //    }
-        //}
+            n, (int[] match) => {
+                var slice = new string[match.Length / 2];
+                for (int j = 0; j < slice.Length; ++j)
+                {
+                    if (match[2 * j] >= 0)
+                    {
+                        slice[j] = s.Substring(match[2 * j], match[2 * j + 1]);
+                    }
+                }
+                result.Add(slice);
+            }
         );
         if (result.Count == 0)
         {
@@ -1002,18 +941,10 @@ public class RE2
     // This is visible for testing.
     public List<int[]> FindAllSubmatchIndex(string s, int n)
     {
-        //TODO:
         List<int[]> result = new ();
         AllMatches(
             MachineInput.FromUTF16(s),
-            n, null
-        //new DeliverFunc() {
-
-        //          public void deliver(int[] match)
-        //    {
-        //        result.add(match);
-        //    }
-        //}
+            n, (int[] match) => result.Add(match)
         );
         if (result.Count == 0)
         {

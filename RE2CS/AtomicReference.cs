@@ -11,16 +11,16 @@ namespace RE2CS;
 
 public class AtomicReference<V> where V : class
 {
-    private volatile V _value;
+    private volatile V? _value;
 
-    public AtomicReference(V initialValue = default)
+    public AtomicReference(V? initialValue = null)
     {
         _value = initialValue;
     }
 
-    public V Value { get => _value; set => _value = value; }
+    public V? Value { get => _value; set => _value = value; }
     
-    public bool compareAndSet(V expect, V update) {
+    public bool CompareAndSet(V expect, V update) {
         lock (this)
         {
             var same = false;

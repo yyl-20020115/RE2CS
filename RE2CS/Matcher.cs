@@ -43,7 +43,7 @@ public class Matcher
     // The group indexes, in [start, end) pairs.  Zeroth pair is overall match.
     private readonly int[] _groups;
 
-    private readonly Dictionary<string, int> _namedGroups;
+    private readonly Dictionary<string, int>? _namedGroups;
 
     // The number of submatches (groups) in the pattern.
     private readonly int _groupCount;

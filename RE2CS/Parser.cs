@@ -1465,8 +1465,8 @@ public class Parser
         if (n < 2) {
             throw new PatternSyntaxException(ERR_INTERNAL_ERROR, "stack underflow");
         }
-        Regexp re1 = Pop();
-        Regexp re2 = Pop();
+        var re1 = Pop();
+        var re2 = Pop();
         if (re2.op != Regexp.Op.LEFT_PAREN) {
             throw new PatternSyntaxException(ERR_MISSING_PAREN, wholeRegexp);
         }
@@ -1493,10 +1493,6 @@ public class Parser
         }
         int c = t.Pop();
     bigswitch:
-        if(c>='0'&& c <= '7')
-        {
-
-        }
         switch (c) {
             default:
                 if (!Utils.Isalnum(c))
@@ -1525,19 +1521,21 @@ public class Parser
                 goto for_zero;
             /* fallthrough */
             case '0':
-                for_zero:
-                // Consume up to three octal digits; already have one.
-                int r = c - '0';
-                for (int i = 1; i < 3; i++)
+            for_zero:
                 {
-                    if (!t.HasMore|| t.Peek() < '0' || t.Peek() > '7')
+                    // Consume up to three octal digits; already have one.
+                    int r = c - '0';
+                    for (int i = 1; i < 3; i++)
                     {
-                        break;
+                        if (!t.HasMore || t.Peek() < '0' || t.Peek() > '7')
+                        {
+                            break;
+                        }
+                        r = r * 8 + t.Peek() - '0';
+                        t.Skip(1); // digit
                     }
-                    r = r * 8 + t.Peek() - '0';
-                    t.Skip(1); // digit
+                    return r;
                 }
-                return r;
 
             // Hexadecimal escapes.
             case 'x':
@@ -1553,7 +1551,7 @@ public class Parser
                     // after the first non-hex digit.  We require only hex digits,
                     // and at least one.
                     int nhex = 0;
-                    r = 0;
+                    int r = 0;
                     for (; ; )
                     {
                         if (!t.HasMore)
