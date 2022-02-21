@@ -43,7 +43,7 @@ public class Simplifier
                             // Start a copy.
                             nre = new (re); // shallow copy
                             nre.runes = null;
-                            nre.subs = Parser.subarray(re.subs, 0, re.subs.Length); // clone
+                            nre.subs = Parser.Subarray(re.subs, 0, re.subs.Length); // clone
                         }
                         if (nre != re)
                         {

@@ -178,7 +178,7 @@ public class RE2
     // Exposed to ExecTests.
     public static RE2 CompileImpl(string expr, int mode, bool longest)
     {
-        var re = Parser.parse(expr, mode);
+        var re = Parser.Parse(expr, mode);
         int maxCap = re.MaxCap(); // (may shrink during simplify)
         re = Simplifier.Simplify(re);
         Program prog = Compiler.CompileRegexp(re);

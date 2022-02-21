@@ -127,7 +127,7 @@ public class ProgTest
     [Test]
     public void testCompile()
     {
-        Regexp re = Parser.parse(input, RE2.PERL);
+        Regexp re = Parser.Parse(input, RE2.PERL);
         Program p = Compiler.CompileRegexp(re);
         string s = p.ToString();
         assertEquals("compiled: " + input, expected, s);

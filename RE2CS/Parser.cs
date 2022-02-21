@@ -10,6 +10,8 @@
 // TODO(adonovan):
 // - Eliminate allocations (new int[], new Regexp[], new ArrayList) by
 //   recycling old arrays on a freelist.
+using System.Text;
+
 namespace RE2CS;
 
 /**
@@ -32,8 +34,7 @@ public class Parser
     private const string ERR_INVALID_REPEAT_SIZE = "invalid repeat count";
     private const string ERR_MISSING_BRACKET = "missing closing ]";
     private const string ERR_MISSING_PAREN = "missing closing )";
-    private const string ERR_MISSING_REPEAT_ARGUMENT =
-        "missing argument to repetition operator";
+    private const string ERR_MISSING_REPEAT_ARGUMENT = "missing argument to repetition operator";
     private const string ERR_TRAILING_BACKSLASH = "trailing backslash at end of expression";
     private const string ERR_DUPLICATE_NAMED_CAPTURE = "duplicate capture group name";
 
@@ -46,7 +47,7 @@ public class Parser
 
     // Stack of parsed expressions.
     private readonly Stack<Regexp> stack = new ();
-    private Regexp free;
+    private Regexp? free;
     private int numCap = 0; // number of capturing groups seen
     private readonly Dictionary<string, int> namedGroups = new();
 
@@ -57,9 +58,9 @@ public class Parser
     }
 
     // Allocate a Regexp, from the free list if possible.
-    private Regexp newRegexp(Regexp.Op op)
+    private Regexp NewRegexp(Regexp.Op op)
     {
-        Regexp re = free;
+        var re = free;
         if (re != null && re.subs != null && re.subs.Length > 0)
         {
             free = re.subs[0];
@@ -68,12 +69,12 @@ public class Parser
         }
         else
         {
-            re = new Regexp(op);
+            re = new (op);
         }
         return re;
     }
 
-    private void reuse(Regexp re)
+    private void Reuse(Regexp re)
     {
         if (re.subs != null && re.subs.Length > 0)
         {
@@ -84,31 +85,28 @@ public class Parser
 
     // Parse stack manipulation.
 
-    private Regexp pop()
-    {
-        return stack.Pop();
-    }
+    private Regexp Pop() => stack.Pop();
 
-    private Regexp[] popToPseudo()
+    private Regexp[] PopToPseudo()
     {
-        int n = stack.Count, i = n;
-        while (i > 0 && !stack.Peek().op.isPseudo())
+        List<Regexp> result = new List<Regexp>();
+        int i = stack.Count;
+        while (i > 0 && ! Regexp.IsPseudo(stack.Peek().op))
         {
-            i--;
+            result.Add(stack.Pop());
         }
-        Regexp[] r = stack.subList(i, n).toArray(new Regexp[n - i]);
-        stack.RemoveRange(i, n);
-        return r;
+        result.Reverse();
+        return result.ToArray();
     }
 
     // push pushes the regexp re onto the parse stack and returns the regexp.
     // Returns null for a CHAR_CLASS that can be merged with the top-of-stack.
-    private Regexp push(Regexp re)
+    private Regexp Push(Regexp re)
     {
         if (re.op == Regexp.Op.CHAR_CLASS && re.runes.Length == 2 && re.runes[0] == re.runes[1])
         {
             // Collapse range [x-x] -> single rune x.
-            if (maybeConcat(re.runes[0], flags & ~RE2.FOLD_CASE))
+            if (MaybeConcat(re.runes[0], flags & ~RE2.FOLD_CASE))
             {
                 return null;
             }
@@ -129,7 +127,7 @@ public class Parser
               && Unicode.SimpleFold(re.runes[1]) == re.runes[0]))
         {
             // Case-insensitive rune like [Aa] or [Δδ].
-            if (maybeConcat(re.runes[0], flags | RE2.FOLD_CASE))
+            if (MaybeConcat(re.runes[0], flags | RE2.FOLD_CASE))
             {
                 return null;
             }
@@ -142,10 +140,10 @@ public class Parser
         else
         {
             // Incremental concatenation.
-            maybeConcat(-1, 0);
+            MaybeConcat(-1, 0);
         }
 
-        stack.add(re);
+        stack.Push(re);
         return re;
     }
 
@@ -158,15 +156,17 @@ public class Parser
     // If (r >= 0 and there's a node left over, maybeConcat uses it
     // to push r with the given flags.
     // maybeConcat reports whether r was pushed.
-    private bool maybeConcat(int r, int flags)
+    private bool MaybeConcat(int r, int flags)
     {
         int n = stack.Count;
         if (n < 2)
         {
             return false;
         }
-        Regexp re1 = stack.get(n - 1);
-        Regexp re2 = stack.get(n - 2);
+        Regexp re1 = stack.Pop();
+        Regexp re2 = stack.Pop();
+        stack.Push(re2);
+        stack.Push(re1);
         if (re1.op != Regexp.Op.LITERAL
             || re2.op != Regexp.Op.LITERAL
             || (re1.flags & RE2.FOLD_CASE) != (re2.flags & RE2.FOLD_CASE))
@@ -175,7 +175,7 @@ public class Parser
         }
 
         // Push re1 into re2.
-        re2.runes = concatRunes(re2.runes, re1.runes);
+        re2.runes = ConcatRunes(re2.runes, re1.runes);
 
         // Reuse re1 if possible.
         if (r >= 0)
@@ -185,26 +185,26 @@ public class Parser
             return true;
         }
 
-        pop();
-        reuse(re1);
+        Pop();
+        Reuse(re1);
         return false; // did not push r
     }
 
     // newLiteral returns a new LITERAL Regexp with the given flags
-    private Regexp newLiteral(int r, int flags)
+    private Regexp NewLiteral(int r, int flags)
     {
-        Regexp re = newRegexp(Regexp.Op.LITERAL);
+        var re = NewRegexp(Regexp.Op.LITERAL);
         re.flags = flags;
         if ((flags & RE2.FOLD_CASE) != 0)
         {
-            r = minFoldRune(r);
+            r = MinFoldRune(r);
         }
         re.runes = new int[] { r };
         return re;
     }
 
     // minFoldRune returns the minimum rune fold-equivalent to r.
-    private static int minFoldRune(int r)
+    private static int MinFoldRune(int r)
     {
         if (r < Unicode.MIN_FOLD || r > Unicode.MAX_FOLD)
         {
@@ -224,18 +224,18 @@ public class Parser
 
     // literal pushes a literal regexp for the rune r on the stack
     // and returns that regexp.
-    private void literal(int r)
+    private void Literal(int r)
     {
-        push(newLiteral(r, flags));
+        Push(NewLiteral(r, flags));
     }
 
     // op pushes a regexp with the given op onto the stack
     // and returns that regexp.
-    private Regexp op(Regexp.Op op)
+    private Regexp Op(Regexp.Op op)
     {
-        Regexp re = newRegexp(op);
+        var re = NewRegexp(op);
         re.flags = flags;
-        return push(re);
+        return Push(re);
     }
 
     // repeat replaces the top stack element with itself repeated according to
@@ -243,14 +243,14 @@ public class Parser
     // Pre: t is positioned after the initial repetition operator.
     // Post: t advances past an optional perl-mode '?', or stays Add.
     //       Or, it fails with PatternSyntaxException.
-    private void repeat(
+    private void Repeat(
         Regexp.Op op, int min, int max, int beforePos, StringIterator t, int lastRepeatPos)
     {
         int flags = this.flags;
         if ((flags & RE2.PERL_X) != 0) {
-            if (t.more() && t.lookingAt('?'))
+            if (t.HasMore&& t.LookingAt('?'))
             {
-                t.skip(1); // '?'
+                t.Skip(1); // '?'
                 flags ^= RE2.NON_GREEDY;
             }
             if (lastRepeatPos != -1)
@@ -258,71 +258,73 @@ public class Parser
                 // In Perl it is not allowed to stack repetition operators:
                 // a** is a syntax error, not a doubled star, and a++ means
                 // something else entirely, which we don't support!
-                throw new PatternSyntaxException(ERR_INVALID_REPEAT_OP, t.from(lastRepeatPos));
+                throw new PatternSyntaxException(ERR_INVALID_REPEAT_OP, t.From(lastRepeatPos));
             }
         }
         int n = stack.Count;
         if (n == 0) {
-            throw new PatternSyntaxException(ERR_MISSING_REPEAT_ARGUMENT, t.from(beforePos));
+            throw new PatternSyntaxException(ERR_MISSING_REPEAT_ARGUMENT, t.From(beforePos));
         }
-        Regexp sub = stack.get(n - 1);
-        if (sub.op.isPseudo())
+        var sub = stack.Peek();
+        if (Regexp.IsPseudo(sub.op))
         {
-            throw new PatternSyntaxException(ERR_MISSING_REPEAT_ARGUMENT, t.from(beforePos));
+            throw new PatternSyntaxException(ERR_MISSING_REPEAT_ARGUMENT, t.From(beforePos));
         }
-        Regexp re = newRegexp(op);
+        Regexp re = NewRegexp(op);
         re.min = min;
         re.max = max;
         re.flags = flags;
         re.subs = new Regexp[] { sub };
-        stack.set(n - 1, re);
+        stack.Pop();
+        stack.Push(re);
+        //stack.set(n - 1, re);
     }
 
     // concat replaces the top of the stack (above the topmost '|' or '(') with
     // its concatenation.
-    private Regexp concat()
+    private Regexp Concat()
     {
-        maybeConcat(-1, 0);
+        MaybeConcat(-1, 0);
 
         // Scan down to find pseudo-operator | or (.
-        Regexp[] subs = popToPseudo();
+        var subs = PopToPseudo();
 
         // Empty concatenation is special case.
         if (subs.Length == 0)
         {
-            return push(newRegexp(Regexp.Op.EMPTY_MATCH));
+            return Push(NewRegexp(Regexp.Op.EMPTY_MATCH));
         }
 
-        return push(collapse(subs, Regexp.Op.CONCAT));
+        return Push(Collapse(subs, Regexp.Op.CONCAT));
     }
 
     // alternate replaces the top of the stack (above the topmost '(') with its
     // alternation.
-    private Regexp alternate()
+    private Regexp Alternate()
     {
         // Scan down to find pseudo-operator (.
         // There are no | above (.
-        Regexp[] subs = popToPseudo();
+        var subs = PopToPseudo();
 
         // Make sure top class is clean.
         // All the others already are (see swapVerticalBar).
         if (subs.Length > 0)
         {
-            cleanAlt(subs[subs.Length - 1]);
+            CleanAlt(subs[subs.Length - 1]);
         }
 
         // Empty alternate is special case
         // (shouldn't happen but easy to handle).
         if (subs.Length == 0)
         {
-            return push(newRegexp(Regexp.Op.NO_MATCH));
+            return Push(NewRegexp(Regexp.Op.NO_MATCH));
         }
 
-        return push(collapse(subs, Regexp.Op.ALTERNATE));
+        return Push(Collapse(subs, Regexp.Op.ALTERNATE));
     }
 
     // cleanAlt cleans re for eventual inclusion in an alternation.
-    private void cleanAlt(Regexp re)
+    private void CleanAlt(Regexp re)
     {
         if (re.op == Regexp.Op.CHAR_CLASS)
         {
@@ -348,7 +350,7 @@ public class Parser
     // If (sub contains op nodes, they all get hoisted up
     // so that there is never a concat of a concat or an
     // alternate of an alternate.
-    private Regexp collapse(Regexp[] subs, Regexp.Op op)
+    private Regexp Collapse(Regexp[] subs, Regexp.Op op)
     {
         if (subs.Length == 1)
         {
@@ -369,24 +371,24 @@ public class Parser
             {
                 Array.Copy(sub.subs, 0, newsubs, i, sub.subs.Length);
                 i += sub.subs.Length;
-                reuse(sub);
+                Reuse(sub);
             }
             else
             {
                 newsubs[i++] = sub;
             }
         }
-        Regexp re = newRegexp(op);
+        Regexp re = NewRegexp(op);
         re.subs = newsubs;
 
         if (op == Regexp.Op.ALTERNATE)
         {
-            re.subs = factor(re.subs, re.flags);
+            re.subs = Factor(re.subs, re.flags);
             if (re.subs.Length == 1)
             {
                 Regexp old = re;
                 re = re.subs[0];
-                reuse(old);
+                Reuse(old);
             }
         }
         return re;
@@ -403,7 +405,7 @@ public class Parser
     // which simplifies by character class introduction to
     //     A(B[CD]|EF)|BC[XY]
     //
-    private Regexp[] factor(Regexp[] array, int flags)
+    private Regexp[] Factor(Regexp[] array, int flags)
     {
         if (array.Length < 2)
         {
@@ -497,17 +499,17 @@ public class Parser
             else
             {
                 // Construct factored form: prefix(suffix1|suffix2|...)
-                Regexp prefix = newRegexp(Regexp.Op.LITERAL);
+                Regexp prefix = NewRegexp(Regexp.Op.LITERAL);
                 prefix.flags = strflags;
                 prefix.runes = Utils.Subarray(str, 0, strlen);
 
                 for (int j = start; j < i; j++)
                 {
-                    array[s + j] = removeLeadingString(array[s + j], strlen);
+                    array[s + j] = RemoveLeadingString(array[s + j], strlen);
                 }
                 // Recurse.
-                Regexp suffix = collapse(subarray(array, s + start, s + i), Regexp.Op.ALTERNATE);
-                Regexp re = newRegexp(Regexp.Op.CONCAT);
+                Regexp suffix = Collapse(Subarray(array, s + start, s + i), Regexp.Op.ALTERNATE);
+                Regexp re = NewRegexp(Regexp.Op.CONCAT);
                 re.subs = new Regexp[] { prefix, suffix };
                 array[lenout++] = re;
             }
@@ -539,13 +541,13 @@ public class Parser
             Regexp ifirst = null;
             if (i < lensub)
             {
-                ifirst = leadingRegexp(array[s + i]);
+                ifirst = LeadingRegexp(array[s + i]);
                 if (first != null
                     && first.Equals(ifirst)
-                    && (isCharClass(first)
+                    && (IsCharClass(first)
                         || (first.op == Regexp.Op.REPEAT
                             && first.min == first.max
-                            && isCharClass(first.subs[0]))))
+                            && IsCharClass(first.subs[0]))))
                 {
                     continue;
                 }
@@ -571,11 +573,11 @@ public class Parser
                 for (int j = start; j < i; j++)
                 {
                     bool reuse = j != start; // prefix came from sub[start]
-                    array[s + j] = removeLeadingRegexp(array[s + j], reuse);
+                    array[s + j] = RemoveLeadingRegexp(array[s + j], reuse);
                 }
                 // recurse
-                Regexp suffix = collapse(subarray(array, s + start, s + i), Regexp.Op.ALTERNATE);
-                Regexp re = newRegexp(Regexp.Op.CONCAT);
+                Regexp suffix = Collapse(Subarray(array, s + start, s + i), Regexp.Op.ALTERNATE);
+                Regexp re = NewRegexp(Regexp.Op.CONCAT);
                 re.subs = new Regexp[] { prefix, suffix };
                 array[lenout++] = re;
             }
@@ -599,7 +601,7 @@ public class Parser
             //
             // Invariant: sub[start:i] consists of regexps that are either
             // literal runes or character classes.
-            if (i < lensub && isCharClass(array[s + i]))
+            if (i < lensub && IsCharClass(array[s + i]))
             {
                 continue;
             }
@@ -635,10 +637,10 @@ public class Parser
 
                 for (int j = start + 1; j < i; j++)
                 {
-                    mergeCharClass(array[s + start], array[s + j]);
-                    reuse(array[s + j]);
+                    MergeCharClass(array[s + start], array[s + j]);
+                    Reuse(array[s + j]);
                 }
-                cleanAlt(array[s + start]);
+                CleanAlt(array[s + start]);
                 array[lenout++] = array[s + start];
             }
 
@@ -670,22 +672,22 @@ public class Parser
         lensub = lenout;
         s = 0;
 
-        return subarray(array, s, lensub);
+        return Subarray(array, s, lensub);
     }
 
     // removeLeadingString removes the first n leading runes
     // from the beginning of re.  It returns the replacement for re.
-    private Regexp removeLeadingString(Regexp re, int n)
+    private Regexp RemoveLeadingString(Regexp re, int n)
     {
         if (re.op == Regexp.Op.CONCAT && re.subs.Length > 0)
         {
             // Removing a leading string in a concatenation
             // might simplify the concatenation.
-            Regexp sub = removeLeadingString(re.subs[0], n);
+            Regexp sub = RemoveLeadingString(re.subs[0], n);
             re.subs[0] = sub;
             if (sub.op == Regexp.Op.EMPTY_MATCH)
             {
-                reuse(sub);
+                Reuse(sub);
                 switch (re.subs.Length)
                 {
                     case 0:
@@ -698,11 +700,11 @@ public class Parser
                         {
                             Regexp old = re;
                             re = re.subs[1];
-                            reuse(old);
+                            Reuse(old);
                             break;
                         }
                     default:
-                        re.subs = subarray(re.subs, 1, re.subs.Length);
+                        re.subs = Subarray(re.subs, 1, re.subs.Length);
                         break;
                 }
             }
@@ -722,7 +724,7 @@ public class Parser
 
     // leadingRegexp returns the leading regexp that re begins with.
     // The regexp refers to storage in re or its children.
-    private static Regexp leadingRegexp(Regexp re)
+    private static Regexp LeadingRegexp(Regexp re)
     {
         if (re.op == Regexp.Op.EMPTY_MATCH)
         {
@@ -744,15 +746,15 @@ public class Parser
     // It returns the replacement for re.
     // If reuse is true, it passes the removed regexp (if no longer needed) to
     // reuse.
-    private Regexp removeLeadingRegexp(Regexp re, bool _reuse)
+    private Regexp RemoveLeadingRegexp(Regexp re, bool _reuse)
     {
         if (re.op == Regexp.Op.CONCAT && re.subs.Length > 0)
         {
             if (_reuse)
             {
-                reuse(re.subs[0]);
+                Reuse(re.subs[0]);
             }
-            re.subs = subarray(re.subs, 1, re.subs.Length);
+            re.subs = Subarray(re.subs, 1, re.subs.Length);
             switch (re.subs.Length)
             {
                 case 0:
@@ -762,21 +764,21 @@ public class Parser
                 case 1:
                     Regexp old = re;
                     re = re.subs[0];
-                    reuse(old);
+                    Reuse(old);
                     break;
             }
             return re;
         }
         if (_reuse)
         {
-            reuse(re);
+            Reuse(re);
         }
-        return newRegexp(Regexp.Op.EMPTY_MATCH);
+        return NewRegexp(Regexp.Op.EMPTY_MATCH);
     }
 
-    private static Regexp literalRegexp(string s, int flags)
+    private static Regexp LiteralRegexp(string s, int flags)
     {
-        Regexp re = new Regexp(Regexp.Op.LITERAL);
+        var re = new Regexp(Regexp.Op.LITERAL);
         re.flags = flags;
         re.runes = Utils.StringToRunes(s);
         return re;
@@ -807,183 +809,147 @@ public class Parser
         }
 
         // Returns the cursor position.  Do not interpret the result!
-        public int pos()
-        {
-            return _pos;
-        }
+        public int Pos => _pos;
 
         // Resets the cursor position to a previous value returned by pos().
-        public void rewindTo(int pos)
-        {
-            this._pos = pos;
-        }
+        public void RewindTo(int pos) => this._pos = pos;
 
         // Returns true unless the stream is exhausted.
-        public bool more()
-        {
-            return _pos < str.Length;
-        }
+        public bool HasMore => _pos < str.Length;
 
         // Returns the rune at the cursor position.
         // Precondition: |more()|.
-        public int peek()
-        {
-            return str[_pos];
-        }
+        public int Peek() => str[_pos];
 
         // Advances the cursor by |n| positions, which must be ASCII runes.
         //
         // (In practise, this is only ever used to skip over regexp
         // metacharacters that are ASCII, so there is no numeric difference
         // between indices into  UTF-8 bytes, UTF-16 codes and runes.)
-        public void skip(int n)
-        {
-            _pos += n;
-        }
+        public void Skip(int n) => _pos += n;
 
         // Advances the cursor by the number of cursor positions in |s|.
-        public void skipString(string s)
-        {
-            _pos += s.Length;
-        }
+        public void SkipString(string s) => _pos += s.Length;
 
         // Returns the rune at the cursor position, and advances the cursor
         // past it.  Precondition: |more()|.
-        public int pop()
+        public int Pop()
         {
-            int r = str.codePointAt(pos);
-            _pos += Character.charCount(r);
+            int r = char.ConvertToUtf32(str, Pos);// str.codePointAt(Pos);
+            _pos += new Rune(r).Utf16SequenceLength;//. Character.charCount(r);
             return r;
         }
 
         // Equivalent to both peek() == c but more efficient because we
         // don't support surrogates.  Precondition: |more()|.
-        public bool lookingAt(char c)
-        {
-            return str[_pos] == c;
-        }
+        public bool LookingAt(char c) => str[_pos] == c;
 
         // Equivalent to rest().StartsWith(s).
-        public bool lookingAt(string s)
-        {
-            return rest().StartsWith(s);
-        }
+        public bool LookingAt(string s) => Rest().StartsWith(s);
 
         // Returns the rest of the pattern as a Java UTF-16 string.
-        public string rest()
-        {
-            return str.Substring(_pos);
-        }
+        public string Rest() => str.Substring(_pos);
 
         // Returns the Substring from |beforePos| to the current position.
         // |beforePos| must have been previously returned by |pos()|.
-        public string from(int beforePos)
-        {
-            return str.Substring(beforePos, _pos);
-        }
+        public string From(int beforePos) => str.Substring(beforePos, _pos);
 
-        public override string ToString()
-        {
-            return rest();
-        }
+        public override string ToString() => Rest();
     }
 
     /**
      * Parse regular expression pattern {@var pattern} with mode flags {@var flags}.
      */
-    public static Regexp parse(string pattern, int flags)
-    {
-        return new Parser(pattern, flags).parseInternal();
-    }
+    public static Regexp Parse(string pattern, int flags) => new Parser(pattern, flags).ParseInternal();
 
-    private Regexp parseInternal()
+    private Regexp ParseInternal()
     {
         if ((flags & RE2.LITERAL) != 0) {
             // Trivial parser for literal string.
-            return literalRegexp(wholeRegexp, flags);
+            return LiteralRegexp(wholeRegexp, flags);
         }
 
         // Otherwise, must do real work.
         int lastRepeatPos = -1, min = -1, max = -1;
-        StringIterator t = new StringIterator(wholeRegexp);
-        while (t.more())
+        var t = new StringIterator(wholeRegexp);
+        while (t.HasMore)
         {
             int repeatPos = -1;
         bigswitch:
-            switch (t.peek())
+            switch (t.Peek())
             {
                 default:
-                    literal(t.pop());
+                    Literal(t.Pop());
                     break;
 
                 case '(':
-                    if ((flags & RE2.PERL_X) != 0 && t.lookingAt("(?"))
+                    if ((flags & RE2.PERL_X) != 0 && t.LookingAt("(?"))
                     {
                         // Flag changes and non-capturing groups.
-                        parsePerlFlags(t);
+                        ParsePerlFlags(t);
                         break;
                     }
-                    op(Regexp.Op.LEFT_PAREN).cap = ++numCap;
-                    t.skip(1); // '('
+                    Op(Regexp.Op.LEFT_PAREN).cap = ++numCap;
+                    t.Skip(1); // '('
                     break;
 
                 case '|':
-                    parseVerticalBar();
-                    t.skip(1); // '|'
+                    ParseVerticalBar();
+                    t.Skip(1); // '|'
                     break;
 
                 case ')':
-                    parseRightParen();
-                    t.skip(1); // ')'
+                    ParseRightParen();
+                    t.Skip(1); // ')'
                     break;
 
                 case '^':
                     if ((flags & RE2.ONE_LINE) != 0)
                     {
-                        op(Regexp.Op.BEGIN_TEXT);
+                        Op(Regexp.Op.BEGIN_TEXT);
                     }
                     else
                     {
-                        op(Regexp.Op.BEGIN_LINE);
+                        Op(Regexp.Op.BEGIN_LINE);
                     }
-                    t.skip(1); // '^'
+                    t.Skip(1); // '^'
                     break;
 
                 case '$':
                     if ((flags & RE2.ONE_LINE) != 0)
                     {
-                        op(Regexp.Op.END_TEXT).flags |= RE2.WAS_DOLLAR;
+                        Op(Regexp.Op.END_TEXT).flags |= RE2.WAS_DOLLAR;
                     }
                     else
                     {
-                        op(Regexp.Op.END_LINE);
+                        Op(Regexp.Op.END_LINE);
                     }
-                    t.skip(1); // '$'
+                    t.Skip(1); // '$'
                     break;
 
                 case '.':
                     if ((flags & RE2.DOT_NL) != 0)
                     {
-                        op(Regexp.Op.ANY_CHAR);
+                        Op(Regexp.Op.ANY_CHAR);
                     }
                     else
                     {
-                        op(Regexp.Op.ANY_CHAR_NOT_NL);
+                        Op(Regexp.Op.ANY_CHAR_NOT_NL);
                     }
-                    t.skip(1); // '.'
+                    t.Skip(1); // '.'
                     break;
 
                 case '[':
-                    parseClass(t);
+                    ParseClass(t);
                     break;
 
                 case '*':
                 case '+':
                 case '?':
                     {
-                        repeatPos = t.pos();
+                        repeatPos = t.Pos;
                         Regexp.Op op = Regexp.Op.ANY_CHAR;
-                        switch (t.pop())
+                        switch (t.Pop())
                         {
                             case '*':
                                 op = Regexp.Op.STAR;
@@ -995,44 +961,44 @@ public class Parser
                                 op = Regexp.Op.QUEST;
                                 break;
                         }
-                        repeat(op, min, max, repeatPos, t, lastRepeatPos);
+                        Repeat(op, min, max, repeatPos, t, lastRepeatPos);
                         // (min and max are now dead.)
                         break;
                     }
                 case '{':
                     {
-                        repeatPos = t.pos();
-                        int minMax = parseRepeat(t);
+                        repeatPos = t.Pos;
+                        int minMax = ParseRepeat(t);
                         if (minMax < 0)
                         {
                             // If the repeat cannot be parsed, { is a literal.
-                            t.rewindTo(repeatPos);
-                            literal(t.pop()); // '{'
+                            t.RewindTo(repeatPos);
+                            Literal(t.Pop()); // '{'
                             break;
                         }
                         min = minMax >> 16;
                         max = (short)(minMax & 0xffff); // sign extend
-                        repeat(Regexp.Op.REPEAT, min, max, repeatPos, t, lastRepeatPos);
+                        Repeat(Regexp.Op.REPEAT, min, max, repeatPos, t, lastRepeatPos);
                         break;
                     }
 
                 case '\\':
                     {
-                        int savedPos = t.pos();
-                        t.skip(1); // '\\'
-                        if ((flags & RE2.PERL_X) != 0 && t.more())
+                        int savedPos = t.Pos;
+                        t.Skip(1); // '\\'
+                        if ((flags & RE2.PERL_X) != 0 && t.HasMore)
                         {
-                            int c = t.pop();
+                            int c = t.Pop();
                             switch (c)
                             {
                                 case 'A':
-                                    op(Regexp.Op.BEGIN_TEXT);
+                                    Op(Regexp.Op.BEGIN_TEXT);
                                     goto bigswitch;
                                 case 'b':
-                                    op(Regexp.Op.WORD_BOUNDARY);
+                                    Op(Regexp.Op.WORD_BOUNDARY);
                                     goto bigswitch;
                                 case 'B':
-                                    op(Regexp.Op.NO_WORD_BOUNDARY);
+                                    Op(Regexp.Op.NO_WORD_BOUNDARY);
                                     goto bigswitch;
                                 case 'C':
                                     // any byte; not supported
@@ -1040,80 +1006,80 @@ public class Parser
                                 case 'Q':
                                     {
                                         // \Q ... \E: the ... is always literals
-                                        string lit = t.rest();
+                                        string lit = t.Rest();
                                         int i = lit.IndexOf("\\E");
                                         if (i >= 0)
                                         {
                                             lit = lit.Substring(0, i);
                                         }
-                                        t.skipString(lit);
-                                        t.skipString("\\E");
+                                        t.SkipString(lit);
+                                        t.SkipString("\\E");
                                         for (int j = 0; j < lit.Length;)
                                         {
-                                            int codepoint = lit.codePointAt(j);
-                                            literal(codepoint);
-                                            j += Character.charCount(codepoint);
+                                            int codepoint = char.ConvertToUtf32(lit, j);// lit.codePointAt(j);
+                                            Literal(codepoint);
+                                            j += new Rune(codepoint).Utf16SequenceLength;// Character.charCount(codepoint);
                                         }
                                         goto bigswitch;
                                     }
                                 case 'z':
-                                    op(Regexp.Op.END_TEXT);
+                                    Op(Regexp.Op.END_TEXT);
                                     goto bigswitch;
                                 default:
-                                    t.rewindTo(savedPos);
+                                    t.RewindTo(savedPos);
                                     break;
                             }
                         }
 
-                        Regexp re = newRegexp(Regexp.Op.CHAR_CLASS);
+                        Regexp re = NewRegexp(Regexp.Op.CHAR_CLASS);
                         re.flags = flags;
 
                         // Look for Unicode character group like \p{Han}
-                        if (t.lookingAt("\\p") || t.lookingAt("\\P"))
+                        if (t.LookingAt("\\p") || t.LookingAt("\\P"))
                         {
                             CharClass cc2 = new CharClass();
-                            if (parseUnicodeClass(t, cc2))
+                            if (ParseUnicodeClass(t, cc2))
                             {
                                 re.runes = cc2.ToArray();
-                                push(re);
+                                Push(re);
                                 goto bigswitch;
                             }
                         }
 
                         // Perl character class escape.
                         CharClass cc = new CharClass();
-                        if (parsePerlClassEscape(t, cc))
+                        if (ParsePerlClassEscape(t, cc))
                         {
                             re.runes = cc.ToArray();
-                            push(re);
+                            Push(re);
                             goto bigswitch;
                         }
 
-                        t.rewindTo(savedPos);
-                        reuse(re);
+                        t.RewindTo(savedPos);
+                        Reuse(re);
 
                         // Ordinary single-character escape.
-                        literal(parseEscape(t));
+                        Literal(ParseEscape(t));
                         break;
                     }
             }
             lastRepeatPos = repeatPos;
         }
 
-        concat();
-        if (swapVerticalBar())
+        Concat();
+        if (SwapVerticalBar())
         {
-            pop(); // pop vertical bar
+            Pop(); // pop vertical bar
         }
-        alternate();
+        Alternate();
 
         int n = stack.Count;
         if (n != 1)
         {
             throw new PatternSyntaxException(ERR_MISSING_PAREN, wholeRegexp);
         }
-        stack.get(0).namedGroups = namedGroups;
-        return stack.get(0);
+        stack.Peek().namedGroups = namedGroups;
+        return stack.Peek();
     }
 
     // parseRepeat parses {min} (max=min) or {min,} (max=-1) or {min,max}.
@@ -1126,45 +1092,45 @@ public class Parser
     //
     // On success, advances |t| beyond the repeat; otherwise |t.pos()| is
     // undefined.
-    private static int parseRepeat(StringIterator t)
+    private static int ParseRepeat(StringIterator t)
     {
-        int start = t.pos();
-        if (!t.more() || !t.lookingAt('{')) {
+        int start = t.Pos;
+        if (!t.HasMore|| !t.LookingAt('{')) {
             return -1;
         }
-        t.skip(1); // '{'
-        int min = parseInt(t); // (can be -2)
+        t.Skip(1); // '{'
+        int min = ParseInt(t); // (can be -2)
         if (min == -1) {
             return -1;
         }
-        if (!t.more()) {
+        if (!t.HasMore) {
             return -1;
         }
         int max;
-        if (!t.lookingAt(',')) {
+        if (!t.LookingAt(',')) {
             max = min;
         } else {
-            t.skip(1); // ','
-            if (!t.more())
+            t.Skip(1); // ','
+            if (!t.HasMore)
             {
                 return -1;
             }
-            if (t.lookingAt('}'))
+            if (t.LookingAt('}'))
             {
                 max = -1;
             }
-            else if ((max = parseInt(t)) == -1)
+            else if ((max = ParseInt(t)) == -1)
             { // (can be -2)
                 return -1;
             }
         }
-        if (!t.more() || !t.lookingAt('}')) {
+        if (!t.HasMore|| !t.LookingAt('}')) {
             return -1;
         }
-        t.skip(1); // '}'
+        t.Skip(1); // '}'
         if (min < 0 || min > 1000 || max == -2 || max > 1000 || (max >= 0 && min > max)) {
             // Numbers were negative or too big, or max is present and min > max.
-            throw new PatternSyntaxException(ERR_INVALID_REPEAT_SIZE, t.from(start));
+            throw new PatternSyntaxException(ERR_INVALID_REPEAT_SIZE, t.From(start));
         }
         return (min << 16) | (max & 0xffff); // success
     }
@@ -1173,9 +1139,9 @@ public class Parser
     // like (?i) or (?: or (?i:.
     // Pre: t at "(?".  Post: t after ")".
     // Sets numCap.
-    private void parsePerlFlags(StringIterator t)
+    private void ParsePerlFlags(StringIterator t)
     {
-        int startPos = t.pos();
+        int startPos = t.Pos;
 
         // Check for named captures, first introduced in Python's regexp library.
         // As usual, there are three slightly different syntaxes:
@@ -1192,7 +1158,7 @@ public class Parser
         // In both the open source world (via Code Search) and the
         // Google source tree, (?P<expr>name) is the dominant form,
         // so that's the one we implement.  One is enough.
-        string s = t.rest();
+        string s = t.Rest();
         if (s.StartsWith("(?P<")) {
             // Pull out name.
             int end = s.IndexOf('>');
@@ -1201,32 +1167,33 @@ public class Parser
                 throw new PatternSyntaxException(ERR_INVALID_NAMED_CAPTURE, s);
             }
             string name = s.Substring(4, end); // "name"
-            t.skipString(name);
-            t.skip(5); // "(?P<>"
-            if (!isValidCaptureName(name))
+            t.SkipString(name);
+            t.Skip(5); // "(?P<>"
+            if (!IsValidCaptureName(name))
             {
                 throw new PatternSyntaxException(
                     ERR_INVALID_NAMED_CAPTURE, s.Substring(0, end)); // "(?P<name>"
             }
             // Like ordinary capture, but named.
-            Regexp re = op(Regexp.Op.LEFT_PAREN);
+            Regexp re = Op(Regexp.Op.LEFT_PAREN);
             re.cap = ++numCap;
-            if (namedGroups.Add(name, numCap) != null)
+            if (namedGroups.ContainsKey(name))
             {
                 throw new PatternSyntaxException(ERR_DUPLICATE_NAMED_CAPTURE, name);
             }
+            namedGroups.Add(name, numCap);
             re.name = name;
             return;
         }
 
         // Non-capturing group.  Might also twiddle Perl flags.
-        t.skip(2); // "(?"
+        t.Skip(2); // "(?"
         int flags = this.flags;
         int sign = +1;
         bool sawFlag = false;
     loop:
-        while (t.more()) {
-            int c = t.pop();
+        while (t.HasMore) {
+            int c = t.Pop();
             switch (c)
             {
                 default:
@@ -1277,14 +1244,14 @@ public class Parser
                     if (c == ':')
                     {
                         // Open new group
-                        op(Regexp.Op.LEFT_PAREN);
+                        Op(Regexp.Op.LEFT_PAREN);
                     }
                     this.flags = flags;
                     return;
             }
         }
 
-        throw new PatternSyntaxException(ERR_INVALID_PERL_OP, t.from(startPos));
+        throw new PatternSyntaxException(ERR_INVALID_PERL_OP, t.From(startPos));
     }
 
     // isValidCaptureName reports whether name
@@ -1292,15 +1259,15 @@ public class Parser
     // PCRE limits names to 32 bytes.
     // Python rejects names starting with digits.
     // We don't enforce either of those.
-    private static bool isValidCaptureName(string name)
+    private static bool IsValidCaptureName(string name)
     {
-        if (name.isEmpty())
+        if (string.IsNullOrEmpty(name))
         {
             return false;
         }
         for (int i = 0; i < name.Length; ++i)
         {
-            char c = name.charAt(i);
+            char c = name[i];
             if (c != '_' && !Utils.Isalnum(c))
             {
                 return false;
@@ -1311,16 +1278,16 @@ public class Parser
 
     // parseInt parses a nonnegative decimal integer.
     // -1 => bad format.  -2 => format ok, but integer overflow.
-    private static int parseInt(StringIterator t)
+    private static int ParseInt(StringIterator t)
     {
-        int start = t.pos();
+        int start = t.Pos;
         int c;
-        while (t.more() && (c = t.peek()) >= '0' && c <= '9')
+        while (t.HasMore&& (c = t.Peek()) >= '0' && c <= '9')
         {
-            t.skip(1); // digit
+            t.Skip(1); // digit
         }
-        string n = t.from(start);
-        if (n.isEmpty() || (n.Length > 1 && n.charAt(0) == '0'))
+        string n = t.From(start);
+        if (string.IsNullOrEmpty(n) || (n.Length > 1 && n[0] == '0'))
         { // disallow leading zeros
             return -1; // bad format
         }
@@ -1328,21 +1295,19 @@ public class Parser
         {
             return -2; // overflow
         }
-        return Integer.valueOf(n, 10); // can't fail
+
+        return int.TryParse(n, out var r) ? r : -1;//  Integer.valueOf(n, 10); // can't fail
     }
 
     // can this be represented as a character class?
     // single-rune literal string, char class, ., and .|\n.
-    private static bool isCharClass(Regexp re)
-    {
-        return ((re.op == Regexp.Op.LITERAL && re.runes.Length == 1)
+    private static bool IsCharClass(Regexp re) => ((re.op == Regexp.Op.LITERAL && re.runes.Length == 1)
             || re.op == Regexp.Op.CHAR_CLASS
             || re.op == Regexp.Op.ANY_CHAR_NOT_NL
             || re.op == Regexp.Op.ANY_CHAR);
-    }
 
     // does re match r?
-    private static bool matchRune(Regexp re, int r)
+    private static bool MatchRune(Regexp re, int r)
     {
         switch (re.op)
         {
@@ -1366,24 +1331,24 @@ public class Parser
     }
 
     // parseVerticalBar handles a | in the input.
-    private void parseVerticalBar()
+    private void ParseVerticalBar()
     {
-        concat();
+        Concat();
 
         // The concatenation we just parsed is on top of the stack.
         // If it sits above an opVerticalBar, swap it below
         // (things below an opVerticalBar become an alternation).
         // Otherwise, push a new vertical bar.
-        if (!swapVerticalBar())
+        if (!SwapVerticalBar())
         {
-            op(Regexp.Op.VERTICAL_BAR);
+            Op(Regexp.Op.VERTICAL_BAR);
         }
     }
 
     // mergeCharClass makes dst = dst|src.
     // The caller must ensure that dst.Op >= src.Op,
     // to reduce the amount of copying.
-    private static void mergeCharClass(Regexp dst, Regexp src)
+    private static void MergeCharClass(Regexp dst, Regexp src)
     {
         switch (dst.op)
         {
@@ -1392,7 +1357,7 @@ public class Parser
                 break;
             case Regexp.Op.ANY_CHAR_NOT_NL:
                 // src might add \n
-                if (matchRune(src, '\n'))
+                if (MatchRune(src, '\n'))
                 {
                     dst.op = Regexp.Op.ANY_CHAR;
                 }
@@ -1427,15 +1392,15 @@ public class Parser
     // If the top of the stack is an element followed by an opVerticalBar
     // swapVerticalBar swaps the two and returns true.
     // Otherwise it returns false.
-    private bool swapVerticalBar()
+    private bool SwapVerticalBar()
     {
         // If above and below vertical bar are literal or char class,
         // can merge into a single char class.
         int n = stack.Count;
         if (n >= 3
             && stack.get(n - 2).op == Regexp.Op.VERTICAL_BAR
-            && isCharClass(stack.get(n - 1))
-            && isCharClass(stack.get(n - 3)))
+            && IsCharClass(stack.get(n - 1))
+            && IsCharClass(stack.get(n - 3)))
         {
             Regexp re1 = stack.get(n - 1);
             Regexp re3 = stack.get(n - 3);
@@ -1447,9 +1412,9 @@ public class Parser
                 re1 = tmp;
                 stack.set(n - 3, re3);
             }
-            mergeCharClass(re3, re1);
-            reuse(re1);
-            pop();
+            MergeCharClass(re3, re1);
+            Reuse(re1);
+            Pop();
             return true;
         }
 
@@ -1463,7 +1428,7 @@ public class Parser
                 {
                     // Now out of reach.
                     // Clean opportunistically.
-                    cleanAlt(stack.get(n - 3));
+                    CleanAlt(stack.get(n - 3));
                 }
                 stack.set(n - 2, re1);
                 stack.set(n - 1, re2);
@@ -1474,20 +1439,20 @@ public class Parser
     }
 
     // parseRightParen handles a ')' in the input.
-    private void parseRightParen()
+    private void ParseRightParen()
     {
-        concat();
-        if (swapVerticalBar()) {
-            pop(); // pop vertical bar
+        Concat();
+        if (SwapVerticalBar()) {
+            Pop(); // pop vertical bar
         }
-        alternate();
+        Alternate();
 
         int n = stack.Count;
         if (n < 2) {
             throw new PatternSyntaxException(ERR_INTERNAL_ERROR, "stack underflow");
         }
-        Regexp re1 = pop();
-        Regexp re2 = pop();
+        Regexp re1 = Pop();
+        Regexp re2 = Pop();
         if (re2.op != Regexp.Op.LEFT_PAREN) {
             throw new PatternSyntaxException(ERR_MISSING_PAREN, wholeRegexp);
         }
@@ -1495,25 +1460,29 @@ public class Parser
         this.flags = re2.flags;
         if (re2.cap == 0) {
             // Just for grouping.
-            push(re1);
+            Push(re1);
         } else {
             re2.op = Regexp.Op.CAPTURE;
             re2.subs = new Regexp[] { re1 };
-            push(re2);
+            Push(re2);
         }
     }
     // parseEscape parses an escape sequence at the beginning of s
     // and returns the rune.
     // Pre: t at '\\'.  Post: after escape.
-    private static int parseEscape(StringIterator t)
+    private static int ParseEscape(StringIterator t)
     {
-        int startPos = t.pos();
-        t.skip(1); // '\\'
-        if (!t.more()) {
+        int startPos = t.Pos;
+        t.Skip(1); // '\\'
+        if (!t.HasMore) {
             throw new PatternSyntaxException(ERR_TRAILING_BACKSLASH);
         }
-        int c = t.pop();
+        int c = t.Pop();
     bigswitch:
+        if(c>='0'&& c <= '7')
+        {
+
+        }
         switch (c) {
             default:
                 if (!Utils.Isalnum(c))
@@ -1535,32 +1504,34 @@ public class Parser
             case '6':
             case '7':
                 // Single non-zero digit is a backreference; not supported
-                if (!t.more() || t.peek() < '0' || t.peek() > '7')
+                if (!t.HasMore|| t.Peek() < '0' || t.Peek() > '7')
                 {
                     break;
                 }
+                goto for_zero;
             /* fallthrough */
             case '0':
+                for_zero:
                 // Consume up to three octal digits; already have one.
                 int r = c - '0';
                 for (int i = 1; i < 3; i++)
                 {
-                    if (!t.more() || t.peek() < '0' || t.peek() > '7')
+                    if (!t.HasMore|| t.Peek() < '0' || t.Peek() > '7')
                     {
                         break;
                     }
-                    r = r * 8 + t.peek() - '0';
-                    t.skip(1); // digit
+                    r = r * 8 + t.Peek() - '0';
+                    t.Skip(1); // digit
                 }
                 return r;
 
             // Hexadecimal escapes.
             case 'x':
-                if (!t.more())
+                if (!t.HasMore)
                 {
                     break;
                 }
-                c = t.pop();
+                c = t.Pop();
                 if (c == '{')
                 {
                     // Any number of digits in braces.
@@ -1571,11 +1542,11 @@ public class Parser
                     r = 0;
                     for (; ; )
                     {
-                        if (!t.more())
+                        if (!t.HasMore)
                         {
                             goto bigswitch;
                         }
-                        c = t.pop();
+                        c = t.Pop();
                         if (c == '}')
                         {
                             break;
@@ -1601,11 +1572,11 @@ public class Parser
 
                 // Easy case: two hex digits.
                 int x = Utils.Unhex(c);
-                if (!t.more())
+                if (!t.HasMore)
                 {
                     break;
                 }
-                c = t.pop();
+                c = t.Pop();
                 int y = Utils.Unhex(c);
                 if (x < 0 || y < 0)
                 {
@@ -1632,44 +1603,43 @@ public class Parser
             case 'v':
                 return 11; // No \v in Java
         }
-        throw new PatternSyntaxException(ERR_INVALID_ESCAPE, t.from(startPos));
+        throw new PatternSyntaxException(ERR_INVALID_ESCAPE, t.From(startPos));
     }
 
     // parseClassChar parses a character class character and returns it.
     // wholeClassPos is the position of the start of the entire class "[...".
     // Pre: t at class char; Post: t after it.
-    private static int parseClassChar(StringIterator t, int wholeClassPos)
+    private static int ParseClassChar(StringIterator t, int wholeClassPos)
     {
-        if (!t.more()) {
-            throw new PatternSyntaxException(ERR_MISSING_BRACKET, t.from(wholeClassPos));
+        if (!t.HasMore) {
+            throw new PatternSyntaxException(ERR_MISSING_BRACKET, t.From(wholeClassPos));
         }
 
         // Allow regular escape sequences even though
         // many need not be escaped in this context.
-        if (t.lookingAt('\\')) {
-            return parseEscape(t);
+        if (t.LookingAt('\\')) {
+            return ParseEscape(t);
         }
 
-        return t.pop();
+        return t.Pop();
     }
 
     // parsePerlClassEscape parses a leading Perl character class escape like \d
     // from the beginning of |t|.  If one is present, it appends the characters
     // to cc and returns true.  The iterator is advanced past the escape
     // on success, undefined on failure, in which case false is returned.
-    private bool parsePerlClassEscape(StringIterator t, CharClass cc)
+    private bool ParsePerlClassEscape(StringIterator t, CharClass cc)
     {
-        int beforePos = t.pos();
+        int beforePos = t.Pos;
         if ((flags & RE2.PERL_X) == 0
-            || !t.more()
-            || t.pop() != '\\'
+            || !t.HasMore            || t.Pop() != '\\'
             || // consume '\\'
-            !t.more())
+            !t.HasMore)
         {
             return false;
         }
-        t.pop(); // e.g. advance past 'd' in "\\d"
-        CharGroup g = CharGroup.PERL_GROUPS.get(t.from(beforePos));
+        t.Pop(); // e.g. advance past 'd' in "\\d"
+        var g = CharGroup.PERL_GROUPS[t.From(beforePos)];
         if (g == null)
         {
             return false;
@@ -1684,17 +1654,17 @@ public class Parser
     // Pre: t at "[:".  Post: t after ":]".
     // On failure (no class of than name), throws PatternSyntaxException.
     // On misparse, returns false; t.pos() is undefined.
-    private bool parseNamedClass(StringIterator t, CharClass cc)
+    private bool ParseNamedClass(StringIterator t, CharClass cc)
     {
         // (Go precondition check deleted.)
-        string cls = t.rest();
+        string cls = t.Rest();
         int i = cls.IndexOf(":]");
         if (i < 0) {
             return false;
         }
         string name = cls.Substring(0, i + 2); // "[:alnum:]"
-        t.skipString(name);
-        CharGroup g = CharGroup.POSIX_GROUPS[name];
+        t.SkipString(name);
+        var g = CharGroup.POSIX_GROUPS[name];
         if (g == null)
         {
             throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, name);
@@ -1712,22 +1682,22 @@ public class Parser
     // unicodeTable() returns the Unicode RangeTable identified by name
     // and the table of additional fold-equivalent code points.
     // Returns null if |name| does not identify a Unicode character range.
-    private static Pair<int[][], int[][]> unicodeTable(string name)
+    private static Pair<int[][], int[][]> UnicodeTable(string name)
     {
         // Special case: "Any" means any.
         if (name.Equals("Any"))
         {
-            return Pair.of(ANY_TABLE, ANY_TABLE);
+            return Pair<int[][], int[][]>.of(ANY_TABLE, ANY_TABLE);
         }
         int[][] table = UnicodeTables.CATEGORIES[name];
         if (table != null)
         {
-            return Pair.of(table, UnicodeTables.FOLD_CATEGORIES[name]);
+            return Pair<int[][], int[][]>.of(table, UnicodeTables.FOLD_CATEGORIES[name]);
         }
         table = UnicodeTables.SCRIPTS[name];
         if (table != null)
         {
-            return Pair.of(table, UnicodeTables.FOLD_SCRIPT[name]);
+            return Pair<int[][], int[][]>.of(table, UnicodeTables.FOLD_SCRIPT[name]);
         }
         return null;
     }
@@ -1739,63 +1709,57 @@ public class Parser
     // Returns false if such a pattern is not present or UNICODE_GROUPS
     // flag is not enabled; |t.pos()| is not advanced in this case.
     // Indicates error by throwing PatternSyntaxException.
-    private bool parseUnicodeClass(StringIterator t, CharClass cc)
+    private bool ParseUnicodeClass(StringIterator t, CharClass cc)
     {
-        int startPos = t.pos();
-        if ((flags & RE2.UNICODE_GROUPS) == 0 || (!t.lookingAt("\\p") && !t.lookingAt("\\P"))) {
+        int startPos = t.Pos;
+        if ((flags & RE2.UNICODE_GROUPS) == 0 || (!t.LookingAt("\\p") && !t.LookingAt("\\P"))) {
             return false;
         }
-        t.skip(1); // '\\'
+        t.Skip(1); // '\\'
                    // Committed to parse or throw exception.
         int sign = +1;
-        int c = t.pop(); // 'p' or 'P'
+        int c = t.Pop(); // 'p' or 'P'
         if (c == 'P') {
             sign = -1;
         }
-        if (!t.more()) {
-            t.rewindTo(startPos);
-            throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.rest());
+        if (!t.HasMore) {
+            t.RewindTo(startPos);
+            throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.Rest());
         }
-        c = t.pop();
+        c = t.Pop();
         string name;
         if (c != '{') {
             // Single-letter name.
             name = Utils.RuneToString(c);
         } else {
             // Name is in braces.
-            string rest = t.rest();
+            string rest = t.Rest();
             int end = rest.IndexOf('}');
             if (end < 0)
             {
-                t.rewindTo(startPos);
-                throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.rest());
+                t.RewindTo(startPos);
+                throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.Rest());
             }
             name = rest.Substring(0, end); // e.g. "Han"
-            t.skipString(name);
-            t.skip(1); // '}'
+            t.SkipString(name);
+            t.Skip(1); // '}'
                        // Don't use skip(end) because it assumes UTF-16 coding, and
                        // StringIterator doesn't guarantee that.
         }
 
         // Group can have leading negation too.
         //  \p{^Han} == \P{Han}, \P{^Han} == \p{Han}.
-        if (!name.isEmpty() && name.charAt(0) == '^') {
+        if (!string.IsNullOrEmpty(name) && name[0] == '^') {
             sign = -sign;
             name = name.Substring(1);
         }
 
-        Pair<int[]
-        [], int[]
-        []> pair = unicodeTable(name);
+        var pair = UnicodeTable(name);
         if (pair == null) {
-            throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.from(startPos));
+            throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.From(startPos));
         }
-        int[]
-        []
-        tab = pair.first;
-        int[]
-        []
-        fold = pair.second; // fold-equivalent table
+        var tab = pair.first;
+        var fold = pair.second; // fold-equivalent table
 
         // Variation of CharClass.appendGroup() for tables.
         if ((flags & RE2.FOLD_CASE) == 0 || fold == null) {
@@ -1815,19 +1779,19 @@ public class Parser
     // NOTES:
     // Pre: at '['; Post: after ']'.
     // Mutates stack.  Advances iterator.  May throw.
-    private void parseClass(StringIterator t)
+    private void ParseClass(StringIterator t)
     {
-        int startPos = t.pos();
-        t.skip(1); // '['
-        Regexp re = newRegexp(Regexp.Op.CHAR_CLASS);
+        int startPos = t.Pos;
+        t.Skip(1); // '['
+        var re = NewRegexp(Regexp.Op.CHAR_CLASS);
         re.flags = flags;
-        CharClass cc = new CharClass();
+        var cc = new CharClass();
 
         int sign = +1;
-        if (t.more() && t.lookingAt('^'))
+        if (t.HasMore&& t.LookingAt('^'))
         {
             sign = -1;
-            t.skip(1); // '^'
+            t.Skip(1); // '^'
 
             // If character class does not match \n, add it here,
             // so that negation later will do the right thing.
@@ -1838,63 +1802,63 @@ public class Parser
         }
 
         bool first = true; // ']' and '-' are okay as first char in class
-        while (!t.more() || t.peek() != ']' || first)
+        while (!t.HasMore|| t.Peek() != ']' || first)
         {
             // POSIX: - is only okay unescaped as first or last in class.
             // Perl: - is okay anywhere.
-            if (t.more() && t.lookingAt('-') && (flags & RE2.PERL_X) == 0 && !first)
+            if (t.HasMore&& t.LookingAt('-') && (flags & RE2.PERL_X) == 0 && !first)
             {
-                string s = t.rest();
+                string s = t.Rest();
                 if (s.Equals("-") || !s.StartsWith("-]"))
                 {
-                    t.rewindTo(startPos);
-                    throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.rest());
+                    t.RewindTo(startPos);
+                    throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.Rest());
                 }
             }
             first = false;
 
-            int beforePos = t.pos();
+            int beforePos = t.Pos;
 
             // Look for POSIX [:alnum:] etc.
-            if (t.lookingAt("[:"))
+            if (t.LookingAt("[:"))
             {
-                if (parseNamedClass(t, cc))
+                if (ParseNamedClass(t, cc))
                 {
                     continue;
                 }
-                t.rewindTo(beforePos);
+                t.RewindTo(beforePos);
             }
 
             // Look for Unicode character group like \p{Han}.
-            if (parseUnicodeClass(t, cc))
+            if (ParseUnicodeClass(t, cc))
             {
                 continue;
             }
 
             // Look for Perl character class symbols (extension).
-            if (parsePerlClassEscape(t, cc))
+            if (ParsePerlClassEscape(t, cc))
             {
                 continue;
             }
-            t.rewindTo(beforePos);
+            t.RewindTo(beforePos);
 
             // Single character or simple range.
-            int lo = parseClassChar(t, startPos);
+            int lo = ParseClassChar(t, startPos);
             int hi = lo;
-            if (t.more() && t.lookingAt('-'))
+            if (t.HasMore&& t.LookingAt('-'))
             {
-                t.skip(1); // '-'
-                if (t.more() && t.lookingAt(']'))
+                t.Skip(1); // '-'
+                if (t.HasMore&& t.LookingAt(']'))
                 {
                     // [a-] means (a|-) so check for final ].
-                    t.skip(-1);
+                    t.Skip(-1);
                 }
                 else
                 {
-                    hi = parseClassChar(t, startPos);
+                    hi = ParseClassChar(t, startPos);
                     if (hi < lo)
                     {
-                        throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.from(beforePos));
+                        throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.From(beforePos));
                     }
                 }
             }
@@ -1907,7 +1871,7 @@ public class Parser
                 cc.AppendFoldedRange(lo, hi);
             }
         }
-        t.skip(1); // ']'
+        t.Skip(1); // ']'
 
         cc.CleanClass();
         if (sign < 0)
@@ -1915,15 +1879,15 @@ public class Parser
             cc.NegateClass();
         }
         re.runes = cc.ToArray();
-        push(re);
+        Push(re);
     }
 
     //// Utilities
 
     // Returns a new copy of the specified subarray.
-    public static Regexp[] subarray(Regexp[] array, int start, int end)
+    public static Regexp[] Subarray(Regexp[] array, int start, int end)
     {
-        Regexp[] r = new Regexp[end - start];
+        var r = new Regexp[end - start];
         for (int i = start; i < end; ++i)
         {
             r[i - start] = array[i];
@@ -1936,19 +1900,16 @@ public class Parser
         public readonly F first;
         public readonly S second;
 
-        Pair(F first, S second)
+        public Pair(F first, S second)
         {
             this.first = first;
             this.second = second;
         }
 
-        static Pair<F, S> of(F first, S second)
-        {
-            return new Pair<F, S>(first, second);
-        }
+        public static Pair<F, S> of(F first, S second) => new Pair<F, S>(first, second);
     }
 
-    private static int[] concatRunes(int[] x, int[] y)
+    private static int[] ConcatRunes(int[] x, int[] y)
     {
         int[] z = new int[x.Length + y.Length];
         Array.Copy(x, 0, z, 0, x.Length);

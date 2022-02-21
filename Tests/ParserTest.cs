@@ -354,7 +354,7 @@ public class ParserTest
         for (string[] test : tests) {
             try
             {
-                Regexp re = Parser.parse(test[0], flags);
+                Regexp re = Parser.Parse(test[0], flags);
                 string d = dump(re);
                 Truth.assertWithMessage("parse/dump of " + test[0]).that(d).isEqualTo(test[1]);
             }
@@ -654,7 +654,7 @@ public class ParserTest
     [Test]
     public void testToStringEquivalentParse() {
         for (string[] tt : PARSE_TESTS) {
-            Regexp re = Parser.parse(tt[0], TEST_FLAGS);
+            Regexp re = Parser.Parse(tt[0], TEST_FLAGS);
             string d = dump(re);
             assertEquals(d, tt[1]); // (already ensured by testParseSimple)
 
@@ -666,7 +666,7 @@ public class ParserTest
                 // Unfortunately we can't check the Length here, because
                 // toString produces "\\{" for a literal brace,
                 // but "{" is a shorter equivalent in some contexts.
-                Regexp nre = Parser.parse(s, TEST_FLAGS);
+                Regexp nre = Parser.Parse(s, TEST_FLAGS);
                 string nd = dump(nre);
                 assertEquals(string.format("parse(%s) -> %s", tt[0], s), d, nd);
 

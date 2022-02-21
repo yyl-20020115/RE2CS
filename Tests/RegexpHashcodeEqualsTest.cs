@@ -41,8 +41,8 @@ public class RegexpHashcodeEqualsTest
     [Test]
     public void testEquals()
     {
-        Regexp ra = Parser.parse(a, mode);
-        Regexp rb = Parser.parse(b, mode);
+        Regexp ra = Parser.Parse(a, mode);
+        Regexp rb = Parser.Parse(b, mode);
         if (areEqual)
         {
             Truth.assertThat(ra).isEqualTo(rb);
