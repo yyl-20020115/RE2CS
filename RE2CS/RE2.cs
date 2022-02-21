@@ -177,7 +177,7 @@ public class RE2
      * second, and so on from left to right. The POSIX rule is computationally prohibitive and not
      * even well-defined. See http://swtch.com/~rsc/regexp/regexp2.html#posix
      */
-    static RE2 CompilePOSIX(string expr)
+    public static RE2 CompilePOSIX(string expr)
     {
         return CompileImpl(expr, POSIX, /*longest=*/ true);
     }

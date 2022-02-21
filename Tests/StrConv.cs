@@ -31,7 +31,7 @@ public static class Strconv
     // If set to a double quote, it permits \" and disallows unescaped ".
     // If set to zero, it does not permit either escape and allows both
     // quote characters to appear unescaped.
-    private static int unquoteChar(string s, int[] i, char quote)
+    private static int UnquoteChar(string s, int[] i, char quote)
     {
         int c = char.ConvertToUtf32(s,(i[0]));
         i[0] = s.OffsetByCodePoints(i[0], 1); // (throws if falls off end)
@@ -153,7 +153,7 @@ public static class Strconv
     // that s quotes.  (If s is single-quoted, it would be a Go
     // character literal; Unquote returns the corresponding
     // one-character string.)
-    static string unquote(string s)
+    public static string Unquote(string s)
     {
         int n = s.Length;
         if (n < 2) {
@@ -197,7 +197,7 @@ public static class Strconv
         int len = s.Length;
         while (i[0] < len)
         {
-            buf.Append(char.ConvertFromUtf32(unquoteChar(s, i, quote)));
+            buf.Append(char.ConvertFromUtf32(UnquoteChar(s, i, quote)));
             if (quote == '\'' && i[0] != len)
             {
                 throw new InvalidOperationException("single-quotation must be one char");

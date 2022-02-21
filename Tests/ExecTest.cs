@@ -57,46 +57,50 @@ namespace RE2CS.Tests;
 [TestFixture]
 public class ExecTest
 {
-    public static void assertEquals(string v1, string v2)
+    public static void AssertEquals(string v1, string v2)
     {
         Assert.AreEqual(v1, v2);
     }
-
-    [Test]
-    public void testExamplesInDocumentation()
+    public static void AssertEquals(List<string> v1, List<string> v2)
     {
-        RE2 re = RE2.Compile("(?i:co(.)a)");
-        assertEquals(Arrays.asList("Copa", "coba"), re.FindAll("Copacobana", 10));
-        List<string[]> x = re.FindAllSubmatch("Copacobana", 100);
-        assertEquals(Arrays.asList("Copa", "p"), Arrays.asList(x.get(0)));
-        assertEquals(Arrays.asList("coba", "b"), Arrays.asList(x.get(1)));
+        Assert.IsTrue(v1.SequenceEqual(v2));
     }
 
     [Test]
-    public void testRE2Search()
+    public void TestExamplesInDocumentation()
     {
-        testRE2("re2-search.txt");
+        RE2 re = RE2.Compile("(?i:co(.)a)");
+        AssertEquals(new List<string> { "Copa", "coba" }, re.FindAll("Copacobana", 10));
+        var x = re.FindAllSubmatch("Copacobana", 100);
+        AssertEquals(new List<string> { "Copa", "p" }, new List<string>(x[0]));
+        AssertEquals(new List<string> { "coba", "b" }, new List<string>(x[1]));
+    }
+
+    [Test]
+    public void TestRE2Search()
+    {
+        TestRE2("re2-search.txt");
     }
 
     [Test]
     public void testRE2Exhaustive()
     {
-        testRE2("re2-exhaustive.txt.gz"); // takes about 30s
+        TestRE2("re2-exhaustive.txt.gz"); // takes about 30s
     }
 
 
-    public void testRE2(string file)
+    public void TestRE2(string file)
     {
-        InputStream _in = ExecTest.getResourceAsStream("/" + file);
-        // TODO(adonovan): call _in.close() on all paths.
-        if (file.EndsWith(".gz"))
-        {
-            _in = new GZIPInputStream(_in);
-            file = file.Substring(0, file.Length() - ".gz".Length()); // for errors
-        }
+        //InputStream _in = ExecTest.getResourceAsStream("/" + file);
+        //// TODO(adonovan): call _in.close() on all paths.
+        //if (file.EndsWith(".gz"))
+        //{
+        //    _in = new GZIPInputStream(_in);
+        //    file = file.Substring(0, file.Length - ".gz".Length); // for errors
+        //}
 
         int lineno = 0;
-        UNIXBufferedReader r = new UNIXBufferedReader(new InputStreamReader(_in, "UTF-8"));
+        UNIXBufferedReader r = new UNIXBufferedReader(new StreamReader(file,System.Text.Encoding.UTF8));
         List<string> strings = new List<string>();
         int input = 0; // next index within strings to read
         bool inStrings = false;
@@ -106,12 +110,12 @@ public class ExecTest
         while ((line = r.readLine()) != null)
         {
             lineno++;
-            if (line.isEmpty())
+            if (line=="")
             {
-                fail(string.format("%s:%d: unexpected blank line", file, lineno));
+                Fail(string.Format("{0}:{1}: unexpected blank line", file, lineno));
             }
 
-            char first = line.charAt(0);
+            char first = line[0];
             if (first == '#')
             {
                 continue;
@@ -119,21 +123,21 @@ public class ExecTest
             if ('A' <= first && first <= 'Z')
             {
                 // Test name.
-                System.err.println(line);
+                Console.Error.WriteLine(line);
                 continue;
             }
             else if (line.Equals("strings"))
             {
                 if (input < strings.Count)
                 {
-                    fail(
-                        string.format(
-                            "%s:%d: _out of sync: have %d strings left",
+                    Fail(
+                        string.Format(
+                            "{0}:{1}: _out of sync: have {2} strings left",
                             file,
                             lineno,
                             strings.Count - input));
                 }
-                strings.clear();
+                strings.Clear();
                 inStrings = true;
             }
             else if (line.Equals("regexps"))
@@ -145,12 +149,12 @@ public class ExecTest
                 string q;
                 try
                 {
-                    q = Strconv.unquote(line);
+                    q = Strconv.Unquote(line);
                 }
                 catch (Exception e)
                 {
                     // Fatal because we'll get _out of sync.
-                    fail(string.format("%s:%d: unquote %s: %s", file, lineno, line, e.Message));
+                    Fail(string.Format("{0}:{1}: unquote {2}: {3}", file, lineno, line, e.Message));
                     q = null; // unreachable
                 }
                 if (inStrings)
@@ -164,17 +168,17 @@ public class ExecTest
                 {
                     re = RE2.Compile(q);
                 }
-                catch (Throwable e)
+                catch (Exception e)
                 { // (handle compiler panic too)
                     if (e.Message.Equals("error parsing regexp: invalid escape sequence: `\\C`"))
                     {
                         // We don't and likely never will support \C; keep going.
                         continue;
                     }
-                    System.err.format("%s:%d: compile %s: %s\n", file, lineno, q, e.Message);
+                    Console.Error.WriteLine("{0}:{1}: compile {2}: {3}\n", file, lineno, q, e.Message);
                     if (++nfail >= 100)
                     {
-                        fail("stopping after " + nfail + " errors");
+                        Fail("stopping after " + nfail + " errors");
                     }
                     continue;
                 }
@@ -186,7 +190,7 @@ public class ExecTest
                 catch (Exception e)
                 { // (handle compiler panic too)
                   // Fatal because q worked, so this should always work.
-                    fail(string.format("%s:%d: compile full %s: %s", file, lineno, full, e.Message));
+                    Fail(string.Format("{0}:{1}: compile full {2}: {3}", file, lineno, full, e.Message));
                 }
                 input = 0;
             }
@@ -201,11 +205,11 @@ public class ExecTest
                 }
                 if (input >= strings.Count)
                 {
-                    fail(string.format("%s:%d: _out of sync: no input remaining", file, lineno));
+                    Fail(string.Format("{0}:{1}: _out of sync: no input remaining", file, lineno));
                 }
-                string text = strings.get(input++);
-                bool multibyte = !isSingleBytes(text);
-                if (multibyte && re.ToString().contains("\\B"))
+                string text = strings[(input++)];
+                bool multibyte = !IsSingleBytes(text);
+                if (multibyte && re.ToString().Contains("\\B"))
                 {
                     // C++ RE2's \B considers every position _in the input, which
                     // is a stream of bytes, so it sees 'not word boundary' _in the
@@ -213,10 +217,10 @@ public class ExecTest
                     // runes, so it disagrees.  Skip those cases.
                     continue;
                 }
-                List<string> res = Splitter.on(';').splitToList(line);
+                List<string> res = line.Split(':').ToList();// Splitter.on(';').splitToList(line);
                 if (res.Count != 4)
                 {
-                    fail(string.format("%s:%d: have %d test results, want %d", file, lineno, res.Count, 4));
+                    Fail(string.Format("{0}:{1}: have {2} test results, want {3}", file, lineno, res.Count, 4));
                 }
                 for (int i = 0; i < 4; ++i)
                 {
@@ -229,24 +233,24 @@ public class ExecTest
                     {
                         // The testdata uses UTF-8 indices, but we're using the UTF-16 API.
                         // Perhaps we should use the UTF-8 RE2 API?
-                        have = utf16IndicesToUtf8(have, text);
+                        have = Utf16IndicesToUtf8(have, text);
                     }
-                    int[] want = parseResult(file, lineno, res.get(i)); // UTF-8 indices
-                    if (!Arrays.Equals(want, have))
+                    int[] want = ParseResult(file, lineno, res[i]); // UTF-8 indices
+                    if (!Enumerable.SequenceEqual(want, have))
                     {
-                        System.err.format(
-                            "%s:%d: %s[partial=%b,longest=%b].findSubmatchIndex(%s) = " + "%s, want %s\n",
+                        Console.Error.WriteLine(
+                            "{0}:{1}: {2}[partial={3},longest={4}].findSubmatchIndex({5}) = " + "{6}, want {7}\n",
                             file,
                             lineno,
                             re,
                             partial,
                             longest,
                             text,
-                            Arrays.ToString(have),
-                            Arrays.ToString(want));
+                            (have),
+                            (want));
                         if (++nfail >= 100)
                         {
-                            fail("stopping after " + nfail + " errors");
+                            Fail("stopping after " + nfail + " errors");
                         }
                         continue;
                     }
@@ -255,8 +259,8 @@ public class ExecTest
                     bool b = regexp.Match(text);
                     if (b != (want != null))
                     {
-                        System.err.format(
-                            "%s:%d: %s[partial=%b,longest=%b].match(%s) = " + "%b, want %b\n",
+                        Console.Error.WriteLine(
+                            "{0}:{1}: {2}[partial={3},longest={4}].match({5}) = " + "{6}, want {7}\n",
                             file,
                             lineno,
                             re,
@@ -267,7 +271,7 @@ public class ExecTest
                             !b);
                         if (++nfail >= 100)
                         {
-                            fail("stopping after " + nfail + " errors");
+                            Fail("stopping after " + nfail + " errors");
                         }
                         continue;
                     }
@@ -275,34 +279,34 @@ public class ExecTest
             }
             else
             {
-                fail(string.format("%s:%d: _out of sync: %s\n", file, lineno, line));
+                Fail(string.Format("{0}:{1}: _out of sync: {2}\n", file, lineno, line));
             }
         }
         if (input < strings.Count)
         {
-            fail(
-                string.format(
-                    "%s:%d: _out of sync: have %d strings left at EOF",
+            Fail(
+                string.Format(
+                    "{0}:{1}: _out of sync: have {2} strings left at EOF",
                     file,
                     lineno,
                     strings.Count - input));
         }
         if (nfail > 0)
         {
-            fail(string.format("Of %d cases tested, %d failed", ncase, nfail));
+            Fail(string.Format("Of {0} cases tested, {1} failed", ncase, nfail));
         }
         else
         {
-            System.err.format("%d cases tested\n", ncase);
+            Console.Error.WriteLine("{0} cases tested\n", ncase);
         }
     }
 
     // Returns true iff there are no runes with multibyte UTF-8 encodings _in s.
-    private static bool isSingleBytes(string s)
+    private static bool IsSingleBytes(string s)
     {
-        for (int i = 0, len = s.Length(); i < len; ++i)
+        for (int i = 0, len = s.Length; i < len; ++i)
         {
-            if (s.charAt(i) >= 0x80)
+            if (s[i] >= 0x80)
             {
                 return false;
             }
@@ -312,24 +316,25 @@ public class ExecTest
 
     // Convert |idx16|, which are Java (UTF-16) string indices, into the
     // corresponding indices _in the UTF-8 encoding of |text|.
-    private static int[] utf16IndicesToUtf8(int[] idx16, string text)
+    private static int[] Utf16IndicesToUtf8(int[] idx16, string text)
     {
         try
         {
             int[] idx8 = new int[idx16.Length];
             for (int i = 0; i < idx16.Length; ++i)
             {
-                idx8[i] = text.Substring(0, idx16[i]).getBytes("UTF-8").Length;
+                idx8[i] = System.Text.Encoding.UTF8.GetBytes( 
+                    text.Substring(0, idx16[i])).Length;
             }
             return idx8;
         }
-        catch (java.io.UnsupportedEncodingException e)
+        catch (Exception e)
         {
-            throw new IllegalStateException(e);
+            throw (e);
         }
     }
 
-    private static int[] parseResult(string file, int lineno, string res)
+    private static int[] ParseResult(string file, int lineno, string res)
     {
         // A single - indicates no match.
         if (res.Equals("-"))
@@ -339,10 +344,10 @@ public class ExecTest
         // Otherwise, a space-separated list of pairs.
         int n = 1;
         // TODO(adonovan): is this safe or must we decode UTF-16?
-        int len = res.Length();
+        int len = res.Length;
         for (int j = 0; j < len; j++)
         {
-            if (res.charAt(j) == ' ')
+            if (res[j] == ' ')
             {
                 n++;
             }
@@ -352,7 +357,7 @@ public class ExecTest
         n = 0;
         for (int j = 0; j <= len; j++)
         {
-            if (j == len || res.charAt(j) == ' ')
+            if (j == len || res[j] == ' ')
             {
                 // Process a single pair.  - means no submatch.
                 string pair = res.Substring(i, j);
@@ -366,21 +371,14 @@ public class ExecTest
                     int k = pair.IndexOf('-');
                     if (k < 0)
                     {
-                        fail(string.format("%s:%d: invalid pair %s", file, lineno, pair));
+                        Fail(string.Format("{0}:{1}: invalid pair {2}", file, lineno, pair));
                     }
                     int lo = -1, hi = -2;
-                    try
-                    {
-                        lo = int.parseInt(pair.Substring(0, k));
-                        hi = int.parseInt(pair.Substring(k + 1));
-                    }
-                    catch (NumberFormatException e)
-                    {
-                        /* fall through */
-                    }
+                    int.TryParse(pair.Substring(0, k), out hi);
+                    int.TryParse(pair.Substring(k + 1), out lo);
                     if (lo > hi)
                     {
-                        fail(string.format("%s:%d: invalid pair %s", file, lineno, pair));
+                        Fail(string.Format("{0}:{1}: invalid pair {2}", file, lineno, pair));
                     }
                     _out[n++] = lo;
                     _out[n++] = hi;
@@ -396,30 +394,31 @@ public class ExecTest
     // http://www2.research.att.com/~gsf/testregex/.
 
     [Test]
-    public void testFowlerBasic()
+    public void TestFowlerBasic()
     {
-        testFowler("basic.dat");
+        TestFowler("basic.dat");
     }
 
     [Test]
-    public void testFowlerNullSubexpr()
+    public void TestFowlerNullSubexpr()
     {
-        testFowler("nullsubexpr.dat");
+        TestFowler("nullsubexpr.dat");
     }
 
     [Test]
-    public void testFowlerRepetition()
+    public void TestFowlerRepetition()
     {
-        testFowler("repetition.dat");
+        TestFowler("repetition.dat");
     }
 
-    private static readonly RE2 NOTAB = RE2.compilePOSIX("[^\t]+");
+    private static readonly RE2 NOTAB = RE2.CompilePOSIX("[^\t]+");
 
-    private void testFowler(string file)
+    private void TestFowler(string file)
     {
-        InputStream _in = ExecTest.getResourceAsStream("/" + file);
+
         // TODO(adonovan): call _in.close() on all paths.
-        UNIXBufferedReader r = new UNIXBufferedReader(new InputStreamReader(_in, "UTF-8"));
+        UNIXBufferedReader r = new UNIXBufferedReader(
+            new StreamReader(file,System.Text.Encoding.UTF8));
         int lineno = 0;
         int nerr = 0;
         string line;
@@ -428,7 +427,7 @@ public class ExecTest
         {
             lineno++;
             // if (line.isEmpty()) {
-            //   fail(string.format("%s:%d: unexpected blank line", file, lineno));
+            //   Fail(string.format("%s:%d: unexpected blank line", file, lineno));
             // }
 
             // http://www2.research.att.com/~gsf/man/man1/testregex.html
@@ -438,24 +437,24 @@ public class ExecTest
             //   specification. A specification is five fields separated by one
             //   or more tabs. NULL denotes the empty string and NULL denotes the
             //   0 pointer.
-            if (line.isEmpty() || line.charAt(0) == '#')
+            if (line=="" || line[0] == '#')
             {
                 continue;
             }
             List<string> field = NOTAB.FindAll(line, -1);
             for (int i = 0; i < field.Count; ++i)
             {
-                if (field.get(i).Equals("NULL"))
+                if (field[i].Equals("NULL"))
                 {
-                    field.set(i, "");
+                    field[i] = "";
                 }
-                if (field.get(i).Equals("NIL"))
+                if (field[i].Equals("NIL"))
                 {
-                    System.err.format("%s:%d: skip: %s\n", file, lineno, line);
+                    Console.Error.WriteLine("{0}:{1}: skip: {2}\n", file, lineno, line);
                     continue;
                 }
             }
-            if (field.isEmpty())
+            if (field.Count==0)
             {
                 continue;
             }
@@ -524,8 +523,8 @@ public class ExecTest
             //     T[EST] comment   comment
             //
             //     number           use number for nmatch (20 by default)
-            string flag = field.get(0);
-            switch (flag.charAt(0))
+            string flag = field[0];
+            switch (flag[0])
             {
                 case '?':
                 case '&':
@@ -536,7 +535,7 @@ public class ExecTest
                     // Ignore all the control operators.
                     // Just run everything.
                     flag = flag.Substring(1);
-                    if (flag.isEmpty())
+                    if (flag=="")
                     {
                         continue;
                     }
@@ -546,7 +545,7 @@ public class ExecTest
                         int i = flag.IndexOf(':', 1);
                         if (i < 0)
                         {
-                            System.err.format("skip: %s\n", line);
+                            Console.Error.WriteLine("skip: {0}\n", line);
                             continue;
                         }
                         flag = flag.Substring(1 + i + 1);
@@ -565,7 +564,7 @@ public class ExecTest
                 case '7':
                 case '8':
                 case '9':
-                    System.err.format("skip: %s\n", line);
+                    Console.Error.WriteLine("skip: {0}\n", line);
                     continue;
             }
 
@@ -573,7 +572,7 @@ public class ExecTest
             // formats.
             if (field.Count < 4)
             {
-                System.err.format("%s:%d: too few fields: %s\n", file, lineno, line);
+                Console.Error.WriteLine("{0}:{1}: too few fields: {2}\n", file, lineno, line);
                 nerr++;
                 continue;
             }
@@ -581,24 +580,24 @@ public class ExecTest
             // Expand C escapes (a.k.a. Go escapes).
             if (flag.IndexOf('$') >= 0)
             {
-                string f = "\"" + field.get(1) + "\"";
+                string f = "\"" + field[1] + "\"";
                 try
                 {
-                    field.set(1, Strconv.unquote(f));
+                    field[1]=Strconv.Unquote(f);
                 }
                 catch (Exception e)
                 {
-                    System.err.format("%s:%d: cannot unquote %s\n", file, lineno, f);
+                    Console.Error.WriteLine("{0}:{1}: cannot unquote {2}\n", file, lineno, f);
                     nerr++;
                 }
-                f = "\"" + field.get(2) + "\"";
+                f = "\"" + field[2] + "\"";
                 try
                 {
-                    field.set(2, Strconv.unquote(f));
+                    field[2]=(Strconv.Unquote(f));
                 }
                 catch (Exception e)
                 {
-                    System.err.format("%s:%d: cannot unquote %s\n", file, lineno, f);
+                    Console.Error.WriteLine("{0}:{1}: cannot unquote {2}\n", file, lineno, f);
                     nerr++;
                 }
             }
@@ -606,25 +605,25 @@ public class ExecTest
             //   Field 2: the regular expression pattern; SAME uses the pattern from
             //     the previous specification.
             //
-            if (field.get(1).Equals("SAME"))
+            if (field[1].Equals("SAME"))
             {
-                field.set(1, lastRegexp);
+                field[1]= lastRegexp;
             }
-            lastRegexp = field.get(1);
+            lastRegexp = field[1];
 
             //   Field 3: the string to match.
-            string text = field.get(2);
+            string text = field[2];
 
             //   Field 4: the test outcome...
             bool[] shouldCompileMatch = { false, false }; // _in/_out param to parser
             List<int> pos;
             try
             {
-                pos = parseFowlerResult(field.get(3), shouldCompileMatch);
+                pos = ParseFowlerResult(field[3], shouldCompileMatch);
             }
             catch (Exception e)
             {
-                System.err.format("%s:%d: cannot parse result %s\n", file, lineno, field.get(3));
+                Console.Error.WriteLine("{0}:{1}: cannot parse result {2}\n", file, lineno, field[3]);
                 nerr++;
                 continue;
             }
@@ -632,9 +631,9 @@ public class ExecTest
             //   Field 5: optional comment appended to the report.
 
             // Run test once for each specified capital letter mode that we support.
-            foreach (char c in flag.toCharArray())
+            foreach (char c in flag.ToCharArray())
             {
-                string pattern = field.get(1);
+                string pattern = field[1];//.get(1);
                 int flags = RE2.POSIX | RE2.CLASS_NL;
                 switch (c)
                 {
@@ -646,6 +645,7 @@ public class ExecTest
                     case 'L':
                         // literal
                         pattern = RE2.QuoteMeta(pattern);
+                        break;
                 }
 
                 if (flag.IndexOf('i') >= 0)
@@ -662,22 +662,22 @@ public class ExecTest
                 {
                     if (shouldCompileMatch[0])
                     {
-                        System.err.format("%s:%d: %s did not compile\n", file, lineno, pattern);
+                        Console.Error.WriteLine("{0}:{1}: {2} did not compile\n", file, lineno, pattern);
                         nerr++;
                     }
                     continue;
                 }
                 if (!shouldCompileMatch[0])
                 {
-                    System.err.format("%s:%d: %s should not compile\n", file, lineno, pattern);
+                    Console.Error.WriteLine("{0}:{1}: {2} should not compile\n", file, lineno, pattern);
                     nerr++;
                     continue;
                 }
                 bool match = re.Match(text);
                 if (match != shouldCompileMatch[1])
                 {
-                    System.err.format(
-                        "%s:%d: %s.match(%s) = %s, want %s\n", file, lineno, pattern, text, match, !match);
+                    Console.Error.WriteLine(
+                        "{0}:{1}: {2}.match({3}) = {4}, want {5}\n", file, lineno, pattern, text, match, !match);
                     nerr++;
                     continue;
                 }
@@ -688,8 +688,8 @@ public class ExecTest
                 }
                 if ((haveArray.Length > 0) != match)
                 {
-                    System.err.format(
-                        "%s:%d: %s.match(%s) = %s, " + "but %s.findSubmatchIndex(%s) = %s\n",
+                    Console.Error.WriteLine(
+                        "{0}:{1}: {2}.match({3}) = {4}, " + "but {5}.findSubmatchIndex({6}) = {7}\n",
                         file,
                         lineno,
                         pattern,
@@ -697,20 +697,20 @@ public class ExecTest
                         match,
                         pattern,
                         text,
-                        Arrays.ToString(haveArray));
+                        (haveArray));
                     nerr++;
                     continue;
                 }
                 // Convert int[] to List<int> and truncate to pos.Length.
-                List<int> have = new ArrayList<int>();
+                List<int> have = new ();
                 for (int i = 0; i < pos.Count; ++i)
                 {
                     have.Add(haveArray[i]);
                 }
                 if (!have.Equals(pos))
                 {
-                    System.err.format(
-                        "%s:%d: %s.findSubmatchIndex(%s) = %s, want %s\n",
+                    Console.Error.WriteLine(
+                        "{0}:{1}: {2}.findSubmatchIndex({3}) = {4}, want {5}\n",
                         file,
                         lineno,
                         pattern,
@@ -724,11 +724,16 @@ public class ExecTest
         }
         if (nerr > 0)
         {
-            fail("There were " + nerr + " errors");
+            Fail("There were " + nerr + " errors");
         }
     }
 
-    private static List<int> parseFowlerResult(string s, bool[] shouldCompileMatch)
+    private static void Fail(string v)
+    {
+        Assert.Fail(v);
+    }
+
+    private static List<int> ParseFowlerResult(string s, bool[] shouldCompileMatch)
 
     {
         string olds = s;
@@ -746,36 +751,36 @@ public class ExecTest
         //     the unmatched portion of the subject string. If x starts with a
         //     number then that is the return value of re_execf(), otherwise 0 is
         //     returned.
-        if (s.isEmpty())
+        if (s==null)
         {
             // Match with no position information.
             shouldCompileMatch[0] = true;
             shouldCompileMatch[1] = true;
-            return Collections.emptyList();
+            return new();
         }
         else if (s.Equals("NOMATCH"))
         {
             // Match failure.
             shouldCompileMatch[0] = true;
             shouldCompileMatch[1] = false;
-            return Collections.emptyList();
+            return new();
         }
-        else if ('A' <= s.charAt(0) && s.charAt(0) <= 'Z')
+        else if ('A' <= s[0] && s[0] <= 'Z')
         {
             // All the other error codes are compile errors.
             shouldCompileMatch[0] = false;
-            return Collections.emptyList();
+            return new();
         }
         shouldCompileMatch[0] = true;
         shouldCompileMatch[1] = true;
 
         List<int> result = new ();
-        while (!s.isEmpty())
+        while (!string.IsNullOrEmpty(s))
         {
             char end = ')';
             if ((result.Count % 2) == 0)
             {
-                if (s.charAt(0) != '(')
+                if (s[0] != '(')
                 {
                     throw new Exception("parse error: missing '('");
                 }
@@ -790,7 +795,7 @@ public class ExecTest
             string num = s.Substring(0, i);
             if (!num.Equals("?"))
             {
-                result.Add(int.valueOf(num)); // (may throw)
+                result.Add(int.TryParse(num,out var v)?v:-1); // (may throw)
             }
             else
             {
