@@ -1397,43 +1397,57 @@ public class Parser
         // If above and below vertical bar are literal or char class,
         // can merge into a single char class.
         int n = stack.Count;
+
+        var re1 = stack.Pop();
+        var re2 = stack.Pop();
+        var re3 = stack.Peek();
         if (n >= 3
-            && stack.get(n - 2).op == Regexp.Op.VERTICAL_BAR
-            && IsCharClass(stack.get(n - 1))
-            && IsCharClass(stack.get(n - 3)))
+            && re2.op == Regexp.Op.VERTICAL_BAR
+            && IsCharClass(re1)
+            && IsCharClass(re3))
         {
-            Regexp re1 = stack.get(n - 1);
-            Regexp re3 = stack.get(n - 3);
             // Make re3 the more complex of the two.
             if (re1.op > re3.op)
             {
-                Regexp tmp = re3;
+                var tmp = re3;
                 re3 = re1;
                 re1 = tmp;
-                stack.set(n - 3, re3);
+                stack.Pop();
+                stack.Push(re3);
+                //stack.set(n - 3, re3);
             }
+            stack.Push(re2);
+            stack.Push(re1);
+
             MergeCharClass(re3, re1);
             Reuse(re1);
             Pop();
             return true;
         }
+        stack.Push(re2);
+        stack.Push(re1);
 
         if (n >= 2)
         {
-            Regexp re1 = stack.get(n - 1);
-            Regexp re2 = stack.get(n - 2);
+            re1 = stack.Pop();
+            re2 = stack.Pop();
             if (re2.op == Regexp.Op.VERTICAL_BAR)
             {
                 if (n >= 3)
                 {
                     // Now out of reach.
                     // Clean opportunistically.
-                    CleanAlt(stack.get(n - 3));
+                    CleanAlt(stack.Peek());
+
                 }
-                stack.set(n - 2, re1);
-                stack.set(n - 1, re2);
+                stack.Push(re1);
+                stack.Push(re2);
+                //stack.set(n - 2, re1);
+                //stack.set(n - 1, re2);
                 return true;
             }
+            stack.Push(re2);
+            stack.Push(re1);
         }
         return false;
     }
