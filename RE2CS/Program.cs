@@ -18,7 +18,7 @@ public class Program
 
     public Inst[] inst = new Inst[10];
     public int instSize = 0;
-    public int start; // index of start instruction
+    public int start = 0; // index of start instruction
     public int numCap = 2; // number of CAPTURE insts in re
                     // 2 => implicit ( and ) for whole match $0
 
@@ -27,25 +27,19 @@ public class Program
 
     // Returns the instruction at the specified pc.
     // Precondition: pc > 0 && pc < numInst().
-    public Inst getInst(int pc)
-    {
-        return inst[pc];
-    }
+    public Inst GetInst(int pc) => inst[pc];
 
     // Returns the number of instructions in this program.
-    public int numInst()
-    {
-        return instSize;
-    }
+    public int NumInst => instSize;
 
     // Adds a new instruction to this program, with operator |op| and |pc| equal
     // to |numInst()|.
-    public void addInst(int op)
+    public void AddInst(int op)
     {
-        if (instSize >= inst.Length)
+        if (this.instSize >= this.inst.Length)
         {
             var new_inst = new Inst[inst.Length<<1];
-            inst.CopyTo(new_inst, instSize);
+            inst.CopyTo(new_inst, 0);
             inst= new_inst;
         }
         inst[instSize] = new Inst(op);
@@ -54,9 +48,9 @@ public class Program
 
     // skipNop() follows any no-op or capturing instructions and returns the
     // resulting instruction.
-    public Inst skipNop(int pc)
+    public Inst SkipNop(int pc)
     {
-        Inst i = inst[pc];
+        var i = inst[pc];
         while (i.op == Inst.NOP || i.op == Inst.CAPTURE)
         {
             i = inst[pc];
@@ -68,9 +62,9 @@ public class Program
     // prefix() returns a pair of a literal string that all matches for the
     // regexp must start with, and a bool which is true if the prefix is the
     // entire match.  The string is returned by appending to |prefix|.
-    public bool prefix(StringBuilder prefix)
+    public bool Prefix(StringBuilder prefix)
     {
-        Inst i = skipNop(start);
+        var i = SkipNop(start);
 
         // Avoid allocation of buffer if prefix is empty.
         if (!Inst.IsRuneOp(i.op) || i.runes.Length != 1)
@@ -82,21 +76,21 @@ public class Program
         while (Inst.IsRuneOp(i.op) && i.runes.Length == 1 && (i.arg & RE2.FOLD_CASE) == 0)
         {
             prefix.Append( new Rune(i.runes[0]).ToString()); // an int, not a byte.
-            i = skipNop(i._out);
+            i = SkipNop(i._out);
         }
         return i.op == Inst.MATCH;
     }
 
     // startCond() returns the leading empty-width conditions that must be true
     // in any match.  It returns -1 (all bits set) if no matches are possible.
-    public int startCond()
+    public int StartCond()
     {
         int flag = 0; // bitmask of EMPTY_* flags
         int pc = start;
     loop:
         for (; ; )
         {
-            Inst i = inst[pc];
+            var i = inst[pc];
             switch (i.op)
             {
                 case Inst.EMPTY_WIDTH:
@@ -128,9 +122,9 @@ public class Program
     // start every program with a fail instruction, so we'll never want to point
     // at its output link.
 
-    public int next(int l)
+    public int Next(int l)
     {
-        Inst i = inst[l >> 1];
+        var i = inst[l >> 1];
         if ((l & 1) == 0)
         {
             return i._out;
@@ -138,11 +132,11 @@ public class Program
         return i.arg;
     }
 
-    public void patch(int l, int val)
+    public void Patch(int l, int val)
     {
         while (l != 0)
         {
-            Inst i = inst[l >> 1];
+            var i = inst[l >> 1];
             if ((l & 1) == 0)
             {
                 l = i._out;
@@ -169,14 +163,14 @@ public class Program
         int last = l1;
         for (; ; )
         {
-            int _next = next(last);
+            int _next = Next(last);
             if (_next == 0)
             {
                 break;
             }
             last = _next;
         }
-        Inst i = inst[last >> 1];
+        var i = inst[last >> 1];
         if ((last & 1) == 0)
         {
             i._out = l2;
@@ -192,19 +186,19 @@ public class Program
 
     public override string ToString()
     {
-        var _out = new StringBuilder();
+        var builder = new StringBuilder();
         for (int pc = 0; pc < instSize; ++pc)
         {
-            int len = _out.Length;
-            _out.Append(pc);
+            int len = builder.Length;
+            builder.Append(pc);
             if (pc == start)
             {
-                _out.Append('*');
+                builder.Append('*');
             }
             // Use spaces not tabs since they're not always preserved in
             // Google Java source, such as our tests.
-            _out.Append("        ".Substring(_out.Length - len)).Append(inst[pc]).Append('\n');
+            builder.Append("        ".Substring(builder.Length - len)).Append(inst[pc]).Append('\n');
         }
-        return _out.ToString();
+        return builder.ToString();
     }
 }

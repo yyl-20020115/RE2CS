@@ -177,7 +177,7 @@ public class CharClass
         for (int c = lo; c <= hi; c++)
         {
             AppendRange(c, c);
-            for (int f = Unicode.simpleFold(c); f != c; f = Unicode.simpleFold(f))
+            for (int f = Unicode.SimpleFold(c); f != c; f = Unicode.SimpleFold(f))
             {
                 AppendRange(f, f);
             }

@@ -130,7 +130,7 @@ public abstract class MachineInput
         public override int Index(RE2 re2, int pos)
         {
             pos += this.start;
-            int i = Utils.indexOf(b, re2.prefixUTF8, pos);
+            int i = Utils.IndexOf(b, re2.prefixUTF8, pos);
             return i < 0 ? i : i - pos;
         }
 
@@ -162,7 +162,7 @@ public abstract class MachineInput
                 }
             }
             int r2 = pos < this.end ? (Step(pos) >> 3) : -1;
-            return Utils.emptyOpContext(r1, r2);
+            return Utils.EmptyOpContext(r1, r2);
         }
 
         public override int EndPos() => this.end;
@@ -210,7 +210,7 @@ public abstract class MachineInput
             int r1 = pos > 0 && pos <= str.Length ?
                 str.CodePointBefore(pos) : -1;
             int r2 = pos < str.Length ? str[pos-1] : -1;
-            return Utils.emptyOpContext(r1, r2);
+            return Utils.EmptyOpContext(r1, r2);
         }
         public override int EndPos() => this.end;
 

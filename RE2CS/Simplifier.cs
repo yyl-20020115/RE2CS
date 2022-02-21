@@ -9,7 +9,7 @@
 
 namespace RE2CS;
 
-public class Simplify
+public class Simplifier
 {
 
     // Simplify returns a regexp equivalent to re but without counted
@@ -20,7 +20,7 @@ public class Simplify
     // or removed.  For example, the simplified form for /(x){1,2}/ is
     // /(x)(x)?/ but both parentheses capture as $1.  The returned regexp
     // may share structure with or be the original.
-    public static Regexp simplify(Regexp re)
+    public static Regexp? Simplify(Regexp? re)
     {
         if (re == null)
         {
@@ -33,15 +33,15 @@ public class Simplify
             case Regexp.Op.ALTERNATE:
                 {
                     // Simplify children, building new Regexp if children change.
-                    Regexp nre = re;
+                    var nre = re;
                     for (int i = 0; i < re.subs.Length; ++i)
                     {
                         Regexp sub = re.subs[i];
-                        Regexp nsub = simplify(sub);
+                        Regexp? nsub = Simplify(sub);
                         if (nre == re && nsub != sub)
                         {
                             // Start a copy.
-                            nre = new Regexp(re); // shallow copy
+                            nre = new (re); // shallow copy
                             nre.runes = null;
                             nre.subs = Parser.subarray(re.subs, 0, re.subs.Length); // clone
                         }
@@ -56,8 +56,8 @@ public class Simplify
             case Regexp.Op.PLUS:
             case Regexp.Op.QUEST:
                 {
-                    Regexp sub = simplify(re.subs[0]);
-                    return simplify1(re.op, re.flags, sub, re);
+                    Regexp? sub = Simplify(re.subs[0]);
+                    return SimplifyForUnary(re.op, re.flags, sub, re);
                 }
             case Regexp.Op.REPEAT:
                 {
@@ -69,7 +69,7 @@ public class Simplify
                     }
 
                     // The fun begins.
-                    Regexp sub = simplify(re.subs[0]);
+                    Regexp sub = Simplify(re.subs[0]);
 
                     // x{n,} means at least n matches of x.
                     if (re.max == -1)
@@ -77,23 +77,23 @@ public class Simplify
                         // Special case: x{0,} is x*.
                         if (re.min == 0)
                         {
-                            return simplify1(Regexp.Op.STAR, re.flags, sub, null);
+                            return SimplifyForUnary(Regexp.Op.STAR, re.flags, sub, null);
                         }
 
                         // Special case: x{1,} is x+.
                         if (re.min == 1)
                         {
-                            return simplify1(Regexp.Op.PLUS, re.flags, sub, null);
+                            return SimplifyForUnary(Regexp.Op.PLUS, re.flags, sub, null);
                         }
 
                         // General case: x{4,} is xxxx+.
                         Regexp nre = new Regexp(Regexp.Op.CONCAT);
-                        List<Regexp> subs = new List<Regexp>();
+                        var subs = new List<Regexp>();
                         for (int i = 0; i < re.min - 1; i++)
                         {
                             subs.Add(sub);
                         }
-                        subs.Add(simplify1(Regexp.Op.PLUS, re.flags, sub, null));
+                        subs.Add(SimplifyForUnary(Regexp.Op.PLUS, re.flags, sub, null));
                         nre.subs = subs.ToArray();
                         return nre;
                     }
@@ -124,12 +124,12 @@ public class Simplify
                     // Build and attach suffix: (x(x(x)?)?)?
                     if (re.max > re.min)
                     {
-                        Regexp suffix = simplify1(Regexp.Op.QUEST, re.flags, sub, null);
+                        Regexp suffix = SimplifyForUnary(Regexp.Op.QUEST, re.flags, sub, null);
                         for (int i = re.min + 1; i < re.max; i++)
                         {
                             Regexp nre2 = new Regexp(Regexp.Op.CONCAT);
                             nre2.subs = new Regexp[] { sub, suffix };
-                            suffix = simplify1(Regexp.Op.QUEST, re.flags, nre2, null);
+                            suffix = SimplifyForUnary(Regexp.Op.QUEST, re.flags, nre2, null);
                         }
                         if (prefixSubs == null)
                         {
@@ -168,7 +168,7 @@ public class Simplify
     // for other operators generates these unary expressions.
     // Letting them call simplify1 makes sure the expressions they
     // generate are simple.
-    private static Regexp simplify1(Regexp.Op op, int flags, Regexp sub, Regexp re)
+    private static Regexp SimplifyForUnary(Regexp.Op op, int flags, Regexp sub, Regexp re)
     {
         // Special case: repeat the empty string as much as
         // you want, but it's still the empty string.
@@ -189,7 +189,7 @@ public class Simplify
             return re;
         }
 
-        re = new Regexp(op);
+        re = new (op);
         re.flags = flags;
         re.subs = new Regexp[] { sub };
         return re;

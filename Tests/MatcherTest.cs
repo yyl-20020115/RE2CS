@@ -207,7 +207,7 @@ public class MatcherTest
         // null in constructor.
         try
         {
-            new Matcher(Pattern.compile("pattern"), (string)null);
+            new Matcher(Pattern.Compile("pattern"), (string)null);
             fail();
         }
         catch (NullReferenceException n)
@@ -241,7 +241,7 @@ public class MatcherTest
     {
         try
         {
-            Matcher m = Pattern.compile("a").matcher("abaca");
+            Matcher m = Pattern.Compile("a").Matcher("abaca");
             m.Start();
             fail();
         }
@@ -258,7 +258,7 @@ public class MatcherTest
     [Test]
     public void testMatchesUpdatesMatchInformation()
     {
-        Matcher m = Pattern.compile("a+").matcher("aaa");
+        Matcher m = Pattern.Compile("a+").Matcher("aaa");
         if (m.Matches())
         {
             assertEquals("aaa", m.Group(0));
@@ -277,8 +277,8 @@ public class MatcherTest
     public void testAlternationMatches()
     {
         string s = "123:foo";
-        assertTrue(Pattern.compile("(?:\\w+|\\d+:foo)").matcher(s).Matches());
-        assertTrue(Pattern.compile("(?:\\d+:foo|\\w+)").matcher(s).Matches());
+        assertTrue(Pattern.Compile("(?:\\w+|\\d+:foo)").Matcher(s).Matches());
+        assertTrue(Pattern.Compile("(?:\\d+:foo|\\w+)").Matcher(s).Matches());
     }
 
     void helperTestMatchEndUTF16(string s, int num, int end)
@@ -297,7 +297,7 @@ public class MatcherTest
     //}
     ;
         Pattern pat = new Pattern(pattern, 0, re);
-        Matcher m = pat.matcher(s);
+        Matcher m = pat.Matcher(s);
 
         int found = 0;
         while (m.Find()) {
@@ -334,8 +334,8 @@ public class MatcherTest
     [Test]
     public void testAppendTail_StringBuffer()
     {
-        Pattern p = Pattern.compile("cat");
-        Matcher m = p.matcher("one cat two cats in the yard");
+        Pattern p = Pattern.Compile("cat");
+        Matcher m = p.Matcher("one cat two cats in the yard");
         StringBuffer sb = new StringBuffer();
         while (m.Find())
         {
@@ -349,8 +349,8 @@ public class MatcherTest
     [Test]
     public void testAppendTail_StringBuilder()
     {
-        Pattern p = Pattern.compile("cat");
-        Matcher m = p.matcher("one cat two cats in the yard");
+        Pattern p = Pattern.Compile("cat");
+        Matcher m = p.Matcher("one cat two cats in the yard");
         StringBuilder sb = new StringBuilder();
         while (m.Find())
         {
@@ -365,7 +365,7 @@ public class MatcherTest
     public void testResetOnFindInt_StringBuffer()
     {
         StringBuffer buffer;
-        Matcher matcher = Pattern.compile("a").matcher("zza");
+        Matcher matcher = Pattern.Compile("a").Matcher("zza");
 
         assertTrue(matcher.Find());
 
@@ -384,7 +384,7 @@ public class MatcherTest
     public void testResetOnFindInt_StringBuilder()
     {
         StringBuilder buffer;
-        Matcher matcher = Pattern.compile("a").matcher("zza");
+        Matcher matcher = Pattern.Compile("a").Matcher("zza");
 
         assertTrue(matcher.Find());
 
@@ -403,7 +403,7 @@ public class MatcherTest
     public void testEmptyReplacementGroups_StringBuffer()
     {
         StringBuffer buffer = new StringBuffer();
-        Matcher matcher = Pattern.compile("(a)(b$)?(b)?").matcher("abc");
+        Matcher matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("abc");
         assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2-$3");
         assertEquals("a--b", buffer.toString());
@@ -411,21 +411,21 @@ public class MatcherTest
         assertEquals("a--bc", buffer.toString());
 
         buffer = new StringBuffer();
-        matcher = Pattern.compile("(a)(b$)?(b)?").matcher("ab");
+        matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("ab");
         assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2-$3");
         matcher.appendTail(buffer);
         assertEquals("a-b-", buffer.toString());
 
         buffer = new StringBuffer();
-        matcher = Pattern.compile("(^b)?(b)?c").matcher("abc");
+        matcher = Pattern.Compile("(^b)?(b)?c").Matcher("abc");
         assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2");
         matcher.appendTail(buffer);
         assertEquals("a-b", buffer.toString());
 
         buffer = new StringBuffer();
-        matcher = Pattern.compile("^(.)[^-]+(-.)?(.*)").matcher("Name");
+        matcher = Pattern.Compile("^(.)[^-]+(-.)?(.*)").Matcher("Name");
         assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1$2");
         matcher.appendTail(buffer);
@@ -436,7 +436,7 @@ public class MatcherTest
     public void testEmptyReplacementGroups_StringBuilder()
     {
         StringBuilder buffer = new StringBuilder();
-        Matcher matcher = Pattern.compile("(a)(b$)?(b)?").matcher("abc");
+        Matcher matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("abc");
         assertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1-$2-$3");
         assertEquals("a--b", buffer.toString());
@@ -444,21 +444,21 @@ public class MatcherTest
         assertEquals("a--bc", buffer.toString());
 
         buffer = new StringBuilder();
-        matcher = Pattern.compile("(a)(b$)?(b)?").matcher("ab");
+        matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("ab");
         assertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1-$2-$3");
         matcher.AppendTail(buffer);
         assertEquals("a-b-", buffer.toString());
 
         buffer = new StringBuilder();
-        matcher = Pattern.compile("(^b)?(b)?c").matcher("abc");
+        matcher = Pattern.Compile("(^b)?(b)?c").Matcher("abc");
         assertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1-$2");
         matcher.AppendTail(buffer);
         assertEquals("a-b", buffer.toString());
 
         buffer = new StringBuilder();
-        matcher = Pattern.compile("^(.)[^-]+(-.)?(.*)").matcher("Name");
+        matcher = Pattern.Compile("^(.)[^-]+(-.)?(.*)").Matcher("Name");
         assertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1$2");
         matcher.AppendTail(buffer);
@@ -469,8 +469,8 @@ public class MatcherTest
     [Test]
     public void testDocumentedExample()
     {
-        Pattern p = Pattern.compile("b(an)*(.)");
-        Matcher m = p.matcher("by, band, banana");
+        Pattern p = Pattern.Compile("b(an)*(.)");
+        Matcher m = p.Matcher("by, band, banana");
         assertTrue(m.LookingAt());
         m.Reset();
         assertTrue(m.Find());
@@ -491,7 +491,7 @@ public class MatcherTest
     [Test]
     public void testMutableCharSequence()
     {
-        Pattern p = Pattern.compile("b(an)*(.)");
+        Pattern p = Pattern.Compile("b(an)*(.)");
         StringBuilder b = new StringBuilder("by, band, banana");
         Matcher m = p.matcher(b);
         assertTrue(m.Find(0));
@@ -504,9 +504,9 @@ public class MatcherTest
     public void testNamedGroups()
     {
         Pattern p =
-            Pattern.compile(
+            Pattern.Compile(
                 "(?P<baz>f(?P<foo>b*a(?P<another>r+)){0,10})" + "(?P<bag>bag)?(?P<nomatch>zzz)?");
-        Matcher m = p.matcher("fbbarrrrrbag");
+        Matcher m = p.Matcher("fbbarrrrrbag");
         assertTrue(m.Matches());
         assertEquals("fbbarrrrr", m.Group("baz"));
         assertEquals("bbarrrrr", m.Group("foo"));
@@ -555,7 +555,7 @@ public class MatcherTest
     [Test]
     public void testGroupZeroWidthAssertions()
     {
-        Matcher m = Pattern.compile("(\\d{2} ?(\\d|[a-z])?)($|[^a-zA-Z])").matcher("22 bored");
+        Matcher m = Pattern.Compile("(\\d{2} ?(\\d|[a-z])?)($|[^a-zA-Z])").Matcher("22 bored");
         Truth.assertThat(m.Find()).isTrue();
         Truth.assertThat(m.Group(1)).isEqualTo("22");
     }
@@ -566,12 +566,12 @@ public class MatcherTest
         string pattern = "(?:a+)|(?:a+ b+)";
         string text = "xxx aaa bbb yyy";
         {
-            Matcher matcher = Pattern.compile(pattern).matcher(text);
+            Matcher matcher = Pattern.Compile(pattern).Matcher(text);
             assertTrue(matcher.Find());
             assertEquals("aaa", text.Substring(matcher.Start(), matcher.End()));
         }
         {
-            Matcher matcher = Pattern.compile(pattern, Pattern.LONGEST_MATCH).matcher(text);
+            Matcher matcher = Pattern.Compile(pattern, Pattern.LONGEST_MATCH).Matcher(text);
             assertTrue(matcher.Find());
             assertEquals("aaa bbb", text.Substring(matcher.Start(), matcher.End()));
         }

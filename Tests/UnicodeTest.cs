@@ -18,7 +18,7 @@ public class UnicodeTest
         int last = -1;
         for (int i = 0; i <= Unicode.MAX_RUNE; i++)
         {
-            if (Unicode.simpleFold(i) == i)
+            if (Unicode.SimpleFold(i) == i)
             {
                 continue;
             }

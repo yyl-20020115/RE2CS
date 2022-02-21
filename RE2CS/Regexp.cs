@@ -18,7 +18,6 @@ namespace RE2CS;
  */
 public class Regexp
 {
-
     public enum Op : uint
     {
         NO_MATCH, // Matches no strings.
@@ -46,9 +45,9 @@ public class Regexp
         VERTICAL_BAR
 
     }
-    public bool isPseudo(Op op)
+    public static bool IsPseudo(Op op)
     {
-        return (int)op >= (int)Op.LEFT_PAREN;
+        return op >= Op.LEFT_PAREN;
     }
 
     public static readonly Regexp[] EMPTY_SUBS = Array.Empty<Regexp>();

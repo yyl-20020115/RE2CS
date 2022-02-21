@@ -136,7 +136,7 @@ public class RE2
         this.expr = expr;
         this.prog = prog;
         this.numSubexp = numSubexp;
-        this.cond = prog.startCond();
+        this.cond = prog.StartCond();
         this.longest = longest;
     }
 
@@ -184,11 +184,11 @@ public class RE2
     {
         Regexp re = Parser.parse(expr, mode);
         int maxCap = re.maxCap(); // (may shrink during simplify)
-        re = Simplify.simplify(re);
+        re = Simplifier.Simplify(re);
         Program prog = Compiler.CompileRegexp(re);
         RE2 re2 = new RE2(expr, prog, maxCap, longest);
         StringBuilder prefixBuilder = new StringBuilder();
-        re2.prefixComplete = prog.prefix(prefixBuilder);
+        re2.prefixComplete = prog.Prefix(prefixBuilder);
         re2.prefix = prefixBuilder.ToString();
         try
         {
@@ -228,7 +228,7 @@ public class RE2
     }
 
     // Clears the memory associated with this machine.
-    public void reset()
+    public void Reset()
     {
         pooled.Value = null;//.set(null);
     }
@@ -647,7 +647,7 @@ public class RE2
         {
             return null;
         }
-        return Utils.subarray(b, a[0], a[1]);
+        return Utils.Subarray(b, a[0], a[1]);
     }
 
     /**
@@ -665,7 +665,7 @@ public class RE2
         {
             return null;
         }
-        return Utils.subarray(a, 0, 2);
+        return Utils.Subarray(a, 0, 2);
     }
 
     /**
@@ -723,7 +723,7 @@ public class RE2
         {
             if (2 * i < a.Length && a[2 * i] >= 0)
             {
-                ret[i] = Utils.subarray(b, a[2 * i], a[2 * i + 1]);
+                ret[i] = Utils.Subarray(b, a[2 * i], a[2 * i + 1]);
             }
         }
         return ret;

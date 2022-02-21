@@ -89,7 +89,7 @@ public static class Strconv
                         int d = s.codePointAt(i[0]);
                         i[0] = s.offsetByCodePoints(i[0], 1); // (throws if falls off end)
 
-                        int x = Utils.unhex(d);
+                        int x = Utils.Unhex(d);
                         if (x == -1)
                         {
                             throw new InvalidOperationException("not a hex char: " + d);

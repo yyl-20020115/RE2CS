@@ -14,7 +14,6 @@ namespace RE2CS;
  */
 public class PatternSyntaxException : Exception
 {
-
     private readonly string error; // the nature of the error
     private readonly string input; // the partial input at the point of error.
 
@@ -39,28 +38,19 @@ public class PatternSyntaxException : Exception
      * @return The approximate index in the pattern of the error, or <tt>-1</tt> if the index is not
      * known
      */
-    public int getIndex()
-    {
-        return -1;
-    }
+    public int Index => -1;
 
     /**
      * Retrieves the description of the error.
      *
      * @return The description of the error
      */
-    public string getDescription()
-    {
-        return error;
-    }
+    public string Description => error;
 
     /**
      * Retrieves the erroneous regular-expression pattern.
      *
      * @return The erroneous pattern
      */
-    public string getPattern()
-    {
-        return input;
-    }
+    public string Pattern => input;
 }

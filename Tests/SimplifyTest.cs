@@ -160,7 +160,7 @@ public class SimplifyTest
     public void testSimplify()
     {
         Regexp re = Parser.parse(input, RE2.MATCH_NL | (RE2.PERL & ~RE2.ONE_LINE));
-        string s = Simplify.simplify(re).ToString();
+        string s = Simplifier.Simplify(re).ToString();
         assertEquals(string.Format("simplify({0})", input), expected, s);
     }
 

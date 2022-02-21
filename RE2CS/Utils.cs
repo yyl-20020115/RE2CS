@@ -18,11 +18,11 @@ public static class Utils
     public static readonly int[] EMPTY_INTS = Array.Empty<int>();
 
     // Returns true iff |c| is an ASCII letter or decimal digit.
-    public static bool isalnum(int c) 
+    public static bool Isalnum(int c) 
         => ('0' <= c && c <= '9') || ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z');
 
     // If |c| is an ASCII hex digit, returns its value, otherwise -1.
-    public static int unhex(int c)
+    public static int Unhex(int c)
     {
         if ('0' <= c && c <= '9')
         {
@@ -45,7 +45,7 @@ public static class Utils
     // with regexp metacharacters escaped.
     public static void EscapeRune(StringBuilder result, int rune)
     {
-        if (Unicode.isPrint(rune))
+        if (Unicode.IsPrint(rune))
         {
             var r = new Rune(rune);
             var m = METACHARACTERS.EnumerateRunes().ToList();
@@ -102,15 +102,15 @@ public static class Utils
     }
 
     // Returns the array of runes in the specified Java UTF-16 string.
-    public static int[] stringToRunes(string str) => str.EnumerateRunes().Select(r => r.Value).ToArray();
+    public static int[] StringToRunes(string str) => str.EnumerateRunes().Select(r => r.Value).ToArray();
 
     // Returns the Java UTF-16 string containing the single rune |r|.
-    public static string runeToString(int r) => new Rune(r).ToString();
+    public static string RuneToString(int r) => new Rune(r).ToString();
 
     // Returns a new copy of the specified subarray.
-    public static int[] subarray(int[] array, int start, int end)
+    public static int[] Subarray(int[] array, int start, int end)
     {
-        int[] r = new int[end - start];
+        var r = new int[end - start];
         for (int i = start; i < end; ++i)
         {
             r[i - start] = array[i];
@@ -119,9 +119,9 @@ public static class Utils
     }
 
     // Returns a new copy of the specified subarray.
-    public static byte[] subarray(byte[] array, int start, int end)
+    public static byte[] Subarray(byte[] array, int start, int end)
     {
-        byte[] r = new byte[end - start];
+        var r = new byte[end - start];
         for (int i = start; i < end; ++i)
         {
             r[i - start] = array[i];
@@ -131,7 +131,7 @@ public static class Utils
 
     // Returns the index of the first occurrence of array |target| within
     // array |source| after |fromIndex|, or -1 if not found.
-    public static int indexOf(byte[] source, byte[] target, int fromIndex)
+    public static int IndexOf(byte[] source, byte[] target, int fromIndex)
     {
         if (fromIndex >= source.Length)
         {
@@ -174,7 +174,7 @@ public static class Utils
     // isWordRune reports whether r is consider a ``word character''
     // during the evaluation of the \b and \B zero-width assertions.
     // These assertions are ASCII-only: the word characters are [A-Za-z0-9_].
-    public static bool isWordRune(int r)
+    public static bool IsWordRune(int r)
     {
         return (('A' <= r && r <= 'Z') || ('a' <= r && r <= 'z') || ('0' <= r && r <= '9') || r == '_');
     }
@@ -195,7 +195,7 @@ public static class Utils
     // text.
     // Passing r2 == -1 indicates that the position is at the end of the text.
     // TODO(adonovan): move to Machine.
-    public static int emptyOpContext(int r1, int r2)
+    public static int EmptyOpContext(int r1, int r2)
     {
         int op = 0;
         if (r1 < 0)
@@ -214,7 +214,7 @@ public static class Utils
         {
             op |= EMPTY_END_LINE;
         }
-        if (isWordRune(r1) != isWordRune(r2))
+        if (IsWordRune(r1) != IsWordRune(r2))
         {
             op |= EMPTY_WORD_BOUNDARY;
         }
@@ -225,10 +225,7 @@ public static class Utils
         return op;
     }
 
-    public static int GetHashCode(IStructuralEquatable s)
-    {
-        return s.GetHashCode(EqualityComparer<int>.Default);
-    }
+    public static int GetHashCode(IStructuralEquatable s) => s.GetHashCode(EqualityComparer<int>.Default);
 
     public static int CodePointBefore(this string s, int i)
     {

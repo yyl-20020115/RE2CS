@@ -410,7 +410,7 @@ public class ParserTest
                     if ((re.flags & FOLD_CASE) != 0)
                     {
                         for (int r : re.runes) {
-                            if (Unicode.simpleFold(r) != r)
+                            if (Unicode.SimpleFold(r) != r)
                             {
                                 b.Append("fold");
                                 break;

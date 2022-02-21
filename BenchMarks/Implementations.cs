@@ -125,19 +125,19 @@ public abstract class Pattern
 
         public Re2Pattern(String pattern)
         {
-            this.pattern = RE2CS.Pattern.compile(pattern);
+            this.pattern = RE2CS.Pattern.Compile(pattern);
         }
 
         public override Matcher matcher(String str)
         {
             return new Matcher.Re2Matcher(
-                pattern.matcher(str));
+                pattern.Matcher(str));
         }
 
         public override Matcher matcher(byte[] bytes)
         {
             return new Matcher.Re2Matcher(
-                pattern.matcher(bytes));
+                pattern.Matcher(bytes));
         }
     }
 }

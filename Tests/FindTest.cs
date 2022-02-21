@@ -60,7 +60,7 @@ public class FindTest
 
         public byte[] submatchBytes(int i, int j)
         {
-            return Utils.subarray(textUTF8, matches[i][2 * j], matches[i][2 * j + 1]);
+            return Utils.Subarray(textUTF8, matches[i][2 * j], matches[i][2 * j + 1]);
         }
 
         public string submatchString(int i, int j)

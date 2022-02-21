@@ -51,53 +51,33 @@ public class Pattern
     private readonly int _flags;
 
     // The compiled RE2 regexp.
-    private RE2 _re2;
+    private readonly RE2 _re2;
 
     // This is visible for testing.
     public Pattern(string pattern, int flags, RE2 re2)
     {
-        if (pattern == null)
-        {
-            throw new ArgumentNullException("pattern is null");
-        }
-        if (re2 == null)
-        {
-            throw new ArgumentNullException("re2 is null");
-        }
-        this._pattern = pattern;
+        this._pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
+        this._re2 = re2 ?? throw new ArgumentNullException(nameof(re2));
         this._flags = flags;
-        this._re2 = re2;
     }
 
     /**
      * Releases memory used by internal caches associated with this pattern. Does not change the
      * observable behaviour. Useful for tests that detect memory leaks via allocation tracking.
      */
-    public void reset()
-    {
-        _re2.reset();
-    }
+    public void Reset() => _re2.Reset();
 
     /**
      * Returns the flags used in the constructor.
      */
-    public int flags()
-    {
-        return _flags;
-    }
+    public int Flags => _flags;
 
     /**
      * Returns the pattern used in the constructor.
      */
-    public string pattern()
-    {
-        return _pattern;
-    }
+    public string PatternText => _pattern;
 
-    public RE2 re2()
-    {
-        return _re2;
-    }
+    public RE2 Re2 => _re2;
 
     /**
      * Creates and returns a new {@code Pattern} corresponding to compiling {@code regex} with the
@@ -106,10 +86,7 @@ public class Pattern
      * @param regex the regular expression
      * @throws PatternSyntaxException if the pattern is malformed
      */
-    public static Pattern compile(string regex)
-    {
-        return compile(regex, regex, 0);
-    }
+    public static Pattern Compile(string regex) => Compile(regex, regex, 0);
 
     /**
      * Creates and returns a new {@code Pattern} corresponding to compiling {@code regex} with the
@@ -121,9 +98,9 @@ public class Pattern
      * @throws PatternSyntaxException if the regular expression is malformed
      * @throws IllegalArgumentException if an unknown flag is given
      */
-    public static Pattern compile(string regex, int flags)
+    public static Pattern Compile(string regex, int flags)
     {
-        string flregex = regex;
+        var flregex = regex;
         if ((flags & CASE_INSENSITIVE) != 0)
         {
             flregex = "(?i)" + flregex;
@@ -143,13 +120,13 @@ public class Pattern
                 "Flags should only be a combination "
                     + "of MULTILINE, DOTALL, CASE_INSENSITIVE, DISABLE_UNICODE_GROUPS, LONGEST_MATCH");
         }
-        return compile(flregex, regex, flags);
+        return Compile(flregex, regex, flags);
     }
 
     /**
      * Helper: create new Pattern with given regex and flags. Flregex is the regex with flags applied.
      */
-    private static Pattern compile(string flregex, string regex, int flags)
+    private static Pattern Compile(string flregex, string regex, int flags)
     {
         int re2Flags = RE2.PERL;
         if ((flags & DISABLE_UNICODE_GROUPS) != 0)
@@ -168,46 +145,25 @@ public class Pattern
      * @return true if the regular expression matches the entire input
      * @throws PatternSyntaxException if the regular expression is malformed
      */
-    public static bool matches(string regex, string input)
-    {
-        return compile(regex).matcher(input).Matches();
-    }
+    public static bool Matches(string regex, string input) => Compile(regex).Matcher(input).Matches();
 
-    public static bool matches(string regex, byte[] input)
-    {
-        return compile(regex).matcher(input).Matches();
-    }
+    public static bool Matches(string regex, byte[] input) => Compile(regex).Matcher(input).Matches();
 
-    public bool matches(string input)
-    {
-        return this.matcher(input).Matches();
-    }
+    public bool Matches(string input) => this.Matcher(input).Matches();
 
-    public bool matches(byte[] input)
-    {
-        return this.matcher(input).Matches();
-    }
+    public bool Matches(byte[] input) => this.Matcher(input).Matches();
 
     /**
      * Creates a new {@code Matcher} matching the pattern against the input.
      *
      * @param input the input string
      */
-    public Matcher matcher(string input)
-    {
-        return new Matcher(this, input);
-    }
+    public Matcher Matcher(string input) => new Matcher(this, input);
 
-    public Matcher matcher(byte[] input)
-    {
-        return new Matcher(this, MatcherInput.Utf8(input));
-    }
+    public Matcher Matcher(byte[] input) => new Matcher(this, MatcherInput.Utf8(input));
 
     // This is visible for testing.
-    Matcher matcher(MatcherInput input)
-    {
-        return new Matcher(this, input);
-    }
+    Matcher Matcher(MatcherInput input) => new Matcher(this, input);
 
     /**
      * Splits input around instances of the regular expression. It returns an array giving the strings
@@ -217,10 +173,6 @@ public class Pattern
      * @param input the input string to be split
      * @return the split strings
      */
-    public string[] split(string input)
-    {
-        return split(input, 0);
-    }
 
     /**
      * Splits input around instances of the regular expression. It returns an array giving the strings
@@ -236,13 +188,10 @@ public class Pattern
      * @param limit the limit
      * @return the split strings
      */
-    public string[] split(string input, int limit)
-    {
-        return split(new Matcher(this, input), limit);
-    }
+    public string[] Split(string input, int limit = 0) => Split(new Matcher(this, input), limit);
 
     /** Helper: run split on m's input. */
-    private string[] split(Matcher m, int limit)
+    private string[] Split(Matcher m, int limit)
     {
         int matchCount = 0;
         int arraySize = 0;
@@ -296,16 +245,10 @@ public class Pattern
      * @param s The string to be literalized
      * @return A literal string replacement
      */
-    public static string quote(string s)
-    {
-        return RE2.quoteMeta(s);
-    }
+    public static string Quote(string s) => RE2.quoteMeta(s);
 
 
-    public override string ToString()
-    {
-        return _pattern;
-    }
+    public override string ToString() => _pattern;
 
     /**
      * Returns the number of capturing groups in this matcher's pattern. Group zero denotes the entire
@@ -313,28 +256,22 @@ public class Pattern
      *
      * @return the number of capturing groups in this pattern
      */
-    public int groupCount()
-    {
-        return _re2.numberOfCapturingGroups();
-    }
+    public int GroupCount => _re2.numberOfCapturingGroups();
 
     /**
      * Return a map of the capturing groups in this matcher's pattern, where key is the name and value
      * is the index of the group in the pattern.
      */
-    public Dictionary<string, int> namedGroups()
-    {
-        return (_re2.namedGroups);
-    }
+    public Dictionary<string, int> NamedGroups => (_re2.namedGroups);
 
-    Object readResolve()
+    object ReadResolve()
     {
         // The deserialized version will be missing the RE2 instance, so we need to create a new,
         // compiled version.
-        return Pattern.compile(_pattern, _flags);
+        return Pattern.Compile(_pattern, _flags);
     }
 
-    public override bool Equals(Object o)
+    public override bool Equals(object? o)
     {
         if (this == o)
         {
@@ -345,8 +282,7 @@ public class Pattern
             return false;
         }
 
-        Pattern other = (Pattern)o;
-        return flags == other.flags && _pattern.Equals(other.pattern);
+        return o is Pattern other && Flags == other.Flags && _pattern.Equals(other.PatternText);
     }
 
     public override int GetHashCode()

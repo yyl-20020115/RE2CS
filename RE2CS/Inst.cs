@@ -58,7 +58,7 @@ public class Inst
             }
             if ((arg & RE2.FOLD_CASE) != 0)
             {
-                for (int r1 = Unicode.simpleFold(r0); r1 != r0; r1 = Unicode.simpleFold(r1))
+                for (int r1 = Unicode.SimpleFold(r0); r1 != r0; r1 = Unicode.SimpleFold(r1))
                 {
                     if (r == r1)
                     {

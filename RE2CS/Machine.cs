@@ -111,8 +111,8 @@ public class Machine
     {
         this.prog = re2.prog;
         this.re2 = re2;
-        this.q0 = new (prog.numInst());
-        this.q1 = new (prog.numInst());
+        this.q0 = new (prog.NumInst);
+        this.q1 = new (prog.NumInst);
         this.matchcap = new int[prog.numCap < 2 ? 2 : prog.numCap];
     }
 
@@ -268,7 +268,7 @@ public class Machine
         int flag; // bitmask of EMPTY_* flags
         if (pos == 0)
         {
-            flag = Utils.emptyOpContext(-1, rune);
+            flag = Utils.EmptyOpContext(-1, rune);
         }
         else
         {

@@ -47,7 +47,7 @@ public class Compiler
     {
         var c = new Compiler();
         var f = c.Compile(re);
-        c.program.patch(f._out, c.NewInst(Inst.MATCH).i);
+        c.program.Patch(f._out, c.NewInst(Inst.MATCH).i);
         c.program.start = f.i;
         return c.program;
     }
@@ -55,8 +55,8 @@ public class Compiler
     private Fragment NewInst(int op)
     {
         // TODO(rsc): impose length limit.
-        program.addInst(op);
-        return new Fragment(program.numInst() - 1, 0, true);
+        program.AddInst(op);
+        return new Fragment(program.NumInst- 1, 0, true);
     }
 
     // Returns a no-op fragment.  Sometimes unavoidable.
@@ -78,7 +78,7 @@ public class Compiler
     {
         var f = NewInst(Inst.CAPTURE);
         f._out = f.i << 1;
-        program.getInst(f.i).arg = arg;
+        program.GetInst(f.i).arg = arg;
         if (program.numCap < arg + 1)
         {
             program.numCap = arg + 1;
@@ -95,7 +95,7 @@ public class Compiler
             return Fail();
         }
         // TODO(rsc): elide nop
-        program.patch(f1._out, f2.i);
+        program.Patch(f1._out, f2.i);
         return new (f1.i, f2._out, f1.nullable && f2.nullable);
     }
 
@@ -106,7 +106,7 @@ public class Compiler
         if (f1.i == 0) return f2;
         if (f2.i == 0) return f1;
         var f = NewInst(Inst.ALT);
-        var i = program.getInst(f.i);
+        var i = program.GetInst(f.i);
         i._out = f1.i;
         i.arg = f2.i;
         f._out = program.Append(f1._out, f2._out);
@@ -122,7 +122,7 @@ public class Compiler
     private Fragment Loop(Fragment f1, bool nongreedy)
     {
         var f = NewInst(Inst.ALT);
-        var i = program.getInst(f.i);
+        var i = program.GetInst(f.i);
         if (nongreedy)
         {
             i.arg = f1.i;
@@ -133,7 +133,7 @@ public class Compiler
             i._out = f1.i;
             f._out = f.i << 1 | 1;
         }
-        program.patch(f1._out, f.i);
+        program.Patch(f1._out, f.i);
         return f;
     }
 
@@ -141,7 +141,7 @@ public class Compiler
     private Fragment Quest(Fragment f1, bool nongreedy)
     {
         var f = NewInst(Inst.ALT);
-        var i = program.getInst(f.i);
+        var i = program.GetInst(f.i);
         if (nongreedy)
         {
             i.arg = f1.i;
@@ -169,7 +169,7 @@ public class Compiler
     private Fragment Empty(int op)
     {
         var f = NewInst(Inst.EMPTY_WIDTH);
-        program.getInst(f.i).arg = op;
+        program.GetInst(f.i).arg = op;
         f._out = f.i << 1;
         return f;
     }
@@ -181,10 +181,10 @@ public class Compiler
     {
         var f = NewInst(Inst.RUNE);
         f.nullable = false;
-        var i = program.getInst(f.i);
+        var i = program.GetInst(f.i);
         i.runes = runes;
         flags &= RE2.FOLD_CASE; // only relevant flag is FoldCase
-        if (runes.Length != 1 || Unicode.simpleFold(runes[0]) == runes[0])
+        if (runes.Length != 1 || Unicode.SimpleFold(runes[0]) == runes[0])
         {
             flags &= ~RE2.FOLD_CASE; // and sometimes not even that
         }

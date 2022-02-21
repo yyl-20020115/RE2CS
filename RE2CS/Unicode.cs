@@ -34,7 +34,7 @@ public static class Unicode
     // is32 uses binary search to test whether rune is in the specified
     // slice of 32-bit ranges.
     // TODO(adonovan): opt: consider using int[n*3] instead of int[n][3].
-    private static bool is32(int[][] ranges, int r)
+    private static bool Is32(int[][] ranges, int r)
     {
         // binary search over ranges
         for (int lo = 0, hi = ranges.Length; lo < hi;)
@@ -58,7 +58,7 @@ public static class Unicode
     }
 
     // is tests whether rune is in the specified table of ranges.
-    private static bool _is(int[][] ranges, int r) {
+    private static bool IsIn(int[][] ranges, int r) {
         // common case: rune is ASCII or Latin-1, so use linear search.
         if (r <= MAX_LATIN1) {
             foreach (int[] range in ranges) { // range = [lo, hi, stride]
@@ -72,33 +72,22 @@ public static class Unicode
             }
             return false;
         }
-        return ranges.Length > 0 && r >= ranges[0][0] && is32(ranges, r);
+        return ranges.Length > 0 && r >= ranges[0][0] && Is32(ranges, r);
     }
 
     // isUpper reports whether the rune is an upper case letter.
-    public static bool isUpper(int r)
-    {
+    public static bool IsUpper(int r) =>
         // See comment in isGraphic.
-        if (r <= MAX_LATIN1)
-        {
-            return char.IsUpper((char)r);
-        }
-        return _is (UnicodeTables.Upper, r);
-    }
+        r <= MAX_LATIN1 ? char.IsUpper((char)r) : IsIn(UnicodeTables.Upper, r);
 
     // isPrint reports whether the rune is printable (Unicode L/M/N/P/S or ' ').
-    public static bool isPrint(int r)
-    {
-        if (r <= MAX_LATIN1)
-        {
-            return (r >= 0x20 && r < 0x7F) || (r >= 0xA1 && r != 0xAD);
-        }
-        return _is(UnicodeTables.L, r)
-            || _is(UnicodeTables.M, r)
-            || _is(UnicodeTables.N, r)
-            || _is(UnicodeTables.P, r)
-            || _is(UnicodeTables.S, r);
-    }
+    public static bool IsPrint(int r) => r <= MAX_LATIN1
+            ? (r >= 0x20 && r < 0x7F) || (r >= 0xA1 && r != 0xAD)
+            : IsIn(UnicodeTables.L, r)
+            || IsIn(UnicodeTables.M, r)
+            || IsIn(UnicodeTables.N, r)
+            || IsIn(UnicodeTables.P, r)
+            || IsIn(UnicodeTables.S, r);
 
     // simpleFold iterates over Unicode code points equivalent under
     // the Unicode-defined simple case folding.  Among the code points
@@ -117,7 +106,7 @@ public static class Unicode
     //
     // Derived from Go's unicode.SimpleFold.
     //
-    public static int simpleFold(int r)
+    public static int SimpleFold(int r)
     {
         // Consult caseOrbit table for special cases.
         if (r < UnicodeTables.CASE_ORBIT.Length && UnicodeTables.CASE_ORBIT[r] != 0)
@@ -129,11 +118,7 @@ public static class Unicode
         // equivalence class containing rune and toLower(rune)
         // and toUpper(rune) if they are different from rune.
         int l = Characters.ToLowerCase(r);
-        if (l != r)
-        {
-            return l;
-        }
-        return Characters.ToUpperCase(r);
+        return l != r ? l : Characters.ToUpperCase(r);
     }
 
 }

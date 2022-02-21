@@ -120,13 +120,13 @@ public class Parser
               && re.runes.Length == 4
               && re.runes[0] == re.runes[1]
               && re.runes[2] == re.runes[3]
-              && Unicode.simpleFold(re.runes[0]) == re.runes[2]
-              && Unicode.simpleFold(re.runes[2]) == re.runes[0])
+              && Unicode.SimpleFold(re.runes[0]) == re.runes[2]
+              && Unicode.SimpleFold(re.runes[2]) == re.runes[0])
           || (re.op == Regexp.Op.CHAR_CLASS
               && re.runes.Length == 2
               && re.runes[0] + 1 == re.runes[1]
-              && Unicode.simpleFold(re.runes[0]) == re.runes[1]
-              && Unicode.simpleFold(re.runes[1]) == re.runes[0]))
+              && Unicode.SimpleFold(re.runes[0]) == re.runes[1]
+              && Unicode.SimpleFold(re.runes[1]) == re.runes[0]))
         {
             // Case-insensitive rune like [Aa] or [Δδ].
             if (maybeConcat(re.runes[0], flags | RE2.FOLD_CASE))
@@ -212,7 +212,7 @@ public class Parser
         }
         int min = r;
         int r0 = r;
-        for (r = Unicode.simpleFold(r); r != r0; r = Unicode.simpleFold(r))
+        for (r = Unicode.SimpleFold(r); r != r0; r = Unicode.SimpleFold(r))
         {
             if (min > r)
             {
@@ -499,7 +499,7 @@ public class Parser
                 // Construct factored form: prefix(suffix1|suffix2|...)
                 Regexp prefix = newRegexp(Regexp.Op.LITERAL);
                 prefix.flags = strflags;
-                prefix.runes = Utils.subarray(str, 0, strlen);
+                prefix.runes = Utils.Subarray(str, 0, strlen);
 
                 for (int j = start; j < i; j++)
                 {
@@ -711,7 +711,7 @@ public class Parser
 
         if (re.op == Regexp.Op.LITERAL)
         {
-            re.runes = Utils.subarray(re.runes, n, re.runes.Length);
+            re.runes = Utils.Subarray(re.runes, n, re.runes.Length);
             if (re.runes.Length == 0)
             {
                 re.op = Regexp.Op.EMPTY_MATCH;
@@ -778,7 +778,7 @@ public class Parser
     {
         Regexp re = new Regexp(Regexp.Op.LITERAL);
         re.flags = flags;
-        re.runes = Utils.stringToRunes(s);
+        re.runes = Utils.StringToRunes(s);
         return re;
     }
 
@@ -1301,7 +1301,7 @@ public class Parser
         for (int i = 0; i < name.Length; ++i)
         {
             char c = name.charAt(i);
-            if (c != '_' && !Utils.isalnum(c))
+            if (c != '_' && !Utils.Isalnum(c))
             {
                 return false;
             }
@@ -1516,7 +1516,7 @@ public class Parser
     bigswitch:
         switch (c) {
             default:
-                if (!Utils.isalnum(c))
+                if (!Utils.Isalnum(c))
                 {
                     // Escaped non-word characters are always themselves.
                     // PCRE is not quite so rigorous: it accepts things like
@@ -1580,7 +1580,7 @@ public class Parser
                         {
                             break;
                         }
-                        int v = Utils.unhex(c);
+                        int v = Utils.Unhex(c);
                         if (v < 0)
                         {
                             goto bigswitch;
@@ -1600,13 +1600,13 @@ public class Parser
                 }
 
                 // Easy case: two hex digits.
-                int x = Utils.unhex(c);
+                int x = Utils.Unhex(c);
                 if (!t.more())
                 {
                     break;
                 }
                 c = t.pop();
-                int y = Utils.unhex(c);
+                int y = Utils.Unhex(c);
                 if (x < 0 || y < 0)
                 {
                     break;
@@ -1760,7 +1760,7 @@ public class Parser
         string name;
         if (c != '{') {
             // Single-letter name.
-            name = Utils.runeToString(c);
+            name = Utils.RuneToString(c);
         } else {
             // Name is in braces.
             string rest = t.rest();

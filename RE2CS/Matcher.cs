@@ -69,7 +69,7 @@ public class Matcher
     public Matcher(Pattern pattern)
     {
         this._pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
-        var re2 = pattern.re2();
+        var re2 = pattern.Re2;
         _groupCount = re2.numberOfCapturingGroups();
         _groups = new int[2 + 2 * _groupCount];
         _namedGroups = re2.namedGroups;
@@ -263,7 +263,7 @@ public class Matcher
         }
 
         bool ok =
-            _pattern.re2().match(_matcherInput, _groups[0], end, _anchorFlag, _groups, 1 + _groupCount);
+            _pattern.Re2.match(_matcherInput, _groups[0], end, _anchorFlag, _groups, 1 + _groupCount);
         // Must match - hasMatch says that the last call with these
         // parameters worked just fine.
         if (!ok)
@@ -333,7 +333,7 @@ public class Matcher
     {
         // TODO(rsc): Is matches/lookingAt supposed to reset the Append or input positions?
         // From the JDK docs, looks like no.
-        var ok = _pattern.re2().match(_matcherInput!, startByte, _inputLength, anchor, _groups, 1);
+        var ok = _pattern.Re2.match(_matcherInput!, startByte, _inputLength, anchor, _groups, 1);
         if (!ok)
         {
             return false;
