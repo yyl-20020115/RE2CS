@@ -24,19 +24,19 @@ public class RE2TestNumSubexps
     new string[]{"(.*)(\\(a\\)b)(.*)a", "3"},
     };
 
-    public static string[][] TestCases() => NUM_SUBEXP_CASES;
-
-    private readonly string input;
-    private readonly int expected;
-
-    public RE2TestNumSubexps(string input, string expected)
-    {
-        this.input = input;
-        int.TryParse(expected, out this.expected);
-    }
-
     [TestMethod]
     public void TestNumSubexp()
+    {
+        var cases = NUM_SUBEXP_CASES;
+        for(int i = 0; i < cases.Length; i++)
+        {
+            var c = cases[i];
+            int.TryParse(c[1], out var expected);
+            this.TestNumSubexp(i,c[0],expected);
+        }
+
+    }
+    public void TestNumSubexp(int i, string input, int expected)
     {
         AssertEquals(
         "numberOfCapturingGroups(" + input + ")",

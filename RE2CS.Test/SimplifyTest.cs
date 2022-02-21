@@ -141,21 +141,20 @@ public class SimplifyTest
     new string[]{"(?:(a){0})", "(?:)"},
     };
 
-    public static object[] GetParameters() => SIMPLIFY_TESTS;
-
-    private readonly string input;
-    private readonly string expected;
-
-    public SimplifyTest(string input, string expected)
-    {
-        this.input = input;
-        this.expected = expected;
-    }
 
     [TestMethod]
     public void TestSimplify()
     {
-        Regexp re = Parser.Parse(input, RE2.MATCH_NL | (RE2.PERL & ~RE2.ONE_LINE));
+        var st = SIMPLIFY_TESTS;
+        for(int i = 0; i < st.Length; i++)
+        {
+            this.TestSimplify(i,st[i][0], st[i][1]);
+        }
+
+    }
+    public void TestSimplify(int i,string input,string expected)
+    {
+        var re = Parser.Parse(input, RE2.MATCH_NL | (RE2.PERL & ~RE2.ONE_LINE));
         string s = Simplifier.Simplify(re).ToString();
         AssertEquals(string.Format("simplify({0})", input), expected, s);
     }

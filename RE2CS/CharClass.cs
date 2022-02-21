@@ -172,13 +172,14 @@ public class CharClass
             AppendRange(Unicode.MAX_FOLD + 1, hi);
             hi = Unicode.MAX_FOLD;
         }
-
+        var visited = new HashSet<int>();
         // Brute force.  Depend on appendRange to coalesce ranges on the fly.
         for (int c = lo; c <= hi; c++)
         {
             AppendRange(c, c);
             for (int f = Unicode.SimpleFold(c); f != c; f = Unicode.SimpleFold(f))
             {
+                if (!visited.Add(f)) break;
                 AppendRange(f, f);
             }
         }

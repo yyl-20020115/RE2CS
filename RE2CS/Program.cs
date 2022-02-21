@@ -102,10 +102,11 @@ public class Program
                 case Inst.NOP:
                     break; // skip
                 default:
-                    goto loop;
+                    goto exit;
             }
             pc = i._out;
         }
+    exit:
         return flag;
     }
 

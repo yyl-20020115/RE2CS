@@ -818,8 +818,14 @@ public class Parser
 
         // Returns the rune at the cursor position.
         // Precondition: |more()|.
-        public int Peek() => str[_pos];
-
+        public int Peek()
+        {
+            if(_pos>=str.Length)
+            {
+                return -1;
+            }
+            return char.ConvertToUtf32(str, _pos);// str[_pos];
+        }
         // Advances the cursor by |n| positions, which must be ASCII runes.
         //
         // (In practise, this is only ever used to skip over regexp
@@ -834,7 +840,7 @@ public class Parser
         // past it.  Precondition: |more()|.
         public int Pop()
         {
-            int r = char.ConvertToUtf32(str, Pos);// str.codePointAt(Pos);
+            int r = char.ConvertToUtf32(str,_pos);// str.codePointAt(Pos);
             _pos += new Rune(r).Utf16SequenceLength;//. Character.charCount(r);
             return r;
         }
@@ -993,13 +999,13 @@ public class Parser
                             {
                                 case 'A':
                                     Op(Regexp.Op.BEGIN_TEXT);
-                                    goto bigswitch;
+                                    goto outswitch;
                                 case 'b':
                                     Op(Regexp.Op.WORD_BOUNDARY);
-                                    goto bigswitch;
+                                    goto outswitch;
                                 case 'B':
                                     Op(Regexp.Op.NO_WORD_BOUNDARY);
-                                    goto bigswitch;
+                                    goto outswitch;
                                 case 'C':
                                     // any byte; not supported
                                     throw new PatternSyntaxException(ERR_INVALID_ESCAPE, "\\C");
@@ -1020,11 +1026,11 @@ public class Parser
                                             Literal(codepoint);
                                             j += new Rune(codepoint).Utf16SequenceLength;// Character.charCount(codepoint);
                                         }
-                                        goto bigswitch;
+                                        goto outswitch;
                                     }
                                 case 'z':
                                     Op(Regexp.Op.END_TEXT);
-                                    goto bigswitch;
+                                    goto outswitch;
                                 default:
                                     t.RewindTo(savedPos);
                                     break;
@@ -1042,7 +1048,7 @@ public class Parser
                             {
                                 re.runes = cc2.ToArray();
                                 Push(re);
-                                goto bigswitch;
+                                goto outswitch;
                             }
                         }
 
@@ -1052,7 +1058,7 @@ public class Parser
                         {
                             re.runes = cc.ToArray();
                             Push(re);
-                            goto bigswitch;
+                            goto outswitch;
                         }
 
                         t.RewindTo(savedPos);
@@ -1063,6 +1069,7 @@ public class Parser
                         break;
                     }
             }
+        outswitch:
             lastRepeatPos = repeatPos;
         }
 
@@ -1197,8 +1204,7 @@ public class Parser
             switch (c)
             {
                 default:
-                    goto loop;
-
+                    goto exit;
                 // Flags.
                 case 'i':
                     flags |= RE2.FOLD_CASE;
@@ -1221,7 +1227,7 @@ public class Parser
                 case '-':
                     if (sign < 0)
                     {
-                        goto loop;
+                        goto exit;
                     }
                     sign = -1;
                     // Invert flags so that | above turn into &~ and vice versa.
@@ -1237,7 +1243,7 @@ public class Parser
                     {
                         if (!sawFlag)
                         {
-                            goto loop;
+                            goto exit;
                         }
                         flags = ~flags;
                     }
@@ -1250,7 +1256,7 @@ public class Parser
                     return;
             }
         }
-
+    exit:
         throw new PatternSyntaxException(ERR_INVALID_PERL_OP, t.From(startPos));
     }
 
@@ -1563,7 +1569,7 @@ public class Parser
                     {
                         if (!t.HasMore)
                         {
-                            goto bigswitch;
+                            goto outswitch;
                         }
                         c = t.Pop();
                         if (c == '}')
@@ -1573,18 +1579,18 @@ public class Parser
                         int v = Utils.Unhex(c);
                         if (v < 0)
                         {
-                            goto bigswitch;
+                            goto outswitch;
                         }
                         r = r * 16 + v;
                         if (r > Unicode.MAX_RUNE)
                         {
-                            goto bigswitch;
+                            goto outswitch;
                         }
                         nhex++;
                     }
                     if (nhex == 0)
                     {
-                        goto bigswitch;
+                        goto outswitch;
                     }
                     return r;
                 }
@@ -1622,6 +1628,7 @@ public class Parser
             case 'v':
                 return 11; // No \v in Java
         }
+    outswitch:
         throw new PatternSyntaxException(ERR_INVALID_ESCAPE, t.From(startPos));
     }
 
@@ -1658,7 +1665,11 @@ public class Parser
             return false;
         }
         t.Pop(); // e.g. advance past 'd' in "\\d"
-        var g = CharGroup.PERL_GROUPS[t.From(beforePos)];
+        var k = t.From(beforePos);
+        if (!CharGroup.PERL_GROUPS.TryGetValue(k,out var g))
+        {
+            return false;
+        }
         if (g == null)
         {
             return false;
@@ -1683,8 +1694,7 @@ public class Parser
         }
         string name = cls.Substring(0, i + 2-0); // "[:alnum:]"
         t.SkipString(name);
-        var g = CharGroup.POSIX_GROUPS[name];
-        if (g == null)
+        if (!CharGroup.POSIX_GROUPS.TryGetValue(name,out var g))
         {
             throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, name);
         }
