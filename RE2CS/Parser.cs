@@ -1714,15 +1714,27 @@ public class Parser
         {
             return Pair<int[][], int[][]>.of(ANY_TABLE, ANY_TABLE);
         }
-        int[][] table = UnicodeTables.CATEGORIES[name];
-        if (table != null)
+        if (UnicodeTables.CATEGORIES.TryGetValue(name,out var table))
         {
-            return Pair<int[][], int[][]>.of(table, UnicodeTables.FOLD_CATEGORIES[name]);
+            if(UnicodeTables.FOLD_CATEGORIES.TryGetValue(name,out var cat))
+            {
+                return Pair<int[][], int[][]>.of(table, cat);
+            }
+            else
+            {
+
+            }
         }
-        table = UnicodeTables.SCRIPTS[name];
-        if (table != null)
+        if (UnicodeTables.SCRIPTS.TryGetValue(name,out table))
         {
-            return Pair<int[][], int[][]>.of(table, UnicodeTables.FOLD_SCRIPT[name]);
+            if(UnicodeTables.FOLD_SCRIPT.TryGetValue(name,out var script))
+            {
+                return Pair<int[][], int[][]>.of(table, script);
+            }
+            else
+            {
+
+            }
         }
         return null;
     }
