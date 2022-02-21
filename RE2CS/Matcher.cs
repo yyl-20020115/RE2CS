@@ -463,7 +463,7 @@ public class Matcher
             {
                 if (last < i)
                 {
-                    builder.Append(replacement.Substring(last, i-last));
+                    builder.Append(replacement.Substring(last, i - last));
                 }
                 i++;
                 last = i;
