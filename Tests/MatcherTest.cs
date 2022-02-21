@@ -20,23 +20,23 @@ public class MatcherTest
 {
 
     [Test]
-    public void testLookingAt()
+    public void TestLookingAt()
     {
-        ApiTestUtils.verifyLookingAt("abcdef", "abc", true);
-        ApiTestUtils.verifyLookingAt("ab", "abc", false);
+        ApiTestUtils.VerifyLookingAt("abcdef", "abc", true);
+        ApiTestUtils.VerifyLookingAt("ab", "abc", false);
     }
 
     [Test]
-    public void testMatches()
+    public void TestMatches()
     {
-        ApiTestUtils.testMatcherMatches("ab+c", "abbbc", "cbbba");
-        ApiTestUtils.testMatcherMatches("ab.*c", "abxyzc", "ab\nxyzc");
-        ApiTestUtils.testMatcherMatches("^ab.*c$", "abc", "xyz\nabc\ndef");
-        ApiTestUtils.testMatcherMatches("ab+c", "abbbc", "abbcabc");
+        ApiTestUtils.TestMatcherMatches("ab+c", "abbbc", "cbbba");
+        ApiTestUtils.TestMatcherMatches("ab.*c", "abxyzc", "ab\nxyzc");
+        ApiTestUtils.TestMatcherMatches("^ab.*c$", "abc", "xyz\nabc\ndef");
+        ApiTestUtils.TestMatcherMatches("ab+c", "abbbc", "abbcabc");
     }
 
     [Test]
-    public void testReplaceAll()
+    public void TestReplaceAll()
     {
         ApiTestUtils.testReplaceAll(
             "What the Frog's Eye Tells the Frog's Brain",
@@ -66,40 +66,40 @@ public class MatcherTest
     }
 
     [Test]
-    public void testReplaceFirst()
+    public void TestReplaceFirst()
     {
-        ApiTestUtils.testReplaceFirst(
+        ApiTestUtils.TestReplaceFirst(
             "What the Frog's Eye Tells the Frog's Brain",
             "Frog",
             "Lizard",
             "What the Lizard's Eye Tells the Frog's Brain");
-        ApiTestUtils.testReplaceFirst(
+        ApiTestUtils.TestReplaceFirst(
             "What the Frog's Eye Tells the Frog's Brain",
             "F(rog)",
             "\\$Liza\\rd$1",
             "What the $Lizardrog's Eye Tells the Frog's Brain");
-        ApiTestUtils.testReplaceFirst(
+        ApiTestUtils.TestReplaceFirst(
             "abcdefghijklmnopqrstuvwxyz123",
             "(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)",
             "$10$20",
             "jb0nopqrstuvwxyz123");
-        ApiTestUtils.testReplaceFirst(
+        ApiTestUtils.TestReplaceFirst(
             "\u00e1\u0062\u00e7\u2655", "(.)", "<$1>", "<\u00e1>\u0062\u00e7\u2655");
-        ApiTestUtils.testReplaceFirst(
+        ApiTestUtils.TestReplaceFirst(
             "\u00e1\u0062\u00e7\u2655", "[\u00e0-\u00e9]", "<$0>", "<\u00e1>\u0062\u00e7\u2655");
-        ApiTestUtils.testReplaceFirst("hello world", "z*", "x", "xhello world");
-        ApiTestUtils.testReplaceFirst("aab", "a*", "<$0>", "<aa>b");
-        ApiTestUtils.testReplaceFirst("aab", "a*?", "<$0>", "<>aab");
+        ApiTestUtils.TestReplaceFirst("hello world", "z*", "x", "xhello world");
+        ApiTestUtils.TestReplaceFirst("aab", "a*", "<$0>", "<aa>b");
+        ApiTestUtils.TestReplaceFirst("aab", "a*?", "<$0>", "<>aab");
     }
 
     [Test]
-    public void testGroupCount()
+    public void TestGroupCount()
     {
         ApiTestUtils.testGroupCount("(a)(b(c))d?(e)", 4);
     }
 
     [Test]
-    public void testGroup()
+    public void TestGroup()
     {
         // ApiTestUtils.testGroup("xabdez", "(a)(b(c)?)d?(e)", new string[] {"abde", "a", "b", null, "e"});
         // ApiTestUtils.testGroup("abc", "(a)(b$)?(b)?", new string[] {"ab", "a", null, "b"});
@@ -108,7 +108,7 @@ public class MatcherTest
 
         // Not allowed to use UTF-8 except in comments, per Java style guide.
         // ("αβξδεφγ", "(.)(..)(...)", new string[] {"αβξδεφ", "α", "βξ", "δεφ"});
-        ApiTestUtils.testGroup(
+        ApiTestUtils.TestGroup(
             "\u03b1\u03b2\u03be\u03b4\u03b5\u03c6\u03b3",
             "(.)(..)(...)",
             new string[] {
@@ -117,25 +117,25 @@ public class MatcherTest
     }
 
     [Test]
-    public void testFind()
+    public void TestFind()
     {
-        ApiTestUtils.testFind("abcdefgh", ".*[aeiou]", 0, "abcde");
-        ApiTestUtils.testFind("abcdefgh", ".*[aeiou]", 1, "bcde");
-        ApiTestUtils.testFind("abcdefgh", ".*[aeiou]", 2, "cde");
-        ApiTestUtils.testFind("abcdefgh", ".*[aeiou]", 3, "de");
-        ApiTestUtils.testFind("abcdefgh", ".*[aeiou]", 4, "e");
+        ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 0, "abcde");
+        ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 1, "bcde");
+        ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 2, "cde");
+        ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 3, "de");
+        ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 4, "e");
         ApiTestUtils.testFindNoMatch("abcdefgh", ".*[aeiou]", 5);
         ApiTestUtils.testFindNoMatch("abcdefgh", ".*[aeiou]", 6);
         ApiTestUtils.testFindNoMatch("abcdefgh", ".*[aeiou]", 7);
     }
 
     [Test]
-    public void testInvalidFind()
+    public void TestInvalidFind()
     {
         try
         {
-            ApiTestUtils.testFind("abcdef", ".*", 10, "xxx");
-            fail();
+            ApiTestUtils.TestFind("abcdef", ".*", 10, "xxx");
+            Fail();
         }
         catch (IndexOutOfRangeException e)
         {
@@ -144,57 +144,57 @@ public class MatcherTest
     }
 
     [Test]
-    public void testInvalidReplacement()
+    public void TestInvalidReplacement()
     {
         try
         {
-            ApiTestUtils.testReplaceFirst("abc", "abc", "$4", "xxx");
-            fail();
+            ApiTestUtils.TestReplaceFirst("abc", "abc", "$4", "xxx");
+            Fail();
         }
         catch (IndexOutOfRangeException e)
         {
             /* ok */
-            assertTrue(true);
+            AssertTrue(true);
         }
     }
 
-    private void assertTrue(bool v)
+    private void AssertTrue(bool v)
     {
-        throw new NotImplementedException();
+        Assert.IsTrue(v);
     }
 
-    private void fail()
+    private void Fail()
     {
-        throw new NotImplementedException();
+        Assert.Fail();
     }
 
     [Test]
-    public void testInvalidGroupNoMatch()
+    public void TestInvalidGroupNoMatch()
     {
         try
         {
             ApiTestUtils.testInvalidGroup("abc", "xxx", 0);
-            fail();
+            Fail();
         }
         catch (Exception e)
         {
             // Linter complains on empty catch block.
-            assertTrue(true);
+            AssertTrue(true);
         }
     }
 
     [Test]
-    public void testInvalidGroupOutOfRange()
+    public void TestInvalidGroupOutOfRange()
     {
         try
         {
             ApiTestUtils.testInvalidGroup("abc", "abc", 1);
-            fail();
+            Fail();
         }
         catch (IndexOutOfRangeException e)
         {
             // Linter complains on empty catch block.
-            assertTrue(true);
+            AssertTrue(true);
         }
     }
 
@@ -202,34 +202,34 @@ public class MatcherTest
      * Test the NullReferenceException is thrown on null input.
      */
     [Test]
-    public void testThrowsOnNullInputReset()
+    public void TestThrowsOnNullInputReset()
     {
         // null in constructor.
         try
         {
             new Matcher(Pattern.Compile("pattern"), (string)null);
-            fail();
+            Fail();
         }
         catch (NullReferenceException n)
         {
             // Linter complains on empty catch block.
-            assertTrue(true);
+            AssertTrue(true);
         }
     }
 
     [Test]
-    public void testThrowsOnNullInputCtor()
+    public void TestThrowsOnNullInputCtor()
     {
         // null in constructor.
         try
         {
             new Matcher(null, "input");
-            fail();
+            Fail();
         }
         catch (NullReferenceException n)
         {
             // Linter complains on empty catch block.
-            assertTrue(true);
+            AssertTrue(true);
         }
     }
 
@@ -237,17 +237,17 @@ public class MatcherTest
      * Test that InvalidOperationException is thrown if start/end are called before calling find
      */
     [Test]
-    public void testStartEndBeforeFind()
+    public void TestStartEndBeforeFind()
     {
         try
         {
             Matcher m = Pattern.Compile("a").Matcher("abaca");
             m.Start();
-            fail();
+            Fail();
         }
         catch (InvalidOperationException ise)
         {
-            assertTrue(true);
+            AssertTrue(true);
         }
     }
 
@@ -256,42 +256,47 @@ public class MatcherTest
      * information of the match.
      */
     [Test]
-    public void testMatchesUpdatesMatchInformation()
+    public void TestMatchesUpdatesMatchInformation()
     {
         Matcher m = Pattern.Compile("a+").Matcher("aaa");
         if (m.Matches())
         {
-            assertEquals("aaa", m.Group(0));
+            AssertEquals("aaa", m.Group(0));
         }
     }
 
-    private void assertEquals(string v1, string v2)
+    private void AssertEquals(string v1, string v2)
     {
-        throw new NotImplementedException();
+        Assert.AreEqual(v1, v2);
+    }
+    private void AssertEquals(int v1, int v2)
+    {
+        Assert.AreEqual(v1, v2);
     }
 
     /**
      * Test for b/6891133. Test matches in case of alternation.
      */
     [Test]
-    public void testAlternationMatches()
+    public void TestAlternationMatches()
     {
         string s = "123:foo";
-        assertTrue(Pattern.Compile("(?:\\w+|\\d+:foo)").Matcher(s).Matches());
-        assertTrue(Pattern.Compile("(?:\\d+:foo|\\w+)").Matcher(s).Matches());
+        AssertTrue(Pattern.Compile("(?:\\w+|\\d+:foo)").Matcher(s).Matches());
+        AssertTrue(Pattern.Compile("(?:\\d+:foo|\\w+)").Matcher(s).Matches());
     }
 
-    void helperTestMatchEndUTF16(string s, int num, int end)
+    void HelperTestMatchEndUTF16(string s, int num, int end)
     {
+        //TODO: need to override RE2.Match
         string pattern = "[" + s + "]";
         RE2 re =
             new RE2(pattern)
     //{
     //  @Override
     //      public bool match(
-    //      CharSequence input, int start, int e, int anchor, int[] group, int ngroup)
+    //      string input, int start, int e, int anchor, int[] group, int ngroup)
     //{
-    //    assertEquals(end, e);
+    //    AssertEquals(end, e);
     //    return super.match(input, start, e, anchor, group, ngroup);
     //}
     //}
@@ -303,8 +308,13 @@ public class MatcherTest
         while (m.Find()) {
             found++;
         }
-        assertEquals(
-                "Matches Expected " + num + " but found " + found + ", for input " + string, num, found);
+        AssertEquals(
+                "Matches Expected " + num + " but found " + found + ", for input " + s, num, found);
+    }
+
+    private void AssertEquals(string message, int num, int found)
+    {
+        Assert.AreEqual(num,found,message);
     }
 
     /**
@@ -312,42 +322,27 @@ public class MatcherTest
      * parameter based on UTF16 codes and not chars and Runes.
      */
     [Test]
-    public void testMatchEndUTF16()
+    public void TestMatchEndUTF16()
     {
         // Latin alphabetic chars such as these 5 lower-case, acute vowels have multi-byte UTF-8
         // encodings but fit in a single UTF-16 code, so the match is at UTF16 offset 5.
-        string vowels = "\225\233\237\243\250";
-        helperTestMatchEndUTF16(vowels, 5, 5);
+        string vowels = "\x95\x9b\x97\xa3\a8"; //"\225\233\237\243\250"
+        HelperTestMatchEndUTF16(vowels, 5, 5);
 
         // But surrogates are encoded as two UTF16 codes, so we should expect match
         // to get 6 rather than 3.
         string utf16 =
             new StringBuilder()
-                .appendCodePoint(0x10000)
-                .appendCodePoint(0x10001)
-                .appendCodePoint(0x10002)
+                .Append(char.ConvertFromUtf32(0x10000))
+                .Append(char.ConvertFromUtf32(0x10001))
+                .Append(char.ConvertFromUtf32(0x10002))
                 .ToString();
-        assertEquals(utf16, "\uD800\uDC00\uD800\uDC01\uD800\uDC02");
-        helperTestMatchEndUTF16(utf16, 3, 6);
+        AssertEquals(utf16, "\uD800\uDC00\uD800\uDC01\uD800\uDC02");
+        HelperTestMatchEndUTF16(utf16, 3, 6);
     }
 
     [Test]
-    public void testAppendTail_StringBuffer()
-    {
-        Pattern p = Pattern.Compile("cat");
-        Matcher m = p.Matcher("one cat two cats in the yard");
-        StringBuilder sb = new StringBuilder();
-        while (m.Find())
-        {
-            m.appendReplacement(sb, "dog");
-        }
-        m.appendTail(sb);
-        m.appendTail(sb);
-        assertEquals("one dog two dogs in the yards in the yard", sb.ToString());
-    }
-
-    [Test]
-    public void testAppendTail_StringBuilder()
+    public void TestAppendTail_StringBuffer()
     {
         Pattern p = Pattern.Compile("cat");
         Matcher m = p.Matcher("one cat two cats in the yard");
@@ -358,186 +353,229 @@ public class MatcherTest
         }
         m.AppendTail(sb);
         m.AppendTail(sb);
-        assertEquals("one dog two dogs in the yards in the yard", sb.ToString());
+        AssertEquals("one dog two dogs in the yards in the yard", sb.ToString());
     }
 
     [Test]
-    public void testResetOnFindInt_StringBuffer()
+    public void TestAppendTail_StringBuilder()
+    {
+        Pattern p = Pattern.Compile("cat");
+        Matcher m = p.Matcher("one cat two cats in the yard");
+        StringBuilder sb = new StringBuilder();
+        while (m.Find())
+        {
+            m.AppendReplacement(sb, "dog");
+        }
+        m.AppendTail(sb);
+        m.AppendTail(sb);
+        AssertEquals("one dog two dogs in the yards in the yard", sb.ToString());
+    }
+
+    [Test]
+    public void TestResetOnFindInt_StringBuffer()
     {
         StringBuilder buffer;
         Matcher matcher = Pattern.Compile("a").Matcher("zza");
 
-        assertTrue(matcher.Find());
+        AssertTrue(matcher.Find());
 
         buffer = new StringBuilder();
-        matcher.appendReplacement(buffer, "foo");
-        assertEquals("1st time", "zzfoo", buffer.ToString());
+        matcher.AppendReplacement(buffer, "foo");
+        AssertEquals("1st time", "zzfoo", buffer.ToString());
 
-        assertTrue(matcher.Find(0));
+        AssertTrue(matcher.Find(0));
 
         buffer = new StringBuilder();
-        matcher.appendReplacement(buffer, "foo");
-        assertEquals("2nd time", "zzfoo", buffer.ToString());
+        matcher.AppendReplacement(buffer, "foo");
+        AssertEquals("2nd time", "zzfoo", buffer.ToString());
     }
 
     [Test]
-    public void testResetOnFindInt_StringBuilder()
+    public void TestResetOnFindInt_StringBuilder()
     {
         StringBuilder buffer;
         Matcher matcher = Pattern.Compile("a").Matcher("zza");
 
-        assertTrue(matcher.Find());
+        AssertTrue(matcher.Find());
 
         buffer = new StringBuilder();
         matcher.AppendReplacement(buffer, "foo");
-        assertEquals("1st time", "zzfoo", buffer.ToString());
+        AssertEquals("1st time", "zzfoo", buffer.ToString());
 
-        assertTrue(matcher.Find(0));
+        AssertTrue(matcher.Find(0));
 
         buffer = new StringBuilder();
         matcher.AppendReplacement(buffer, "foo");
-        assertEquals("2nd time", "zzfoo", buffer.ToString());
+        AssertEquals("2nd time", "zzfoo", buffer.ToString());
+    }
+
+    private void AssertEquals(string message, string v1, string v2)
+    {
+        Assert.AreEqual(v1, v2, message);
     }
 
     [Test]
-    public void testEmptyReplacementGroups_StringBuffer()
+    public void TestEmptyReplacementGroups_StringBuffer()
     {
-        StringBuilder buffer = new StringBuilder();
+        var buffer = new StringBuilder();
         Matcher matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("abc");
-        assertTrue(matcher.Find());
-        matcher.appendReplacement(buffer, "$1-$2-$3");
-        assertEquals("a--b", buffer.ToString());
-        matcher.appendTail(buffer);
-        assertEquals("a--bc", buffer.ToString());
+        AssertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1-$2-$3");
+        AssertEquals("a--b", buffer.ToString());
+        matcher.AppendTail(buffer);
+        AssertEquals("a--bc", buffer.ToString());
 
         buffer = new StringBuilder();
         matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("ab");
-        assertTrue(matcher.Find());
-        matcher.appendReplacement(buffer, "$1-$2-$3");
-        matcher.appendTail(buffer);
-        assertEquals("a-b-", buffer.ToString());
+        AssertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1-$2-$3");
+        matcher.AppendTail(buffer);
+        AssertEquals("a-b-", buffer.ToString());
 
         buffer = new StringBuilder();
         matcher = Pattern.Compile("(^b)?(b)?c").Matcher("abc");
-        assertTrue(matcher.Find());
-        matcher.appendReplacement(buffer, "$1-$2");
-        matcher.appendTail(buffer);
-        assertEquals("a-b", buffer.ToString());
-
-        buffer = new StringBuilder();
-        matcher = Pattern.Compile("^(.)[^-]+(-.)?(.*)").Matcher("Name");
-        assertTrue(matcher.Find());
-        matcher.appendReplacement(buffer, "$1$2");
-        matcher.appendTail(buffer);
-        assertEquals("N", buffer.ToString());
-    }
-
-    [Test]
-    public void testEmptyReplacementGroups_StringBuilder()
-    {
-        StringBuilder buffer = new StringBuilder();
-        Matcher matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("abc");
-        assertTrue(matcher.Find());
-        matcher.AppendReplacement(buffer, "$1-$2-$3");
-        assertEquals("a--b", buffer.ToString());
-        matcher.AppendTail(buffer);
-        assertEquals("a--bc", buffer.ToString());
-
-        buffer = new StringBuilder();
-        matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("ab");
-        assertTrue(matcher.Find());
-        matcher.AppendReplacement(buffer, "$1-$2-$3");
-        matcher.AppendTail(buffer);
-        assertEquals("a-b-", buffer.ToString());
-
-        buffer = new StringBuilder();
-        matcher = Pattern.Compile("(^b)?(b)?c").Matcher("abc");
-        assertTrue(matcher.Find());
+        AssertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1-$2");
         matcher.AppendTail(buffer);
-        assertEquals("a-b", buffer.ToString());
+        AssertEquals("a-b", buffer.ToString());
 
         buffer = new StringBuilder();
         matcher = Pattern.Compile("^(.)[^-]+(-.)?(.*)").Matcher("Name");
-        assertTrue(matcher.Find());
+        AssertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1$2");
         matcher.AppendTail(buffer);
-        assertEquals("N", buffer.ToString());
+        AssertEquals("N", buffer.ToString());
+    }
+
+    [Test]
+    public void TestEmptyReplacementGroups_StringBuilder()
+    {
+        StringBuilder buffer = new StringBuilder();
+        Matcher matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("abc");
+        AssertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1-$2-$3");
+        AssertEquals("a--b", buffer.ToString());
+        matcher.AppendTail(buffer);
+        AssertEquals("a--bc", buffer.ToString());
+
+        buffer = new StringBuilder();
+        matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("ab");
+        AssertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1-$2-$3");
+        matcher.AppendTail(buffer);
+        AssertEquals("a-b-", buffer.ToString());
+
+        buffer = new StringBuilder();
+        matcher = Pattern.Compile("(^b)?(b)?c").Matcher("abc");
+        AssertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1-$2");
+        matcher.AppendTail(buffer);
+        AssertEquals("a-b", buffer.ToString());
+
+        buffer = new StringBuilder();
+        matcher = Pattern.Compile("^(.)[^-]+(-.)?(.*)").Matcher("Name");
+        AssertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1$2");
+        matcher.AppendTail(buffer);
+        AssertEquals("N", buffer.ToString());
     }
 
     // This example is documented in the com.google.re2j package.html.
     [Test]
-    public void testDocumentedExample()
+    public void TestDocumentedExample()
     {
         Pattern p = Pattern.Compile("b(an)*(.)");
         Matcher m = p.Matcher("by, band, banana");
-        assertTrue(m.LookingAt());
+        AssertTrue(m.LookingAt());
         m.Reset();
-        assertTrue(m.Find());
-        assertEquals("by", m.Group(0));
-        assertNull(m.Group(1));
-        assertEquals("y", m.Group(2));
-        assertTrue(m.Find());
-        assertEquals("band", m.Group(0));
-        assertEquals("an", m.Group(1));
-        assertEquals("d", m.Group(2));
-        assertTrue(m.Find());
-        assertEquals("banana", m.Group(0));
-        assertEquals("an", m.Group(1));
-        assertEquals("a", m.Group(2));
-        assertFalse(m.Find());
+        AssertTrue(m.Find());
+        AssertEquals("by", m.Group(0));
+        AssertNull(m.Group(1));
+        AssertEquals("y", m.Group(2));
+        AssertTrue(m.Find());
+        AssertEquals("band", m.Group(0));
+        AssertEquals("an", m.Group(1));
+        AssertEquals("d", m.Group(2));
+        AssertTrue(m.Find());
+        AssertEquals("banana", m.Group(0));
+        AssertEquals("an", m.Group(1));
+        AssertEquals("a", m.Group(2));
+        AssertFalse(m.Find());
+    }
+
+    
+    private void AssertFalse(bool v)
+    {
+        Assert.IsFalse(v);
     }
 
     [Test]
-    public void testMutableCharSequence()
+    public void TestMutableCharSequence()
     {
         Pattern p = Pattern.Compile("b(an)*(.)");
-        StringBuilder b = new StringBuilder("by, band, banana");
-        Matcher m = p.matcher(b);
-        assertTrue(m.Find(0));
-        int start = b.indexOf("ban");
-        b.replace(b.indexOf("ban"), start + 3, "b");
-        assertTrue(m.find(b.indexOf("ban")));
+        var b = new StringBuilder("by, band, banana");
+        var t = b.ToString();
+        Matcher m = p.Matcher(t);
+        AssertTrue(m.Find(0));
+        int start = t.IndexOf("ban");
+        for(int i = start; i < t.Length; i++)
+        {
+            b[i] = t[i - start];
+        }
+        //b.Replace(t.IndexOf("ban"), start + 3, "b");
+        AssertTrue(m.Find(t.IndexOf("ban")));
     }
 
+    
+
     [Test]
-    public void testNamedGroups()
+    public void TestNamedGroups()
     {
         Pattern p =
             Pattern.Compile(
                 "(?P<baz>f(?P<foo>b*a(?P<another>r+)){0,10})" + "(?P<bag>bag)?(?P<nomatch>zzz)?");
         Matcher m = p.Matcher("fbbarrrrrbag");
-        assertTrue(m.Matches());
-        assertEquals("fbbarrrrr", m.Group("baz"));
-        assertEquals("bbarrrrr", m.Group("foo"));
-        assertEquals("rrrrr", m.Group("another"));
-        assertEquals(0, m.start("baz"));
-        assertEquals(1, m.start("foo"));
-        assertEquals(4, m.start("another"));
-        assertEquals(9, m.End("baz"));
-        assertEquals(9, m.End("foo"));
-        assertEquals("bag", m.Group("bag"));
-        assertEquals(9, m.start("bag"));
-        assertEquals(12, m.End("bag"));
-        assertNull(m.Group("nomatch"));
-        assertEquals(-1, m.start("nomatch"));
-        assertEquals(-1, m.End("nomatch"));
-        assertEquals("whatbbarrrrreverbag", appendReplacement(m, "what$2ever${bag}"));
+        AssertTrue(m.Matches());
+        AssertEquals("fbbarrrrr", m.Group("baz"));
+        AssertEquals("bbarrrrr", m.Group("foo"));
+        AssertEquals("rrrrr", m.Group("another"));
+        AssertEquals(0, m.start("baz"));
+        AssertEquals(1, m.start("foo"));
+        AssertEquals(4, m.start("another"));
+        AssertEquals(9, m.End("baz"));
+        AssertEquals(9, m.End("foo"));
+        AssertEquals("bag", m.Group("bag"));
+        AssertEquals(9, m.start("bag"));
+        AssertEquals(12, m.End("bag"));
+        AssertNull(m.Group("nomatch"));
+        AssertEquals(-1, m.start("nomatch"));
+        AssertEquals(-1, m.End("nomatch"));
+        AssertEquals("whatbbarrrrreverbag", AppendReplacement(m, "what$2ever${bag}"));
 
         try
         {
             m.Group("nonexistent");
-            fail("Should have thrown IllegalArgumentException");
+            Fail("Should have thrown IllegalArgumentException");
         }
-        catch (IllegalArgumentException expected)
+        catch (InvalidOperationException expected)
         {
             // Expected
         }
     }
 
-    private string appendReplacement(Matcher m, string replacement)
+    private void Fail(string v)
     {
-        StringBuilder b = new StringBuilder();
+        Assert.Fail(v);
+    }
+
+    private void AssertNull(string? v)
+    {
+        Assert.Null(v);
+    }
+
+    private string AppendReplacement(Matcher m, string replacement)
+    {
+        var b = new StringBuilder();
         m.AppendReplacement(b, replacement);
         return b.ToString();
     }
@@ -553,27 +591,27 @@ public class MatcherTest
     // RE2J re-matches the group, but only considers "22 b" as the input. If it incorrectly treats 'b' as END_OF_LINE
     // and END_OF_TEXT, then group(1) will contain "22 b" when it should actually contain "22".
     [Test]
-    public void testGroupZeroWidthAssertions()
+    public void TestGroupZeroWidthAssertions()
     {
         Matcher m = Pattern.Compile("(\\d{2} ?(\\d|[a-z])?)($|[^a-zA-Z])").Matcher("22 bored");
-        Truth.assertThat(m.Find()).isTrue();
-        Truth.assertThat(m.Group(1)).isEqualTo("22");
+        Assert.IsTrue(m.Find());
+        Assert.AreEqual(m.Group(1), "22");
     }
 
     [Test]
-    public void testPatternLongestMatch()
+    public void TestPatternLongestMatch()
     {
         string pattern = "(?:a+)|(?:a+ b+)";
         string text = "xxx aaa bbb yyy";
         {
             Matcher matcher = Pattern.Compile(pattern).Matcher(text);
-            assertTrue(matcher.Find());
-            assertEquals("aaa", text.Substring(matcher.Start(), matcher.End()));
+            AssertTrue(matcher.Find());
+            AssertEquals("aaa", text.Substring(matcher.Start(), matcher.End()));
         }
         {
             Matcher matcher = Pattern.Compile(pattern, Pattern.LONGEST_MATCH).Matcher(text);
-            assertTrue(matcher.Find());
-            assertEquals("aaa bbb", text.Substring(matcher.Start(), matcher.End()));
+            AssertTrue(matcher.Find());
+            AssertEquals("aaa bbb", text.Substring(matcher.Start(), matcher.End()));
         }
     }
 }

@@ -157,9 +157,9 @@ public class ParserTest
     new string[]{ "[\\p{^Braille}]", "cc{0x0-0x27ff 0x2900-0x10ffff}"},
     new string[]{ "[\\P{^Braille}]", "cc{0x2800-0x28ff}"},
     new string[]{ "[\\pZ]", "cc{0x20 0xa0 0x1680 0x180e 0x2000-0x200a 0x2028-0x2029 0x202f 0x205f 0x3000}"},
-    new string[]{ "\\p{Lu}", mkCharClass(IS_UPPER)},
-    new string[]{ "[\\p{Lu}]", mkCharClass(IS_UPPER)},
-    new string[]{ "(?i)[\\p{Lu}]", mkCharClass(IS_UPPER_FOLD)},
+    new string[]{ "\\p{Lu}", MakeCharClass(IS_UPPER)},
+    new string[]{ "[\\p{Lu}]", MakeCharClass(IS_UPPER)},
+    new string[]{ "(?i)[\\p{Lu}]", MakeCharClass(IS_UPPER_FOLD)},
     new string[]{ "\\p{Any}", "dot{}"},
     new string[]{ "\\p{^Any}", "cc{}"},
 
@@ -268,9 +268,9 @@ public class ParserTest
     // - Java UTF-16 things.
 
     [Test]
-    public void testParseSimple()
+    public void TestParseSimple()
     {
-        testParseDump(PARSE_TESTS, TEST_FLAGS);
+        TestParseDump(PARSE_TESTS, TEST_FLAGS);
     }
 
     private static string[][] FOLDCASE_TESTS = {
@@ -286,19 +286,19 @@ public class ParserTest
 };
 
     [Test]
-    public void testParseFoldCase()
+    public void TestParseFoldCase()
     {
-        testParseDump(FOLDCASE_TESTS, RE2.FOLD_CASE);
+        TestParseDump(FOLDCASE_TESTS, RE2.FOLD_CASE);
     }
 
     private static string[][] LITERAL_TESTS = {
-    new string[]{ "(|)^$.[*+?]{5,10},\\", "str{(|)^$.[*+?]{5,10},\\}"},
-  };
+        new string[]{ "(|)^$.[*+?]{5,10},\\", "str{(|)^$.[*+?]{5,10},\\}"},
+    };
 
     [Test]
-    public void testParseLiteral()
+    public void TestParseLiteral()
     {
-        testParseDump(LITERAL_TESTS, RE2.LITERAL);
+        TestParseDump(LITERAL_TESTS, RE2.LITERAL);
     }
 
     private static readonly string[][] MATCHNL_TESTS = {
@@ -306,12 +306,12 @@ public class ParserTest
     new string[]{ "\n", "lit{\n}"},
     new string[]{ "[^a]", "cc{0x0-0x60 0x62-0x10ffff}"},
     new string[]{ "[a\\n]", "cc{0xa 0x61}"},
-  };
+      };
 
     [Test]
-    public void testParseMatchNL()
+    public void TestParseMatchNL()
     {
-        testParseDump(MATCHNL_TESTS, RE2.MATCH_NL);
+        TestParseDump(MATCHNL_TESTS, RE2.MATCH_NL);
     }
 
     private static string[][] NOMATCHNL_TESTS = {
@@ -319,22 +319,22 @@ public class ParserTest
     new string[]{ "\n", "lit{\n}"},
     new string[]{ "[^a]", "cc{0x0-0x9 0xb-0x60 0x62-0x10ffff}"},
     new string[]{ "[a\\n]", "cc{0xa 0x61}"},
-  };
+      };
 
     [Test]
-    public void testParseNoMatchNL()
+    public void TestParseNoMatchNL()
     {
-        testParseDump(NOMATCHNL_TESTS, 0);
+        TestParseDump(NOMATCHNL_TESTS, 0);
     }
 
     // Test Parse -> Dump.
-    private void testParseDump(string[][] tests, int flags)
+    private void TestParseDump(string[][] tests, int flags)
     {
         foreach (string[] test in tests) {
             try
             {
                 Regexp re = Parser.Parse(test[0], flags);
-                string d = dump(re);
+                string d = Dump(re);
                 Assert.AreEqual(d, test[1], "parse/dump of " + test[0]);
                 //Truth.assertWithMessage("parse/dump of " + test[0]).that(d).isEqualTo(test[1]);
             }
@@ -347,17 +347,17 @@ public class ParserTest
 
     // dump prints a string representation of the regexp showing
     // the structure explicitly.
-    private static string dump(Regexp re)
+    private static string Dump(Regexp re)
     {
-        StringBuilder b = new StringBuilder();
-        dumpRegexp(b, re);
+        var b = new StringBuilder();
+        DumpRegexp(b, re);
         return b.ToString();
     }
 
     // dumpRegexp writes an encoding of the syntax tree for the regexp |re|
     // to |b|.  It is used during testing to distinguish between parses that
     // might print the same using re's ToString() method.
-    private static void dumpRegexp(StringBuilder b, Regexp re)
+    private static void DumpRegexp(StringBuilder b, Regexp re)
     {
         string name = OP_NAMES[re.op];
         if (name == null)
@@ -423,17 +423,17 @@ public class ParserTest
             case Regexp.Op.ALTERNATE:
                 foreach (Regexp sub in re.subs)
                 {
-                    dumpRegexp(b, sub);
+                    DumpRegexp(b, sub);
                 }
                 break;
             case Regexp.Op.STAR:
             case Regexp.Op.PLUS:
             case Regexp.Op.QUEST:
-                dumpRegexp(b, re.subs[0]);
+                DumpRegexp(b, re.subs[0]);
                 break;
             case Regexp.Op.REPEAT:
                 b.Append(re.min).Append(',').Append(re.max).Append(' ');
-                dumpRegexp(b, re.subs[0]);
+                DumpRegexp(b, re.subs[0]);
                 break;
             case Regexp.Op.CAPTURE:
                 if (re.name != null && !string.IsNullOrEmpty( re.name))
@@ -441,7 +441,7 @@ public class ParserTest
                     b.Append(re.name);
                     b.Append(':');
                 }
-                dumpRegexp(b, re.subs[0]);
+                DumpRegexp(b, re.subs[0]);
                 break;
             case Regexp.Op.CHAR_CLASS:
                 {
@@ -466,9 +466,9 @@ public class ParserTest
         b.Append('}');
     }
 
-    private static string mkCharClass(RunePredicate f)
+    private static string MakeCharClass(RunePredicate f)
     {
-        Regexp re = new Regexp(Regexp.Op.CHAR_CLASS);
+        var re = new Regexp(Regexp.Op.CHAR_CLASS);
         List<int> runes = new();
         int lo = -1;
         for (int i = 0; i <= Unicode.MAX_RUNE; i++)
@@ -500,28 +500,28 @@ public class ParserTest
         foreach (int i in runes) {
             re.runes[j++] = i;
         }
-        return dump(re);
+        return Dump(re);
     }
 
     [Test]
-    public void testAppendRangeCollapse()
+    public void TestAppendRangeCollapse()
     {
         // AppendRange should collapse each of the new ranges
         // into the earlier ones (it looks back two ranges), so that
         // the slice never grows very large.
         // Note that we are not calling cleanClass.
-        CharClass cc = new CharClass();
+        var cc = new CharClass();
         // Add 'A', 'a', 'B', 'b', etc.
         for (int i = 'A'; i <= 'Z'; i++)
         {
             cc.AppendRange(i, i);
             cc.AppendRange(i + 'a' - 'A', i + 'a' - 'A');
         }
-        assertEquals("AZaz", runesToString(cc.ToArray()));
+        AssertEquals("AZaz", RunesToString(cc.ToArray()));
     }
 
     // Converts an array of Unicode runes to a Java UTF-16 string.
-    private static string runesToString(int[] runes)
+    private static string RunesToString(int[] runes)
     {
         var builder = new StringBuilder();
         foreach (int rune in runes) {
@@ -572,20 +572,20 @@ public class ParserTest
     "\\Q\\\\\\\\\\E",
     "(?:a)",
     "(?P<name>a)",
-  };
+    };
 
     private static readonly string[] ONLY_POSIX = {
     "a++", "a**", "a?*", "a+*", "a{1}*", ".{1}{2}.{3}",
-  };
+    };
 
     [Test]
-    public void testParseInvalidRegexps()
+    public void TestParseInvalidRegexps()
     {
         foreach (string regexp in INVALID_REGEXPS) {
             try
             {
-                Regexp re = Parser.Parse(regexp, RE2.PERL);
-                fail("Parsing (PERL) " + regexp + " should have failed, instead got " + dump(re));
+                var re = Parser.Parse(regexp, RE2.PERL);
+                Fail("Parsing (PERL) " + regexp + " should have failed, instead got " + Dump(re));
             }
             catch (PatternSyntaxException e)
             {
@@ -594,7 +594,7 @@ public class ParserTest
             try
             {
                 Regexp re = Parser.Parse(regexp, RE2.POSIX);
-                fail("parsing (POSIX) " + regexp + " should have failed, instead got " + dump(re));
+                Fail("parsing (POSIX) " + regexp + " should have failed, instead got " + Dump(re));
             }
             catch (PatternSyntaxException e)
             {
@@ -606,7 +606,7 @@ public class ParserTest
             try
             {
                 Regexp re = Parser.Parse(regexp, RE2.POSIX);
-                fail("parsing (POSIX) " + regexp + " should have failed, instead got " + dump(re));
+                Fail("parsing (POSIX) " + regexp + " should have failed, instead got " + Dump(re));
             }
             catch (PatternSyntaxException e)
             {
@@ -617,7 +617,7 @@ public class ParserTest
             try
             {
                 Regexp re = Parser.Parse(regexp, RE2.PERL);
-                fail("parsing (PERL) " + regexp + " should have failed, instead got " + dump(re));
+                Fail("parsing (PERL) " + regexp + " should have failed, instead got " + Dump(re));
             }
             catch (PatternSyntaxException e)
             {
@@ -627,17 +627,17 @@ public class ParserTest
         }
     }
 
-    private void fail(string v)
+    private void Fail(string v)
     {
         Assert.Fail(v);
     }
 
     [Test]
-    public void testToStringEquivalentParse() {
+    public void TestToStringEquivalentParse() {
         foreach (string[] tt in PARSE_TESTS) {
             Regexp re = Parser.Parse(tt[0], TEST_FLAGS);
-            string d = dump(re);
-            assertEquals(d, tt[1]); // (already ensured by testParseSimple)
+            string d = Dump(re);
+            AssertEquals(d, tt[1]); // (already ensured by testParseSimple)
 
             string s = re.ToString();
             if (!s.Equals(tt[0]))
@@ -648,21 +648,21 @@ public class ParserTest
                 // ToString produces "\\{" for a literal brace,
                 // but "{" is a shorter equivalent in some contexts.
                 Regexp nre = Parser.Parse(s, TEST_FLAGS);
-                string nd = dump(nre);
-                assertEquals(string.Format("parse({0}) -> {1}", tt[0], s), d, nd);
+                string nd = Dump(nre);
+                AssertEquals(string.Format("parse({0}) -> {1}", tt[0], s), d, nd);
 
                 string ns = nre.ToString();
-                assertEquals(string.Format("parse({0}) -> {1}", tt[0], s), s, ns);
+                AssertEquals(string.Format("parse({0}) -> {1}", tt[0], s), s, ns);
             }
         }
     }
 
-    private void assertEquals(string d, string v)
+    private void AssertEquals(string d, string v)
     {
         Assert.AreEqual(d, v);  
     }
 
-    private void assertEquals(string message, string d, string nd)
+    private void AssertEquals(string message, string d, string nd)
     {
         Assert.AreEqual(d, nd, message);
     }

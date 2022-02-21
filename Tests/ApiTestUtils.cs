@@ -57,7 +57,7 @@ public class ApiTestUtils
     }
 
     // Test matches via a matcher.
-    public static void testMatcherMatches(string regexp, string match, string nonMatch)
+    public static void TestMatcherMatches(string regexp, string match, string nonMatch)
     {
         testMatcherMatches(regexp, match);
         testMatcherNotMatches(regexp, nonMatch);
@@ -146,7 +146,7 @@ public class ApiTestUtils
     }
 
     // Tests that both RE2 and JDK's Matchers do the same replaceFist.
-    public static void testReplaceFirst(string orig, string regex, string repl, string actual)
+    public static void TestReplaceFirst(string orig, string regex, string repl, string actual)
     {
         Pattern p = Pattern.Compile(regex);
         string replaced;
@@ -192,7 +192,7 @@ public class ApiTestUtils
         Assert.AreEqual(v1, v2);
     }
 
-    public static void testGroup(string text, string regexp, string[] output)
+    public static void TestGroup(string text, string regexp, string[] output)
     {
         // RE2
         Pattern p = Pattern.Compile(regexp);
@@ -224,7 +224,7 @@ public class ApiTestUtils
         }
     }
 
-    public static void testFind(string text, string regexp, int start, string output)
+    public static void TestFind(string text, string regexp, int start, string output)
     {
         // RE2
         Pattern p = Pattern.Compile(regexp);
@@ -272,7 +272,7 @@ public class ApiTestUtils
         fail(); // supposed to have exception by now
     }
 
-    public static void verifyLookingAt(string text, string regexp, bool output)
+    public static void VerifyLookingAt(string text, string regexp, bool output)
     {
         assertEquals(output, Pattern.Compile(regexp).Matcher(text).LookingAt());
         assertEquals(output, Pattern.Compile(regexp).Matcher(getUtf8Bytes(text)).LookingAt());
