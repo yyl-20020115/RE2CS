@@ -110,9 +110,7 @@ public static class Unicode
     {
         // Consult caseOrbit table for special cases.
         if (r < UnicodeTables.CASE_ORBIT.Length && UnicodeTables.CASE_ORBIT[r] != 0)
-        {
             return UnicodeTables.CASE_ORBIT[r];
-        }
 
         // No folding specified.  This is a one- or two-element
         // equivalence class containing rune and toLower(rune)

@@ -232,7 +232,7 @@ public static class Utils
         if (i > 0)
         {
             char c = s[--i];
-            if (char.IsLowSurrogate(c))
+            if (char.IsLowSurrogate(c) && i>0)
             {
                 char d = s[--i];
                 if (char.IsHighSurrogate(d))

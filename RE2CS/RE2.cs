@@ -21,6 +21,13 @@ using System.Text;
 
 namespace RE2CS;
 
+// Called iteratively with a list of submatch indices _in the same
+// unit as the MachineInput cursor.
+public delegate void DeliverFunction(int[] x);
+
+// This is visible for testing.
+public delegate string ReplaceFunction(string orig);
+
 /**
  * An RE2 class instance is a compiled representation of an RE2 regular expression, independent of
  * the public Java-like Pattern/Matcher API.
@@ -355,12 +362,6 @@ public class RE2
         return Compile(pattern).Match(s);
     }
 
-    // This is visible for testing.
-    public interface ReplaceFunc
-    {
-        string replace(string orig);
-    }
-
     /**
      * Returns a copy of {@code src} _in which all matches for this regexp have been replaced by
      * {@code repl}. No support is provided for expressions (e.g. {@code \1} or {@code $1}) _in the
@@ -414,7 +415,7 @@ public class RE2
      * replacement string.
      */
     // This is visible for testing.
-    public string ReplaceAllFunc(string src, ReplaceFunc repl, int maxReplaces)
+    public string ReplaceAllFunc(string src, ReplaceFunction repl, int maxReplaces)
     {
         int lastMatchEnd = 0; // end position of the most recent match
         int searchPos = 0; // position where we next look for a match
@@ -444,7 +445,7 @@ public class RE2
             // though).
             if (a[1] > lastMatchEnd || a[0] == 0)
             {
-                builder.Append(repl.replace(src.Substring(a[0], a[1])));
+                builder.Append(repl(src.Substring(a[0], a[1])));
                 // Increment the replace count.
                 ++numReplaces;
             }
@@ -523,15 +524,8 @@ public class RE2
         return a;
     }
 
-    public interface DeliverFunc
-    {
-        // Called iteratively with a list of submatch indices _in the same
-        // unit as the MachineInput cursor.
-        void deliver(int[] x);
-    }
-
     // Find matches _in input.
-    private void AllMatches(MachineInput input, int n, DeliverFunc deliver)
+    private void AllMatches(MachineInput input, int n, DeliverFunction deliver)
     {
         int end = input.EndPos();
         if (n < 0)
@@ -574,7 +568,7 @@ public class RE2
 
             if (accept)
             {
-                deliver.deliver(Pad(matches));
+                deliver(Pad(matches));
                 i++;
             }
         }
@@ -1008,6 +1002,7 @@ public class RE2
     // This is visible for testing.
     public List<int[]> FindAllSubmatchIndex(string s, int n)
     {
+        //TODO:
         List<int[]> result = new ();
         AllMatches(
             MachineInput.FromUTF16(s),
