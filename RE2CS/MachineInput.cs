@@ -188,8 +188,11 @@ public abstract class MachineInput
             if (pos < end)
             {
                 var rune = char.ConvertToUtf32(str, pos);
-
-                return rune << 3 | new Rune(rune).Utf16SequenceLength;
+                var len = 1;
+                if (rune > char.MaxValue) len++;
+                rune <<= 3;
+                rune |= len;
+                return rune;
             }
             else
             {

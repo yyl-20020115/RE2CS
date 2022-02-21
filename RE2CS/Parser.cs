@@ -820,10 +820,6 @@ public class Parser
         // Precondition: |more()|.
         public int Peek()
         {
-            if(_pos>=str.Length)
-            {
-                return -1;
-            }
             return char.ConvertToUtf32(str, _pos);// str[_pos];
         }
         // Advances the cursor by |n| positions, which must be ASCII runes.

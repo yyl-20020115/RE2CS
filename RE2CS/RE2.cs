@@ -193,17 +193,10 @@ public class RE2
         StringBuilder prefixBuilder = new StringBuilder();
         re2.prefixComplete = prog.Prefix(prefixBuilder);
         re2.prefix = prefixBuilder.ToString();
-        try
-        {
-            re2.prefixUTF8 = Encoding.UTF8.GetBytes( re2.prefix);
-        }
-        catch (Exception e)
-        {
-            throw new InvalidOperationException("can't happen");
-        }
+        re2.prefixUTF8 = Encoding.UTF8.GetBytes( re2.prefix);
         if (!string.IsNullOrEmpty( re2.prefix))
         {
-            re2.prefixRune = re2.prefix.EnumerateRunes().ToArray()[0].Value;
+            re2.prefixRune = char.ConvertToUtf32( re2.prefix,0);
         }
         re2.namedGroups = re.namedGroups;
         return re2;

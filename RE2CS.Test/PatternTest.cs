@@ -265,9 +265,9 @@ public class PatternTest
         Pattern pattern3 = Pattern.Compile("def");
         Pattern pattern4 = Pattern.Compile("abc", Pattern.CASE_INSENSITIVE);
         Assert.AreEqual(pattern1, pattern2);
-        Assert.AreNotEqual(pattern1, pattern2);
+        //Assert.AreNotEqual(pattern1, pattern2);
         Assert.AreEqual(pattern1.GetHashCode(), pattern2.GetHashCode());
-        Assert.AreNotEqual(pattern1.GetHashCode(), pattern2.GetHashCode());
+        //Assert.AreNotEqual(pattern1.GetHashCode(), pattern2.GetHashCode());
 
     }
 }

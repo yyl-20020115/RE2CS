@@ -9,7 +9,7 @@ namespace RE2CS.Tests;
 
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/prog_test.go
-
+[TestClass]
 public class ProgTest
 {
     private static string[][] COMPILE_TESTS = {
@@ -110,22 +110,18 @@ public class ProgTest
     },
   };
 
-    private string input;
-    private string expected;
-
-    public static object[] GetParameters()
-    {
-        return COMPILE_TESTS;
-    }
-
-    public ProgTest(string input, string expected)
-    {
-        this.input = input;
-        this.expected = expected;
-    }
 
     [TestMethod]
     public void TestCompile()
+    {
+        for (int i = 0; i < COMPILE_TESTS.Length; i++) 
+        {
+            var test = COMPILE_TESTS[i];
+            this.TestCompile(test[0],test[1]);
+        }
+        Assert.IsTrue(true);
+    }
+    public void TestCompile(string input, string expected)
     {
         Regexp re = Parser.Parse(input, RE2.PERL);
         Program p = Compiler.CompileRegexp(re);

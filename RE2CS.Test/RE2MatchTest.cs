@@ -10,21 +10,22 @@ namespace RE2CS.Tests;
 [TestClass]
 public class RE2MatchTest
 {
-    public static FindTest.Test[] MatchTests()
-    {
-        return FindTest.FIND_TESTS;
-    }
-
-    private FindTest.Test test;
-
-    public RE2MatchTest(FindTest.Test findTest)
-    {
-        this.test = findTest;
-    }
 
     [TestMethod]
     public void TestMatch()
     {
+        for(int i = 0; i < FindTest.FIND_TESTS.Length; i++)
+        {
+            TestMatch(FindTest.FIND_TESTS[i]);
+        }
+        Assert.IsTrue(true);
+    }
+    public void TestMatch(FindTest.Test test)
+    {
+        if (test.pat == "\\a\\f\\n\\r\\t\\v")
+        {
+            //TODO: why failed?
+        }
         RE2 re = RE2.Compile(test.pat);
         bool m = re.Match(test.text);
         if (m != (test.matches.Length > 0))
@@ -46,6 +47,14 @@ public class RE2MatchTest
 
     [TestMethod]
     public void TestMatchFunction()
+    {
+        for (int i = 0; i < FindTest.FIND_TESTS.Length; i++)
+        {
+            TestMatchFunction(FindTest.FIND_TESTS[i]);
+        }
+        Assert.IsTrue(true);
+    }
+    public void TestMatchFunction(FindTest.Test test)
     {
         bool m = RE2.Match(test.pat, test.text);
         if (m != (test.matches.Length > 0))
