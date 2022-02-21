@@ -134,7 +134,7 @@ public class RE2ReplaceTest
     new string[]{"[a-c]*", "x", "abcbcdcdedef", "xdcdedef", "true"},
     };
 
-    public static Object[][] replaceTests()
+    public static Object[][] ReplaceTests()
     {
         return REPLACE_TESTS;
     }
@@ -156,7 +156,7 @@ public class RE2ReplaceTest
     }
 
     [Test]
-    public void replaceTestHelper()
+    public void ReplaceTestHelper()
     {
         RE2 re = null;
         try
@@ -165,13 +165,13 @@ public class RE2ReplaceTest
         }
         catch (PatternSyntaxException e)
         {
-            fail(string.Format("Unexpected error compiling {0}: {1}", pattern, e.Message));
+            Fail(string.Format("Unexpected error compiling {0}: {1}", pattern, e.Message));
         }
         string actual =
             replaceFirst ? re.ReplaceFirst(source, replacement) : re.ReplaceAll(source, replacement);
         if (!actual.Equals(expected))
         {
-            fail(
+            Fail(
                 string.Format(
                     "{0}.replaceAll({1},{2}) = {3}; want {4}",
                     pattern,
@@ -182,7 +182,7 @@ public class RE2ReplaceTest
         }
     }
 
-    private void fail(string p)
+    private void Fail(string p)
     {
         Assert.Fail(p);
     }

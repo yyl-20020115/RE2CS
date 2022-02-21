@@ -18,94 +18,98 @@ public class PatternTest
 {
 
     [Test]
-    public void testCompile()
+    public void TestCompile()
     {
         Pattern p = Pattern.Compile("abc");
-        assertEquals("abc", p.PatternText);
-        assertEquals(0, p.Flags);
+        AssertEquals("abc", p.PatternText);
+        AssertEquals(0, p.Flags);
     }
 
     [Test]
-    public void testCompileExceptionWithDuplicateGroups()
+    public void TestCompileExceptionWithDuplicateGroups()
     {
         try
         {
             Pattern.Compile("(?P<any>.*)(?P<any>.*");
-            fail();
+            Fail();
         }
         catch (PatternSyntaxException e)
         {
-            assertEquals("error parsing regexp: duplicate capture group name: `any`", e.Message);
+            AssertEquals("error parsing regexp: duplicate capture group name: `any`", e.Message);
         }
     }
 
-    private void fail()
+    private void Fail()
     {
-        throw new NotImplementedException();
+        Assert.Fail();
+    }
+    private void AssertEquals(string v1, string v2)
+    {
+        Assert.AreEqual(v1, v2);
     }
 
-    private void assertEquals(string v, string message)
+    private void AssertEquals(int v1,int v2)
     {
-        throw new NotImplementedException();
+        Assert.AreEqual(v1, v2);
     }
 
     [Test]
-    public void testToString()
+    public void TestToString()
     {
         Pattern p = Pattern.Compile("abc");
-        assertEquals("abc", p.toString());
+        AssertEquals("abc", p.ToString());
     }
 
     [Test]
-    public void testCompileFlags()
+    public void TestCompileFlags()
     {
         Pattern p = Pattern.Compile("abc", 5);
-        assertEquals("abc", p.PatternText);
-        assertEquals(5, p.Flags);
+        AssertEquals("abc", p.PatternText);
+        AssertEquals(5, p.Flags);
     }
 
     [Test]
-    public void testSyntaxError()
+    public void TestSyntaxError()
     {
         try
         {
             Pattern.Compile("abc(");
-            fail("should have thrown");
+            Fail("should have thrown");
         }
         catch (PatternSyntaxException e)
         {
-            assertEquals(-1, e.Index);
-            assertNotSame("", e.Description);
-            assertNotSame("", e.Message);
-            assertEquals("abc(", e.Pattern);
+            AssertEquals(-1, e.Index);
+            AssertNotSame("", e.Description);
+            AssertNotSame("", e.Message);
+            AssertEquals("abc(", e.Pattern);
         }
     }
 
-    private void assertNotSame(string v1, string v2)
+    private void AssertNotSame(string v1, string v2)
     {
-        throw new NotImplementedException();
+        Assert.AreNotSame(v1, v2);
     }
 
-    private void fail(string v)
+    private void Fail(string v)
     {
-        throw new NotImplementedException();
+        Assert.Fail(v);
     }
 
     [Test]
-    public void testMatchesNoFlags()
+    public void TestMatchesNoFlags()
     {
-        ApiTestUtils.testMatches("ab+c", "abbbc", "cbbba");
-        ApiTestUtils.testMatches("ab.*c", "abxyzc", "ab\nxyzc");
-        ApiTestUtils.testMatches("^ab.*c$", "abc", "xyz\nabc\ndef");
+        ApiTestUtils.TestMatches("ab+c", "abbbc", "cbbba");
+        ApiTestUtils.TestMatches("ab.*c", "abxyzc", "ab\nxyzc");
+        ApiTestUtils.TestMatches("^ab.*c$", "abc", "xyz\nabc\ndef");
 
         // Test quoted codepoints that require a surrogate pair. See https://github.com/google/re2j/issues/123.
-        string source = new StringBuilder().appendCodePoint(110781).toString();
-        ApiTestUtils.testMatches(source, source, "blah");
-        ApiTestUtils.testMatches("\\Q" + source + "\\E", source, "blah");
+        string source = char.ConvertFromUtf32(110781);
+        ApiTestUtils.TestMatches(source, source, "blah");
+        ApiTestUtils.TestMatches("\\Q" + source + "\\E", source, "blah");
     }
 
     [Test]
-    public void testMatchesWithFlags()
+    public void TestMatchesWithFlags()
     {
         ApiTestUtils.testMatchesRE2("ab+c", 0, "abbbc", "cbba");
         ApiTestUtils.testMatchesRE2("ab+c", Pattern.CASE_INSENSITIVE, "abBBc", "cbbba");
@@ -122,24 +126,34 @@ public class PatternTest
             "^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE, "AB\nc", "z");
     }
 
-    private void testFind(string regexp, int flag, string match, string nonMatch)
+    private void TestFind(string regexp, int flag, string match, string nonMatch)
     {
-        assertTrue(Pattern.Compile(regexp, flag).Matcher(match).Find());
-        assertFalse(Pattern.Compile(regexp, flag).Matcher(nonMatch).Find());
+        AssertTrue(Pattern.Compile(regexp, flag).Matcher(match).Find());
+        AssertFalse(Pattern.Compile(regexp, flag).Matcher(nonMatch).Find());
+    }
+
+    private void AssertFalse(bool v)
+    {
+        Assert.IsFalse(v);
+    }
+
+    private void AssertTrue(bool v)
+    {
+        Assert.IsTrue(v);
     }
 
     [Test]
-    public void testFind()
+    public void TestFind()
     {
-        testFind("ab+c", 0, "xxabbbc", "cbbba");
-        testFind("ab+c", Pattern.CASE_INSENSITIVE, "abBBc", "cbbba");
-        testFind("ab.*c", 0, "xxabxyzc", "ab\nxyzc");
-        testFind("ab.*c", Pattern.DOTALL, "ab\nxyzc", "aB\nxyzC");
-        testFind("ab.*c", Pattern.DOTALL | Pattern.CASE_INSENSITIVE, "xaB\nxyzCz", "z");
-        testFind("^ab.*c$", 0, "abc", "xyz\nabc\ndef");
-        testFind("^ab.*c$", Pattern.MULTILINE, "xyz\nabc\ndef", "xyz\nab\nc\ndef");
-        testFind("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE, "xyz\nab\nc\ndef", "xyz\nAB\nc\ndef");
-        testFind(
+        TestFind("ab+c", 0, "xxabbbc", "cbbba");
+        TestFind("ab+c", Pattern.CASE_INSENSITIVE, "abBBc", "cbbba");
+        TestFind("ab.*c", 0, "xxabxyzc", "ab\nxyzc");
+        TestFind("ab.*c", Pattern.DOTALL, "ab\nxyzc", "aB\nxyzC");
+        TestFind("ab.*c", Pattern.DOTALL | Pattern.CASE_INSENSITIVE, "xaB\nxyzCz", "z");
+        TestFind("^ab.*c$", 0, "abc", "xyz\nabc\ndef");
+        TestFind("^ab.*c$", Pattern.MULTILINE, "xyz\nabc\ndef", "xyz\nab\nc\ndef");
+        TestFind("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE, "xyz\nab\nc\ndef", "xyz\nAB\nc\ndef");
+        TestFind(
             "^ab.*c$",
             Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE,
             "xyz\nAB\nc\ndef",
@@ -147,7 +161,7 @@ public class PatternTest
     }
 
     [Test]
-    public void testSplit()
+    public void TestSplit()
     {
         ApiTestUtils.testSplit("/", "abcde", new string[] { "abcde" });
         ApiTestUtils.testSplit("/", "a/b/cc//d/e//", new string[] { "a", "b", "cc", "", "d", "e" });
@@ -179,7 +193,7 @@ public class PatternTest
     }
 
     [Test]
-    public void testGroupCount()
+    public void TestGroupCount()
     {
         // It is a simple delegation, but still test it.
         ApiTestUtils.testGroupCount("(.*)ab(.*)a", 2);
@@ -190,22 +204,21 @@ public class PatternTest
     }
 
     [Test]
-    public void testNamedGroups()
+    public void TestNamedGroups()
     {
-        assertNamedGroupsEquals(Collections.< string, Integer > emptyMap(), "hello");
-        assertNamedGroupsEquals(Collections.< string, Integer > emptyMap(), "(.*)");
-        assertNamedGroupsEquals(ImmutableMap.of("any", 1), "(?P<any>.*)");
-        assertNamedGroupsEquals(ImmutableMap.of("foo", 1, "bar", 2), "(?P<foo>.*)(?P<bar>.*)");
+        AssertNamedGroupsEquals(new Dictionary<string, int>(), "hello");
+        AssertNamedGroupsEquals(new Dictionary<string, int>(), "(.*)");
+        AssertNamedGroupsEquals(new Dictionary<string, int>() { ["any"]=1}, "(?P<any>.*)");
+        AssertNamedGroupsEquals(new Dictionary<string, int>() { ["foo"] = 1,["bar"]=2 }, "(?P<foo>.*)(?P<bar>.*)");
     }
 
-    private static void assertNamedGroupsEquals(Dictionary<string, Integer> expected, string pattern)
+    private static void AssertNamedGroupsEquals(Dictionary<string, int> expected, string pattern)
     {
-        assertEquals(expected, Pattern.Compile(pattern).NamedGroups);
+        Assert.AreEqual(expected, Pattern.Compile(pattern).NamedGroups);
     }
-
     // See https://github.com/google/re2j/issues/93.
     [Test]
-    public void testIssue93()
+    public void TestIssue93()
     {
         Pattern p1 = Pattern.Compile("(a.*?c)|a.*?b");
         Pattern p2 = Pattern.Compile("a.*?c|a.*?b");
@@ -214,61 +227,46 @@ public class PatternTest
         m1.Find();
         Matcher m2 = p2.Matcher("abc");
         m2.Find();
-
-        assertThat(m2.Group()).isEqualTo(m1.Group());
+        Assert.AreEqual(m2.Group(), m1.Group());
     }
 
     [Test]
-    public void testQuote()
+    public void TestQuote()
     {
         ApiTestUtils.testMatchesRE2(Pattern.Quote("ab+c"), 0, "ab+c", "abc");
     }
 
-    private Pattern reserialize(Pattern object)
+    private Pattern Reserialize(Pattern o)
     {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        try
-        {
-            ObjectOutputStream out = new ObjectOutputStream(bytes);
-      out.writeObject(object);
-            ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()));
-            return (Pattern) in.readObject();
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-        catch (ClassNotFoundException e)
-        {
-            throw new RuntimeException(e);
-        }
+        return o;
     }
 
-    private void assertSerializes(Pattern p)
+    private void AssertSerializes(Pattern p)
     {
-        Pattern reserialized = reserialize(p);
-        assertEquals(p.PatternText, reserialized.PatternText);
-        assertEquals(p.Flags, reserialized.Flags);
+        Pattern reserialized = Reserialize(p);
+        AssertEquals(p.PatternText, reserialized.PatternText);
+        AssertEquals(p.Flags, reserialized.Flags);
     }
 
     [Test]
-    public void testSerialize()
+    public void TestSerialize()
     {
-        assertSerializes(Pattern.Compile("ab+c"));
-        assertSerializes(Pattern.Compile("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE));
-        assertFalse(reserialize(Pattern.Compile("abc")).Matcher("def").Find());
+        AssertSerializes(Pattern.Compile("ab+c"));
+        AssertSerializes(Pattern.Compile("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE));
+        AssertFalse(Reserialize(Pattern.Compile("abc")).Matcher("def").Find());
     }
 
     [Test]
-    public void testEquals()
+    public void TestEquals()
     {
         Pattern pattern1 = Pattern.Compile("abc");
         Pattern pattern2 = Pattern.Compile("abc");
         Pattern pattern3 = Pattern.Compile("def");
         Pattern pattern4 = Pattern.Compile("abc", Pattern.CASE_INSENSITIVE);
-        assertThat(pattern1).isEqualTo(pattern2);
-        assertThat(pattern1).isNotEqualTo(pattern3);
-        assertThat(pattern1.hashCode()).isEqualTo(pattern2.hashCode());
-        assertThat(pattern1).isNotEqualTo(pattern4);
+        Assert.AreEqual(pattern1, pattern2);
+        Assert.AreNotEqual(pattern1, pattern2);
+        Assert.AreEqual(pattern1.GetHashCode(), pattern2.GetHashCode());
+        Assert.AreNotEqual(pattern1.GetHashCode(), pattern2.GetHashCode());
+
     }
 }

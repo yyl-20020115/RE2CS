@@ -13,7 +13,7 @@ public class UnicodeTest
 {
 
     [Test]
-    public void testFoldConstants()
+    public void TestFoldConstants()
     {
         int last = -1;
         for (int i = 0; i <= Unicode.MAX_RUNE; i++)
@@ -24,17 +24,17 @@ public class UnicodeTest
             }
             if (last == -1 && Unicode.MIN_FOLD != i)
             {
-                fail(string.Format("MIN_FOLD=#{0:04X} should be #{1:04X}", Unicode.MIN_FOLD, i));
+                Fail(string.Format("MIN_FOLD=#{0:X4} should be #{1:X4}", Unicode.MIN_FOLD, i));
             }
             last = i;
         }
         if (Unicode.MAX_FOLD != last)
         {
-            fail(string.Format("MAX_FOLD=#{0:04X} should be #{1:04X}", Unicode.MAX_FOLD, last));
+            Fail(string.Format("MAX_FOLD=#{0:X4} should be #{1:X4}", Unicode.MAX_FOLD, last));
         }
     }
 
-    private void fail(string v)
+    private void Fail(string v)
     {
         Assert.Fail(v);
     }

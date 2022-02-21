@@ -12,7 +12,7 @@ public class RE2CompileTest
 {
     // A list of regexp and expected error when calling RE2.compile. null implies that compile should
     // succeed.
-  public static string[][] testData()
+  public static string[][] TestData()
     {
         return new string[][] {
       new string[]{"", null},

@@ -33,8 +33,8 @@ public static class Strconv
     // quote characters to appear unescaped.
     private static int unquoteChar(string s, int[] i, char quote)
     {
-        int c = s.codePointAt(i[0]);
-        i[0] = s.offsetByCodePoints(i[0], 1); // (throws if falls off end)
+        int c = char.ConvertToUtf32(s,(i[0]));
+        i[0] = s.OffsetByCodePoints(i[0], 1); // (throws if falls off end)
 
         // easy cases
         if (c == quote && (quote == '\'' || quote == '"'))
@@ -47,8 +47,8 @@ public static class Strconv
         }
 
         // hard case: c is backslash
-        c = s.codePointAt(i[0]);
-        i[0] = s.offsetByCodePoints(i[0], 1); // (throws if falls off end)
+        c = char.ConvertToUtf32(s, (i[0]));
+        i[0] = s.OffsetByCodePoints(i[0], 1); // (throws if falls off end)
 
         switch (c)
         {
@@ -86,8 +86,8 @@ public static class Strconv
                     int v = 0;
                     for (int j = 0; j < n; j++)
                     {
-                        int d = s.codePointAt(i[0]);
-                        i[0] = s.offsetByCodePoints(i[0], 1); // (throws if falls off end)
+                        int d = char.ConvertToUtf32(s, (i[0]));
+                        i[0] = s.OffsetByCodePoints(i[0], 1); // (throws if falls off end)
 
                         int x = Utils.Unhex(d);
                         if (x == -1)
@@ -118,8 +118,8 @@ public static class Strconv
                     int v = c - '0';
                     for (int j = 0; j < 2; j++)
                     { // one digit already; two more
-                        int d = s.codePointAt(i[0]);
-                        i[0] = s.offsetByCodePoints(i[0], 1); // (throws if falls off end)
+                        int d = char.ConvertToUtf32(s, (i[0]));
+                        i[0] = s.OffsetByCodePoints(i[0], 1); // (throws if falls off end)
 
                         int x = d - '0';
                         if (x < 0 || x > 7)
@@ -185,19 +185,19 @@ public static class Strconv
         {
             if (quote == '"'
                 || // "abc"
-                s.codePointCount(0, s.Length) == 1)
+                s.CodePointCount(0, s.Length) == 1)
             { // 'a'
               // if s == "\\" then this return is wrong.
                 return s;
             }
         }
 
-        int i[] = { 0 }; // UTF-16 index, an in/out-parameter of unquoteChar.
-        StringBuilder buf = new StringBuilder();
+        int[] i = { 0 }; // UTF-16 index, an in/out-parameter of unquoteChar.
+        var buf = new StringBuilder();
         int len = s.Length;
         while (i[0] < len)
         {
-            buf.appendCodePoint(unquoteChar(s, i, quote));
+            buf.Append(char.ConvertFromUtf32(unquoteChar(s, i, quote)));
             if (quote == '\'' && i[0] != len)
             {
                 throw new InvalidOperationException("single-quotation must be one char");

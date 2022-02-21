@@ -27,7 +27,7 @@ public class RE2QuoteMetaTest
     },
   };
 
-    public static string[][] testCases()
+    public static string[][] TestCases()
     {
         return META_TESTS;
     }
@@ -42,22 +42,22 @@ public class RE2QuoteMetaTest
         this.pattern = pattern;
         this.output = output;
         this.literal = literal;
-        this.isLiteral = Boolean.parseBoolean(isLiteral);
+        bool.TryParse(this.literal, out this.isLiteral);
     }
 
     [Test]
-    public void testQuoteMeta()
+    public void TestQuoteMeta()
     {
         // Verify that quoteMeta returns the expected string.
         string quoted = RE2.QuoteMeta(pattern);
         if (!quoted.Equals(output))
         {
-            fail(string.format("RE2.quoteMeta(\"%s\") = \"%s\"; want \"%s\"", pattern, quoted, output));
+            Fail(string.Format("RE2.quoteMeta(\"{0}\") = \"{1}\"; want \"{2}\"", pattern, quoted, output));
         }
 
         // Verify that the quoted string is in fact treated as expected
         // by compile -- i.e. that it matches the original, unquoted string.
-        if (!pattern.isEmpty())
+        if (!string.IsNullOrEmpty(pattern))
         {
             RE2 re = null;
             try
@@ -66,9 +66,9 @@ public class RE2QuoteMetaTest
             }
             catch (PatternSyntaxException e)
             {
-                fail(
-                    string.format(
-                        "Unexpected error compiling quoteMeta(\"%s\"): %s", pattern, e.Message));
+                Fail(
+                    string.Format(
+                        "Unexpected error compiling quoteMeta(\"{0}\"): {1}", pattern, e.Message));
             }
             string src = "abc" + pattern + "def";
             string repl = "xyz";
@@ -76,9 +76,9 @@ public class RE2QuoteMetaTest
             string expected = "abcxyzdef";
             if (!replaced.Equals(expected))
             {
-                fail(
-                    string.format(
-                        "quoteMeta(`%s`).replace(`%s`,`%s`) = `%s`; want `%s`",
+                Fail(
+                    string.Format(
+                        "quoteMeta(`{0}`).replace(`{1}`,`{2}`) = `{3}`; want `{4}`",
                         pattern,
                         src,
                         repl,
@@ -89,25 +89,25 @@ public class RE2QuoteMetaTest
     }
 
     [Test]
-    public void testLiteralPrefix()
+    public void TestLiteralPrefix()
     {
         // Literal method needs to scan the pattern.
         RE2 re = RE2.Compile(pattern);
         if (re.prefixComplete != isLiteral)
         {
-            fail(
-                string.format(
-                    "literalPrefix(\"%s\") = %s; want %s", pattern, re.prefixComplete, isLiteral));
+            Fail(
+                string.Format(
+                    "literalPrefix(\"{0}\") = {1}; want {2}", pattern, re.prefixComplete, isLiteral));
         }
         if (!re.prefix.Equals(literal))
         {
-            fail(
-                string.format(
-                    "literalPrefix(\"%s\") = \"%s\"; want \"%s\"", pattern, re.prefix, literal));
+            Fail(
+                string.Format(
+                    "literalPrefix(\"{0}\") = \"{1}\"; want \"{2}\"", pattern, re.prefix, literal));
         }
     }
 
-    private void fail(string p)
+    private void Fail(string p)
     {
         Assert.Fail(p);
     }

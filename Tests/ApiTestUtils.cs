@@ -22,7 +22,7 @@ public class ApiTestUtils
      * Tests that both RE2's and JDK's pattern class act as we expect them. The regular expression
      * {@code regexp} matches the string {@code match} and doesn't match {@code nonMatch}
      */
-    public static void testMatches(string regexp, string match, string nonMatch)
+    public static void TestMatches(string regexp, string match, string nonMatch)
     {
         string errorString = "Pattern with regexp: " + regexp;
         assertTrue(

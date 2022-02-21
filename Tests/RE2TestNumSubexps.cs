@@ -24,7 +24,7 @@ public class RE2TestNumSubexps
     new string[]{"(.*)(\\(a\\)b)(.*)a", "3"},
     };
 
-    public static string[][] testCases()
+    public static string[][] TestCases()
     {
         return NUM_SUBEXP_CASES;
     }
@@ -39,14 +39,14 @@ public class RE2TestNumSubexps
     }
 
     [Test]
-    public void testNumSubexp()
+    public void TestNumSubexp()
     {
-        assertEquals(
+        AssertEquals(
         "numberOfCapturingGroups(" + input + ")",
         expected,
         RE2.Compile(input).NumberOfCapturingGroups);
     }
-    public static void assertEquals(string message,int v1, int v2)
+    public static void AssertEquals(string message,int v1, int v2)
     {
         Assert.AreEqual(v1, v2,message);
     }

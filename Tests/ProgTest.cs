@@ -113,7 +113,7 @@ public class ProgTest
     private string input;
     private string expected;
 
-    public static Object[] getParameters()
+    public static object[] GetParameters()
     {
         return COMPILE_TESTS;
     }
@@ -125,16 +125,16 @@ public class ProgTest
     }
 
     [Test]
-    public void testCompile()
+    public void TestCompile()
     {
         Regexp re = Parser.Parse(input, RE2.PERL);
         Program p = Compiler.CompileRegexp(re);
         string s = p.ToString();
-        assertEquals("compiled: " + input, expected, s);
+        AssertEquals("compiled: " + input, expected, s);
     }
 
-    private void assertEquals(string v, string expected, string s)
+    private void AssertEquals(string message, string expected, string s)
     {
-        throw new NotImplementedException();
+        Assert.AreEqual(expected, s, message);
     }
 }

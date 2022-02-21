@@ -76,7 +76,7 @@ public class FindTest
     }
 
     // Used by RE2Test also.
-    static readonly Test[] FIND_TESTS = {
+    public static readonly Test[] FIND_TESTS = {
     new Test("", "", 1, 0, 0),
     new Test("^abcdefg", "abcdefg", 1, 0, 7),
     new Test("a+", "baaab", 1, 1, 4),

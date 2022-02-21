@@ -10,7 +10,7 @@ namespace RE2CS.Tests;
 [TestFixture]
 public class RE2MatchTest
 {
-    public static FindTest.Test[] matchTests()
+    public static FindTest.Test[] MatchTests()
     {
         return FindTest.FIND_TESTS;
     }
@@ -23,40 +23,40 @@ public class RE2MatchTest
     }
 
     [Test]
-    public void testMatch()
+    public void TestMatch()
     {
         RE2 re = RE2.Compile(test.pat);
         bool m = re.Match(test.text);
         if (m != (test.matches.Length > 0))
         {
-            fail(
-                string.format(
-                    "RE2.match failure on %s: %s should be %s", test, m, test.matches.Length > 0));
+            Fail(
+                string.Format(
+                    "RE2.match failure on {0}: {1} should be {2}", test, m, test.matches.Length > 0));
         }
         // now try bytes
         m = re.MatchUTF8(test.textUTF8);
         if (m != (test.matches.Length > 0))
         {
-            fail(
-                string.format(
-                    "RE2.matchUTF8 failure on %s: %s should be %s", test, m, test.matches.Length > 0));
+            Fail(
+                string.Format(
+                    "RE2.matchUTF8 failure on {0}: {1} should be {2}", test, m, test.matches.Length > 0));
         }
     }
 
-    private void fail(object p)
-    {
-        throw new NotImplementedException();
-    }
 
     [Test]
-    public void testMatchFunction()
+    public void TestMatchFunction()
     {
         bool m = RE2.Match(test.pat, test.text);
         if (m != (test.matches.Length > 0))
         {
-            fail(
-                string.format(
-                    "RE2.match failure on %s: %s should be %s", test, m, test.matches.Length > 0));
+            Fail(
+                string.Format(
+                    "RE2.match failure on {0}: {1} should be {2}", test, m, test.matches.Length > 0));
         }
+    }
+    private void Fail(string p)
+    {
+        Assert.Fail(p);
     }
 }

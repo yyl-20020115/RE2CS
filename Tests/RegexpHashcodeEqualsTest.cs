@@ -12,10 +12,10 @@ namespace RE2CS.Tests;
 [TestFixture]
 public class RegexpHashcodeEqualsTest
 {
-    public static IEnumerable<Object[]> testCases()
+    public static IEnumerable<object[]> TestCases()
     {
-        return new List<Object[]>(
-            new Object[][] {
+        return new List<object[]>(
+          new object[][] {
           new object[]{"abc", "abc", true, RE2.POSIX},
           new object[]{"abc", "def", false, RE2.POSIX},
           new object[]{"(abc)", "(a)(b)(c)", false, RE2.POSIX},
@@ -39,18 +39,18 @@ public class RegexpHashcodeEqualsTest
     public int mode;
 
     [Test]
-    public void testEquals()
+    public void TestEquals()
     {
         Regexp ra = Parser.Parse(a, mode);
         Regexp rb = Parser.Parse(b, mode);
         if (areEqual)
         {
-            Truth.assertThat(ra).isEqualTo(rb);
-            Truth.assertThat(ra.GetHashCode()).isEqualTo(rb.GetHashCode());
+            Assert.AreEqual(ra, rb);
+            Assert.AreEqual(ra.GetHashCode(), rb.GetHashCode());
         }
         else
         {
-            Truth.assertThat(ra).isNotEqualTo(rb);
+            Assert.AreNotEqual(ra, rb);
         }
     }
 }

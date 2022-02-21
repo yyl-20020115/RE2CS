@@ -12,22 +12,13 @@ namespace RE2CS.Tests;
 public class CharClassTest
 {
 
-    private static CharClass cc(params int[] x)
-    {
-        return new CharClass(x);
-    }
+    private static CharClass CreateCharClass(params int[] x) => new CharClass(x);
 
-    private static int[] i(params int[] x)
-    {
-        return x;
-    }
+    private static int[] Ints(params int[] x) => x;
 
-    private static int[] s(string s)
-    {
-        return s.EnumerateRunes().Select(r => r.Value).ToArray();// stringToRunes(s);
-    }
+    private static int[] StringToRunes(string s) => s.EnumerateRunes().Select(r => r.Value).ToArray();// stringToRunes(s);
 
-    private static void assertClass(CharClass cc, params int[] expected)
+    private static void AssertClass(CharClass cc, params int[] expected)
     {
         var actual = cc.ToArray();
         if (!Enumerable.SequenceEqual(actual, expected))
@@ -42,22 +33,22 @@ public class CharClassTest
         }
     }
     [Test]
-    public void testCleanClass()
+    public void TestCleanClass()
     {
-        assertClass(cc().CleanClass());
+        AssertClass(CreateCharClass().CleanClass());
 
-        assertClass(cc(10, 20, 10, 20, 10, 20).CleanClass(), 10, 20);
+        AssertClass(CreateCharClass(10, 20, 10, 20, 10, 20).CleanClass(), 10, 20);
 
-        assertClass(cc(10, 20).CleanClass(), 10, 20);
+        AssertClass(CreateCharClass(10, 20).CleanClass(), 10, 20);
 
-        assertClass(cc(10, 20, 20, 30).CleanClass(), 10, 30);
+        AssertClass(CreateCharClass(10, 20, 20, 30).CleanClass(), 10, 30);
 
-        assertClass(cc(10, 20, 30, 40, 20, 30).CleanClass(), 10, 40);
+        AssertClass(CreateCharClass(10, 20, 30, 40, 20, 30).CleanClass(), 10, 40);
 
-        assertClass(cc(0, 50, 20, 30).CleanClass(), 0, 50);
+        AssertClass(CreateCharClass(0, 50, 20, 30).CleanClass(), 0, 50);
 
-        assertClass(
-            cc(10, 11, 13, 14, 16, 17, 19, 20, 22, 23).CleanClass(),
+        AssertClass(
+            CreateCharClass(10, 11, 13, 14, 16, 17, 19, 20, 22, 23).CleanClass(),
             10,
             11,
             13,
@@ -69,8 +60,8 @@ public class CharClassTest
             22,
             23);
 
-        assertClass(
-            cc(13, 14, 10, 11, 22, 23, 19, 20, 16, 17).CleanClass(),
+        AssertClass(
+            CreateCharClass(13, 14, 10, 11, 22, 23, 19, 20, 16, 17).CleanClass(),
             10,
             11,
             13,
@@ -82,8 +73,8 @@ public class CharClassTest
             22,
             23);
 
-        assertClass(
-            cc(13, 14, 10, 11, 22, 23, 19, 20, 16, 17).CleanClass(),
+        AssertClass(
+            CreateCharClass(13, 14, 10, 11, 22, 23, 19, 20, 16, 17).CleanClass(),
             10,
             11,
             13,
@@ -95,54 +86,54 @@ public class CharClassTest
             22,
             23);
 
-        assertClass(cc(13, 14, 10, 11, 22, 23, 19, 20, 16, 17, 5, 25).CleanClass(), 5, 25);
+        AssertClass(CreateCharClass(13, 14, 10, 11, 22, 23, 19, 20, 16, 17, 5, 25).CleanClass(), 5, 25);
 
-        assertClass(cc(13, 14, 10, 11, 22, 23, 19, 20, 16, 17, 12, 21).CleanClass(), 10, 23);
+        AssertClass(CreateCharClass(13, 14, 10, 11, 22, 23, 19, 20, 16, 17, 12, 21).CleanClass(), 10, 23);
 
-        assertClass(cc(0, Unicode.MAX_RUNE).CleanClass(), 0, Unicode.MAX_RUNE);
+        AssertClass(CreateCharClass(0, Unicode.MAX_RUNE).CleanClass(), 0, Unicode.MAX_RUNE);
 
-        assertClass(cc(0, 50).CleanClass(), 0, 50);
+        AssertClass(CreateCharClass(0, 50).CleanClass(), 0, 50);
 
-        assertClass(cc(50, Unicode.MAX_RUNE).CleanClass(), 50, Unicode.MAX_RUNE);
+        AssertClass(CreateCharClass(50, Unicode.MAX_RUNE).CleanClass(), 50, Unicode.MAX_RUNE);
     }
 
     [Test]
-    public void testAppendLiteral()
+    public void TestAppendLiteral()
     {
-        assertClass(cc().AppendLiteral('a', 0), 'a', 'a');
-        assertClass(cc('a', 'f').AppendLiteral('a', 0), 'a', 'f');
-        assertClass(cc('b', 'f').AppendLiteral('a', 0), 'a', 'f');
-        assertClass(cc('a', 'f').AppendLiteral('g', 0), 'a', 'g');
-        assertClass(cc('a', 'f').AppendLiteral('A', 0), 'a', 'f', 'A', 'A');
+        AssertClass(CreateCharClass().AppendLiteral('a', 0), 'a', 'a');
+        AssertClass(CreateCharClass('a', 'f').AppendLiteral('a', 0), 'a', 'f');
+        AssertClass(CreateCharClass('b', 'f').AppendLiteral('a', 0), 'a', 'f');
+        AssertClass(CreateCharClass('a', 'f').AppendLiteral('g', 0), 'a', 'g');
+        AssertClass(CreateCharClass('a', 'f').AppendLiteral('A', 0), 'a', 'f', 'A', 'A');
 
-        assertClass(cc().AppendLiteral('A', RE2.FOLD_CASE), 'A', 'A', 'a', 'a');
-        assertClass(cc('a', 'f').AppendLiteral('a', RE2.FOLD_CASE), 'a', 'f', 'A', 'A');
-        assertClass(cc('b', 'f').AppendLiteral('a', RE2.FOLD_CASE), 'a', 'f', 'A', 'A');
-        assertClass(cc('a', 'f').AppendLiteral('g', RE2.FOLD_CASE), 'a', 'g', 'G', 'G');
-        assertClass(cc('a', 'f').AppendLiteral('A', RE2.FOLD_CASE), 'a', 'f', 'A', 'A');
+        AssertClass(CreateCharClass().AppendLiteral('A', RE2.FOLD_CASE), 'A', 'A', 'a', 'a');
+        AssertClass(CreateCharClass('a', 'f').AppendLiteral('a', RE2.FOLD_CASE), 'a', 'f', 'A', 'A');
+        AssertClass(CreateCharClass('b', 'f').AppendLiteral('a', RE2.FOLD_CASE), 'a', 'f', 'A', 'A');
+        AssertClass(CreateCharClass('a', 'f').AppendLiteral('g', RE2.FOLD_CASE), 'a', 'g', 'G', 'G');
+        AssertClass(CreateCharClass('a', 'f').AppendLiteral('A', RE2.FOLD_CASE), 'a', 'f', 'A', 'A');
 
         // ' ' is beneath the MIN-MAX_FOLD range.
-        assertClass(cc('a', 'f').AppendLiteral(' ', 0), 'a', 'f', ' ', ' ');
-        assertClass(cc('a', 'f').AppendLiteral(' ', RE2.FOLD_CASE), 'a', 'f', ' ', ' ');
+        AssertClass(CreateCharClass('a', 'f').AppendLiteral(' ', 0), 'a', 'f', ' ', ' ');
+        AssertClass(CreateCharClass('a', 'f').AppendLiteral(' ', RE2.FOLD_CASE), 'a', 'f', ' ', ' ');
     }
 
     [Test]
-    public void testAppendFoldedRange()
+    public void TestAppendFoldedRange()
     {
         // These cases are derived directly from the program logic:
 
         // Range is full: folding can't add more.
-        assertClass(cc().AppendFoldedRange(10, 0x10ff0), 10, 0x10ff0);
+        AssertClass(CreateCharClass().AppendFoldedRange(10, 0x10ff0), 10, 0x10ff0);
 
         // Range is outside folding possibilities.
-        assertClass(cc().AppendFoldedRange(' ', '&'), ' ', '&');
+        AssertClass(CreateCharClass().AppendFoldedRange(' ', '&'), ' ', '&');
 
         // [lo, MIN_FOLD - 1] needs no folding.  Only [...abc] suffix is folded.
-        assertClass(cc().AppendFoldedRange(' ', 'C'), ' ', 'C', 'a', 'c');
+        AssertClass(CreateCharClass().AppendFoldedRange(' ', 'C'), ' ', 'C', 'a', 'c');
 
         // [MAX_FOLD...] needs no folding
-        assertClass(
-            cc().AppendFoldedRange(0x10400, 0x104f0),
+        AssertClass(
+            CreateCharClass().AppendFoldedRange(0x10400, 0x104f0),
             0x10450,
             0x104f0,
             0x10400,
@@ -152,45 +143,45 @@ public class CharClassTest
     }
 
     [Test]
-    public void testAppendClass()
+    public void TestAppendClass()
     {
-        assertClass(cc().AppendClass(i('a', 'z')), 'a', 'z');
-        assertClass(cc('a', 'f').AppendClass(i('c', 't')), 'a', 't');
-        assertClass(cc('c', 't').AppendClass(i('a', 'f')), 'a', 't');
+        AssertClass(CreateCharClass().AppendClass(Ints('a', 'z')), 'a', 'z');
+        AssertClass(CreateCharClass('a', 'f').AppendClass(Ints('c', 't')), 'a', 't');
+        AssertClass(CreateCharClass('c', 't').AppendClass(Ints('a', 'f')), 'a', 't');
 
-        assertClass(
-            cc('d', 'e').AppendNegatedClass(i('b', 'f')), 'd', 'e', 0, 'a', 'g', Unicode.MAX_RUNE);
+        AssertClass(
+            CreateCharClass('d', 'e').AppendNegatedClass(Ints('b', 'f')), 'd', 'e', 0, 'a', 'g', Unicode.MAX_RUNE);
     }
 
     [Test]
-    public void testAppendFoldedClass()
+    public void TestAppendFoldedClass()
     {
         // NB, local variable names use Unicode.
         // 0x17F is an old English long s (looks like an f) and folds to s.
         // 0x212A is the Kelvin symbol and folds to k.
         char ſ = (char)0x17F, K = (char)0x212A;
 
-        assertClass(cc().AppendFoldedClass(i('a', 'z')), s("akAK" + K + K + "lsLS" + ſ + ſ + "tzTZ"));
+        AssertClass(CreateCharClass().AppendFoldedClass(Ints('a', 'z')), StringToRunes("akAK" + K + K + "lsLS" + ſ + ſ + "tzTZ"));
 
-        assertClass(
-            cc('a', 'f').AppendFoldedClass(i('c', 't')), s("akCK" + K + K + "lsLS" + ſ + ſ + "ttTT"));
+        AssertClass(
+            CreateCharClass('a', 'f').AppendFoldedClass(Ints('c', 't')), StringToRunes("akCK" + K + K + "lsLS" + ſ + ſ + "ttTT"));
 
-        assertClass(cc('c', 't').AppendFoldedClass(i('a', 'f')), 'c', 't', 'a', 'f', 'A', 'F');
+        AssertClass(CreateCharClass('c', 't').AppendFoldedClass(Ints('a', 'f')), 'c', 't', 'a', 'f', 'A', 'F');
     }
 
     [Test]
-    public void testNegateClass()
+    public void TestNegateClass()
     {
-        assertClass(cc().NegateClass(), '\0', Unicode.MAX_RUNE);
-        assertClass(cc('A', 'Z').NegateClass(), '\0', '@', '[', Unicode.MAX_RUNE);
-        assertClass(cc('A', 'Z', 'a', 'z').NegateClass(), '\0', '@', '[', '`', '{', Unicode.MAX_RUNE);
+        AssertClass(CreateCharClass().NegateClass(), '\0', Unicode.MAX_RUNE);
+        AssertClass(CreateCharClass('A', 'Z').NegateClass(), '\0', '@', '[', Unicode.MAX_RUNE);
+        AssertClass(CreateCharClass('A', 'Z', 'a', 'z').NegateClass(), '\0', '@', '[', '`', '{', Unicode.MAX_RUNE);
     }
 
     [Test]
-    public void testAppendTable()
+    public void TestAppendTable()
     {
-        assertClass(
-            cc().AppendTable(new int[][] { i('a', 'z', 1), i('A', 'M', 4) }),
+        AssertClass(
+            CreateCharClass().AppendTable(new int[][] { Ints('a', 'z', 1), Ints('A', 'M', 4) }),
             'a',
             'z',
             'A',
@@ -201,31 +192,31 @@ public class CharClassTest
             'I',
             'M',
             'M');
-        assertClass(
-            cc().AppendTable(new int[][] { i('Ā', 'Į', 2) }),
-            s("ĀĀĂĂĄĄĆĆĈĈĊĊČČĎĎĐĐĒĒĔĔĖĖĘĘĚĚĜĜĞĞĠĠĢĢĤĤĦĦĨĨĪĪĬĬĮĮ"));
-        assertClass(
-            cc().AppendTable(new int[][] { i('Ā' + 1, 'Į' + 1, 2) }),
-            s("āāăăąąććĉĉċċččďďđđēēĕĕėėęęěěĝĝğğġġģģĥĥħħĩĩīīĭĭįį"));
+        AssertClass(
+            CreateCharClass().AppendTable(new int[][] { Ints('Ā', 'Į', 2) }),
+            StringToRunes("ĀĀĂĂĄĄĆĆĈĈĊĊČČĎĎĐĐĒĒĔĔĖĖĘĘĚĚĜĜĞĞĠĠĢĢĤĤĦĦĨĨĪĪĬĬĮĮ"));
+        AssertClass(
+            CreateCharClass().AppendTable(new int[][] { Ints('Ā' + 1, 'Į' + 1, 2) }),
+            StringToRunes("āāăăąąććĉĉċċččďďđđēēĕĕėėęęěěĝĝğğġġģģĥĥħħĩĩīīĭĭįį"));
 
-        assertClass(
-            cc().AppendNegatedTable(new int[][] { i('b', 'f', 1) }), 0, 'a', 'g', Unicode.MAX_RUNE);
+        AssertClass(
+            CreateCharClass().AppendNegatedTable(new int[][] { Ints('b', 'f', 1) }), 0, 'a', 'g', Unicode.MAX_RUNE);
     }
 
     [Test]
-    public void testAppendGroup()
+    public void TestAppendGroup()
     {
-        assertClass(cc().AppendGroup(CharGroup.PERL_GROUPS[("\\d")], false), '0', '9');
-        assertClass(
-            cc().AppendGroup(CharGroup.PERL_GROUPS[("\\D")], false), 0, '/', ':', Unicode.MAX_RUNE);
+        AssertClass(CreateCharClass().AppendGroup(CharGroup.PERL_GROUPS[("\\d")], false), '0', '9');
+        AssertClass(
+            CreateCharClass().AppendGroup(CharGroup.PERL_GROUPS[("\\D")], false), 0, '/', ':', Unicode.MAX_RUNE);
     }
 
     [Test]
-    public void testToString()
+    public void TestToString()
     {
-        assertEquals("[0xa 0xc-0x14]", cc(10, 10, 12, 20).ToString());
+        AssertEquals("[0xa 0xc-0x14]", CreateCharClass(10, 10, 12, 20).ToString());
     }
-    public static void assertEquals(string v1, string v2)
+    public static void AssertEquals(string v1, string v2)
     {
         Assert.AreEqual(v1, v2);
     }

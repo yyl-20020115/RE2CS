@@ -18,54 +18,24 @@ public class UNIXBufferedReader :TextReader
 
     private readonly TextReader r;
 
-    public UNIXBufferedReader(TextReader r)
-    {
-        this.r = r;
-    }
+    public UNIXBufferedReader(TextReader r) => this.r = r;
 
-    public string readLine()
-    {
-        return r.ReadLine();
-    }
+    public string? readLine() => r.ReadLine();
 
-    public void close()
-    {
-        r.Close();
-    }
+    public void close() => r.Close();
 
     // Unimplemented:
 
-    public int read(char[] buf, int off, int len)
-    {
-        return r.Read(buf, off, len);
-    }
+    public int read(char[] buf, int off, int len) => r.Read(buf, off, len);
 
-    public int read()
-    {
-        return r.Read();
-    }
+    public int read() => r.Read();
 
-    public long skip(long n)
-    {
-        throw new NotImplementedException();
-    }
-    public bool ready()
-    {
-        throw new NotImplementedException();
-    }
+    public long skip(long n) => throw new NotImplementedException();
+    public bool ready() => throw new NotImplementedException();
 
-    public bool markSupported()
-    {
-        throw new NotImplementedException();
-    }
+    public bool markSupported() => throw new NotImplementedException();
 
-    public void mark(int readAheadLimit)
-    {
-        throw new NotImplementedException();
-    }
+    public void mark(int readAheadLimit) => throw new NotImplementedException();
 
-    public void reset()
-    {
-        throw new NotImplementedException();
-    }
+    public void reset() => throw new NotImplementedException();
 }

@@ -142,7 +142,7 @@ public class SimplifyTest
     new string[]{"(?:(a){0})", "(?:)"},
     };
 
-    public static Object[] getParameters()
+    public static Object[] GetParameters()
     {
         return SIMPLIFY_TESTS;
     }
@@ -157,14 +157,14 @@ public class SimplifyTest
     }
 
     [Test]
-    public void testSimplify()
+    public void TestSimplify()
     {
         Regexp re = Parser.Parse(input, RE2.MATCH_NL | (RE2.PERL & ~RE2.ONE_LINE));
         string s = Simplifier.Simplify(re).ToString();
-        assertEquals(string.Format("simplify({0})", input), expected, s);
+        AssertEquals(string.Format("simplify({0})", input), expected, s);
     }
 
-    private void assertEquals(string message, string expected, string s)
+    private void AssertEquals(string message, string expected, string s)
     {
         Assert.AreEqual(expected,s,message);
     }
