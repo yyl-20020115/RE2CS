@@ -61,10 +61,6 @@ namespace RE2CS.Tests;
 [TestClass]
 public class ExecTest
 {
-    public static void AssertEquals(string v1, string v2)
-    {
-        Assert.AreEqual(v1, v2);
-    }
     public static void AssertEquals(List<string> v1, List<string> v2)
     {
         Assert.IsTrue(v1.SequenceEqual(v2));
@@ -328,7 +324,7 @@ public class ExecTest
             for (int i = 0; i < idx16.Length; ++i)
             {
                 idx8[i] = System.Text.Encoding.UTF8.GetBytes( 
-                    text.Substring(0, idx16[i])).Length;
+                    text.Substring(0, idx16[i]-0)).Length;
             }
             return idx8;
         }
@@ -364,7 +360,7 @@ public class ExecTest
             if (j == len || res[j] == ' ')
             {
                 // Process a single pair.  - means no submatch.
-                string pair = res.Substring(i, j);
+                string pair = res.Substring(i, j-i);
                 if (pair.Equals("-"))
                 {
                     _out[n++] = -1;
@@ -378,7 +374,7 @@ public class ExecTest
                         Fail(string.Format("{0}:{1}: invalid pair {2}", file, lineno, pair));
                     }
                     int lo = -1, hi = -2;
-                    int.TryParse(pair.Substring(0, k), out hi);
+                    int.TryParse(pair.Substring(0, k-0), out hi);
                     int.TryParse(pair.Substring(k + 1), out lo);
                     if (lo > hi)
                     {
@@ -796,7 +792,7 @@ public class ExecTest
             { // [sic]
                 throw new Exception("parse error: missing '" + end + "'");
             }
-            string num = s.Substring(0, i);
+            string num = s.Substring(0, i-0);
             if (!num.Equals("?"))
             {
                 result.Add(int.TryParse(num,out var v)?v:-1); // (may throw)

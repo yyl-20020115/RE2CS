@@ -14,7 +14,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RE2CS.Tests;
 
-[TestClass]
 public class ApiTestUtils
 {
 

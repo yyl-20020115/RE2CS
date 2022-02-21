@@ -335,11 +335,11 @@ public class Regexp
                 break;
             case Op.LITERAL:
             case Op.CHAR_CLASS:
-                hashcode += 31 * Utils.GetHashCode(runes);
+                hashcode += 31 * Utils.GetHashCode<int>(runes);
                 break;
             case Op.ALTERNATE:
             case Op.CONCAT:
-                hashcode += 31 * Utils.GetHashCode(subs);
+                hashcode += 31 * Utils.GetHashCode<Regexp>(subs);
                 break;
             case Op.STAR:
             case Op.PLUS:

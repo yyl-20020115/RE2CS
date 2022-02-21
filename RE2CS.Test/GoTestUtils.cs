@@ -35,7 +35,7 @@ public static class GoTestUtils
         {
             idx8[i] =
                 idx16[i] == -1 ? -1 :
-                    Encoding.UTF8.GetBytes(text.Substring(0, idx16[i])).Length; // yikes
+                    Encoding.UTF8.GetBytes(text.Substring(0, idx16[i]-0)).Length; // yikes
         }
         return idx8;
     }

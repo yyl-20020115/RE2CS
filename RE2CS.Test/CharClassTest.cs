@@ -222,5 +222,4 @@ public class CharClassTest
     {
         Assert.AreEqual(v1, v2);
     }
-
 }

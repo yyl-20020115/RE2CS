@@ -225,7 +225,8 @@ public static class Utils
         return op;
     }
 
-    public static int GetHashCode(IStructuralEquatable s) => s.GetHashCode(EqualityComparer<int>.Default);
+    public static int GetHashCode<T>(IStructuralEquatable s)
+        => s.GetHashCode(EqualityComparer<T>.Default);
 
     public static int CodePointBefore(this string s, int i)
     {

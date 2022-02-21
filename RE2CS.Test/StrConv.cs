@@ -164,7 +164,7 @@ public static class Strconv
         if (quote != s[n - 1]) {
             throw new InvalidOperationException("quotes don't match");
         }
-        s = s.Substring(1, n - 1);
+        s = s.Substring(1, n - 1 - 1);
         if (quote == '`')
         {
             if (s.IndexOf('`') >= 0)

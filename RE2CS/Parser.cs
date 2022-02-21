@@ -89,10 +89,9 @@ public class Parser
 
     private Regexp[] PopToPseudo()
     {
-        List<Regexp> result = new List<Regexp>();
-        int i = stack.Count;
-        while (i > 0 && ! Regexp.IsPseudo(stack.Peek().op))
-        {
+        var result = new List<Regexp>();
+        while (stack.Count > 0 && ! Regexp.IsPseudo(stack.Peek().op))
+        {           
             result.Add(stack.Pop());
         }
         result.Reverse();
@@ -852,7 +851,7 @@ public class Parser
 
         // Returns the Substring from |beforePos| to the current position.
         // |beforePos| must have been previously returned by |pos()|.
-        public string From(int beforePos) => str.Substring(beforePos, _pos);
+        public string From(int beforePos) => str.Substring(beforePos, _pos - beforePos);
 
         public override string ToString() => Rest();
     }
@@ -860,7 +859,8 @@ public class Parser
     /**
      * Parse regular expression pattern {@var pattern} with mode flags {@var flags}.
      */
-    public static Regexp Parse(string pattern, int flags) => new Parser(pattern, flags).ParseInternal();
+    public static Regexp Parse(string pattern, int flags) 
+        => new Parser(pattern, flags).ParseInternal();
 
     private Regexp ParseInternal()
     {
@@ -1010,7 +1010,7 @@ public class Parser
                                         int i = lit.IndexOf("\\E");
                                         if (i >= 0)
                                         {
-                                            lit = lit.Substring(0, i);
+                                            lit = lit.Substring(0, i - 0);
                                         }
                                         t.SkipString(lit);
                                         t.SkipString("\\E");
@@ -1031,13 +1031,13 @@ public class Parser
                             }
                         }
 
-                        Regexp re = NewRegexp(Regexp.Op.CHAR_CLASS);
+                        var re = NewRegexp(Regexp.Op.CHAR_CLASS);
                         re.flags = flags;
 
                         // Look for Unicode character group like \p{Han}
                         if (t.LookingAt("\\p") || t.LookingAt("\\P"))
                         {
-                            CharClass cc2 = new CharClass();
+                            var cc2 = new CharClass();
                             if (ParseUnicodeClass(t, cc2))
                             {
                                 re.runes = cc2.ToArray();
@@ -1047,7 +1047,7 @@ public class Parser
                         }
 
                         // Perl character class escape.
-                        CharClass cc = new CharClass();
+                        var cc = new CharClass();
                         if (ParsePerlClassEscape(t, cc))
                         {
                             re.runes = cc.ToArray();
@@ -1166,13 +1166,13 @@ public class Parser
             {
                 throw new PatternSyntaxException(ERR_INVALID_NAMED_CAPTURE, s);
             }
-            string name = s.Substring(4, end); // "name"
+            string name = s.Substring(4, end-4); // "name"
             t.SkipString(name);
             t.Skip(5); // "(?P<>"
             if (!IsValidCaptureName(name))
             {
                 throw new PatternSyntaxException(
-                    ERR_INVALID_NAMED_CAPTURE, s.Substring(0, end)); // "(?P<name>"
+                    ERR_INVALID_NAMED_CAPTURE, s.Substring(0, end - 0)); // "(?P<name>"
             }
             // Like ordinary capture, but named.
             Regexp re = Op(Regexp.Op.LEFT_PAREN);
@@ -1398,34 +1398,41 @@ public class Parser
         // can merge into a single char class.
         int n = stack.Count;
 
-        var re1 = stack.Pop();
-        var re2 = stack.Pop();
-        var re3 = stack.Peek();
-        if (n >= 3
-            && re2.op == Regexp.Op.VERTICAL_BAR
-            && IsCharClass(re1)
-            && IsCharClass(re3))
+        Regexp re1 = null;
+        Regexp re2 = null;
+        Regexp re3 = null;
+        if (n >= 3)
         {
-            // Make re3 the more complex of the two.
-            if (re1.op > re3.op)
+            re1 = stack.Pop();
+            re2 = stack.Pop();
+            re3 = stack.Peek();
+
+            if (re2.op == Regexp.Op.VERTICAL_BAR
+                && IsCharClass(re1)
+                && IsCharClass(re3))
             {
-                var tmp = re3;
-                re3 = re1;
-                re1 = tmp;
-                stack.Pop();
-                stack.Push(re3);
-                //stack.set(n - 3, re3);
+                // Make re3 the more complex of the two.
+                if (re1.op > re3.op)
+                {
+                    var tmp = re3;
+                    re3 = re1;
+                    re1 = tmp;
+                    stack.Pop();
+                    stack.Push(re3);
+                    //stack.set(n - 3, re3);
+                }
+                stack.Push(re2);
+                stack.Push(re1);
+
+                MergeCharClass(re3, re1);
+                Reuse(re1);
+                Pop();
+                return true;
             }
             stack.Push(re2);
             stack.Push(re1);
 
-            MergeCharClass(re3, re1);
-            Reuse(re1);
-            Pop();
-            return true;
         }
-        stack.Push(re2);
-        stack.Push(re1);
 
         if (n >= 2)
         {
@@ -1674,7 +1681,7 @@ public class Parser
         if (i < 0) {
             return false;
         }
-        string name = cls.Substring(0, i + 2); // "[:alnum:]"
+        string name = cls.Substring(0, i + 2-0); // "[:alnum:]"
         t.SkipString(name);
         var g = CharGroup.POSIX_GROUPS[name];
         if (g == null)
@@ -1752,7 +1759,7 @@ public class Parser
                 t.RewindTo(startPos);
                 throw new PatternSyntaxException(ERR_INVALID_CHAR_RANGE, t.Rest());
             }
-            name = rest.Substring(0, end); // e.g. "Han"
+            name = rest.Substring(0, end - 0); // e.g. "Han"
             t.SkipString(name);
             t.Skip(1); // '}'
                        // Don't use skip(end) because it assumes UTF-16 coding, and

@@ -414,7 +414,7 @@ public class RE2
             }
 
             // Copy the unmatched characters before this match.
-            builder.Append(src.Substring(lastMatchEnd, a[0]));
+            builder.Append(src.Substring(lastMatchEnd, a[0] - lastMatchEnd));
 
             // Now insert a copy of the replacement string, but not for a
             // match of the empty string immediately after another match.
@@ -428,7 +428,7 @@ public class RE2
             // though).
             if (a[1] > lastMatchEnd || a[0] == 0)
             {
-                builder.Append(repl(src.Substring(a[0], a[1])));
+                builder.Append(repl(src.Substring(a[0], a[1]-a[0])));
                 // Increment the replace count.
                 ++numReplaces;
             }
@@ -646,7 +646,7 @@ public class RE2
         {
             return "";
         }
-        return s.Substring(a[0], a[1]);
+        return s.Substring(a[0], a[1]-a[0]);
     }
 
     /**
@@ -725,7 +725,7 @@ public class RE2
         {
             if (2 * i < a.Length && a[2 * i] >= 0)
             {
-                ret[i] = s.Substring(a[2 * i], a[2 * i + 1]);
+                ret[i] = s.Substring(a[2 * i], a[2 * i + 1]-a[2*i]);
             }
         }
         return ret;
@@ -808,7 +808,7 @@ public class RE2
         List<string> result = new();
         AllMatches(
             MachineInput.FromUTF16(s),
-            n, (int[] match) => result.Add(s.Substring(match[0],match[1]))
+            n, (int[] match) => result.Add(s.Substring(match[0],match[1]-match[0]))
         );
         if (result.Count == 0)
         {
@@ -917,7 +917,7 @@ public class RE2
                 {
                     if (match[2 * j] >= 0)
                     {
-                        slice[j] = s.Substring(match[2 * j], match[2 * j + 1]);
+                        slice[j] = s.Substring(match[2 * j], match[2 * j + 1]-match[2*j]);
                     }
                 }
                 result.Add(slice);

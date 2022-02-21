@@ -160,7 +160,7 @@ public class Matcher
      * @param group the group name
      * @throws ArgumentException if no group with that name exists
      */
-    public int start(string group)
+    public int Start(string group)
     {
         if (!_namedGroups.TryGetValue(group,out var g))
         {
@@ -355,7 +355,7 @@ public class Matcher
         }
 
         // This is fast for both StringBuilder and string.
-        return _matcherInput.AsCharSequence().Substring(start, end);
+        return _matcherInput.AsCharSequence().Substring(start, end - start);
     }
 
     /** Helper for Pattern: return input length. */
@@ -463,7 +463,7 @@ public class Matcher
             {
                 if (last < i)
                 {
-                    builder.Append(replacement.Substring(last, i));
+                    builder.Append(replacement.Substring(last, i-last));
                 }
                 i++;
                 last = i;
@@ -477,7 +477,7 @@ public class Matcher
                     int n = c - '0';
                     if (last < i)
                     {
-                        builder.Append(replacement.Substring(last, i));
+                        builder.Append(replacement.Substring(last, i - last));
                     }
                     for (i += 2; i < m; i++)
                     {
@@ -505,7 +505,7 @@ public class Matcher
                 {
                     if (last < i)
                     {
-                        builder.Append(replacement.Substring(last, i));
+                        builder.Append(replacement.Substring(last, i - last));
                     }
                     i++; // skip {
                     int j = i + 1;
@@ -519,7 +519,7 @@ public class Matcher
                     {
                         throw new ArgumentException("named capture group is missing trailing '}'");
                     }
-                    string groupName = replacement.Substring(i + 1, j);
+                    string groupName = replacement.Substring(i + 1, j-(i+1));
                     builder.Append(Group(groupName));
                     last = j + 1;
                 }

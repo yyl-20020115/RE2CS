@@ -540,16 +540,16 @@ public class MatcherTest
         AssertEquals("fbbarrrrr", m.Group("baz"));
         AssertEquals("bbarrrrr", m.Group("foo"));
         AssertEquals("rrrrr", m.Group("another"));
-        AssertEquals(0, m.start("baz"));
-        AssertEquals(1, m.start("foo"));
-        AssertEquals(4, m.start("another"));
+        AssertEquals(0, m.Start("baz"));
+        AssertEquals(1, m.Start("foo"));
+        AssertEquals(4, m.Start("another"));
         AssertEquals(9, m.End("baz"));
         AssertEquals(9, m.End("foo"));
         AssertEquals("bag", m.Group("bag"));
-        AssertEquals(9, m.start("bag"));
+        AssertEquals(9, m.Start("bag"));
         AssertEquals(12, m.End("bag"));
         AssertNull(m.Group("nomatch"));
-        AssertEquals(-1, m.start("nomatch"));
+        AssertEquals(-1, m.Start("nomatch"));
         AssertEquals(-1, m.End("nomatch"));
         AssertEquals("whatbbarrrrreverbag", AppendReplacement(m, "what$2ever${bag}"));
 
@@ -607,12 +607,12 @@ public class MatcherTest
         {
             Matcher matcher = Pattern.Compile(pattern).Matcher(text);
             AssertTrue(matcher.Find());
-            AssertEquals("aaa", text.Substring(matcher.Start(), matcher.End()));
+            AssertEquals("aaa", text.Substring(matcher.Start(), matcher.End()-matcher.Start()));
         }
         {
             Matcher matcher = Pattern.Compile(pattern, Pattern.LONGEST_MATCH).Matcher(text);
             AssertTrue(matcher.Find());
-            AssertEquals("aaa bbb", text.Substring(matcher.Start(), matcher.End()));
+            AssertEquals("aaa bbb", text.Substring(matcher.Start(), matcher.End()-matcher.Start()));
         }
     }
 }

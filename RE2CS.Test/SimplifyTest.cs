@@ -13,7 +13,6 @@ namespace RE2CS.Tests;
 [TestClass]
 public class SimplifyTest
 {
-
     private static readonly string[][] SIMPLIFY_TESTS = new string[][]{
     // Already-simple constructs
     new string[]{"a", "a"},
