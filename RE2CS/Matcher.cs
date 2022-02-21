@@ -527,7 +527,7 @@ public class Matcher
         }
         if (last < m)
         {
-            builder.Append(replacement, last, m);
+            builder.Append(replacement, last, m - last);
         }
     }
 

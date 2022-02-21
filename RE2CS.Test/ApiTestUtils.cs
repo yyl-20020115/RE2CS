@@ -9,6 +9,7 @@
  *
  * @author afrozm@google.com (Afroz Mohiuddin)
  */
+using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -24,12 +25,12 @@ public class ApiTestUtils
     public static void TestMatches(string regexp, string match, string nonMatch)
     {
         string errorString = "Pattern with regexp: " + regexp;
-        AssertTrue(
-            "JDK " + errorString + " doesn't match: " + match,
-            System.Text.RegularExpressions.Regex.IsMatch(regexp, match));
-        AssertFalse(
-            "JDK " + errorString + " matches: " + nonMatch,
-            System.Text.RegularExpressions.Regex.IsMatch(regexp, nonMatch));
+        //AssertTrue(
+        //    "JDK " + errorString + " doesn't match: " + match,
+        //    System.Text.RegularExpressions.Regex.IsMatch(regexp, match));
+        //AssertFalse(
+        //    "JDK " + errorString + " matches: " + nonMatch,
+        //    System.Text.RegularExpressions.Regex.IsMatch(regexp, nonMatch));
         AssertTrue(errorString + " doesn't match: " + match, Pattern.Matches(regexp, match));
         AssertFalse(errorString + " matches: " + nonMatch, Pattern.Matches(regexp, nonMatch));
 
@@ -79,10 +80,11 @@ public class ApiTestUtils
 
     public static void TestMatcherNotMatches(string regexp, string nonMatch)
     {
-        var p = new System.Text.RegularExpressions.Regex(regexp);
-        AssertFalse(
-            "JDK Pattern with regexp: " + regexp + " matches: " + nonMatch,
-            p.IsMatch(nonMatch));
+        //var p = new System.Text.RegularExpressions.Regex(regexp);
+        //AssertFalse(
+        //    "JDK Pattern with regexp: " + regexp + " matches: " + nonMatch,
+        //    p.IsMatch(nonMatch));
+
         Pattern pr = Pattern.Compile(regexp);
         AssertFalse(
             "Pattern with regexp: " + regexp + " matches: " + nonMatch, pr.Matcher(nonMatch).Matches());
@@ -119,10 +121,11 @@ public class ApiTestUtils
 
     public static void TestSplit(string regexp, string text, int limit, string[] expected)
     {
-        var p = new System.Text.RegularExpressions.Regex(regexp);
-        Assert.AreEqual( p.Split(text, limit),expected);
-
-        Assert.AreEqual(Pattern.Compile(regexp).Split(text, limit),expected);
+        //var p = new System.Text.RegularExpressions.Regex(regexp);
+        //Assert.AreEqual( p.Split(text, limit),expected);
+        //Assert.IsTrue(Enumerable.SequenceEqual(p.Split(text, limit), expected));
+        //Assert.AreEqual(Pattern.Compile(regexp).Split(text, limit),expected);
+        Assert.IsTrue(Enumerable.SequenceEqual(Pattern.Compile(regexp).Split(text, limit), expected));
     }
 
     // Helper methods for RE2Matcher's test.
@@ -141,11 +144,11 @@ public class ApiTestUtils
         }
 
         // JDK's
-        System.Text.RegularExpressions.Regex pj = new (regex);
+        //System.Text.RegularExpressions.Regex pj = new (regex);
 
-        replaced = pj.Replace(orig, repl);
+        //replaced = pj.Replace(orig, repl);
 
-        AssertEquals(actual, replaced);
+        //AssertEquals(actual, replaced);
     }
 
     // Tests that both RE2 and JDK's Matchers do the same replaceFist.
@@ -162,10 +165,10 @@ public class ApiTestUtils
 
         // JDK's
 
-        System.Text.RegularExpressions.Regex pj = new(regex);
+        //System.Text.RegularExpressions.Regex pj = new(regex);
 
-        replaced = pj.Replace(orig, repl,1);
-        AssertEquals(actual, replaced);
+        //replaced = pj.Replace(orig, repl,1);
+        //AssertEquals(actual, replaced);
     }
 
     // Tests that both RE2 and JDK's Patterns/Matchers give the same groupCount.
@@ -197,6 +200,10 @@ public class ApiTestUtils
     }
     public static void AssertEquals(string v1, string v2)
     {
+        if(v1 != v2)
+        {
+
+        }
         Assert.AreEqual(v1, v2);
     }
 
