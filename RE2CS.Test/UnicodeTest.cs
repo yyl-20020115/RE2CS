@@ -4,15 +4,15 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RE2CS.Tests;
 
-[TestFixture]
+[TestClass]
 public class UnicodeTest
 {
 
-    [Test]
+    [TestMethod]
     public void TestFoldConstants()
     {
         int last = -1;

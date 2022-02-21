@@ -10,11 +10,11 @@
  * @author afrozm@google.com (Afroz Mohiuddin)
  */
 using System.Text;
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RE2CS.Tests;
 
-[TestFixture]
+[TestClass]
 public class ApiTestUtils
 {
 

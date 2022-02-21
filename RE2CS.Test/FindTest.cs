@@ -10,11 +10,14 @@
 // The original Go function names are documented because of the
 // potential for confusion arising from systematic renamings
 // (e.g. "string" -> "", "" -> "UTF8", "Test" -> "test", etc.)
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RE2CS.Tests;
 
-[TestFixture]
+[TestClass]
 public class FindTest
 {
 
@@ -265,7 +268,7 @@ public class FindTest
 
     // First the simple cases.
 
-    [Test]
+    [TestMethod]
     public void TestFindUTF8()
     {
         RE2 re = RE2.Compile(test.pat);
@@ -301,7 +304,7 @@ public class FindTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestFind()
     {
         string result = RE2.Compile(test.pat).Find(test.text);
@@ -368,14 +371,14 @@ public class FindTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestFindUTF8Index()
     {
         TestFindIndexCommon(
             "testFindUTF8Index", test, RE2.Compile(test.pat).FindUTF8Index(test.textUTF8), true);
     }
 
-    [Test]
+    [TestMethod]
     public void TestFindIndex()
     {
         int[] result = RE2.Compile(test.pat).FindIndex(test.text);
@@ -384,7 +387,7 @@ public class FindTest
 
     // Now come the simple All cases.
 
-    [Test]
+    [TestMethod]
     public void TestFindAllUTF8()
     {
         List<byte[]> result = RE2.Compile(test.pat).FindAllUTF8(test.textUTF8, -1);
@@ -428,7 +431,7 @@ public class FindTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestFindAll()
     {
         List<string> result = RE2.Compile(test.pat).FindAll(test.text, -1);
@@ -517,7 +520,7 @@ public class FindTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestFindAllUTF8Index()
     {
         TestFindAllIndexCommon(
@@ -527,7 +530,7 @@ public class FindTest
             true);
     }
 
-    [Test]
+    [TestMethod]
     public void TestFindAllIndex()
     {
         TestFindAllIndexCommon(
@@ -575,7 +578,7 @@ public class FindTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestFindUTF8Submatch()
     {
         byte[][] result = RE2.Compile(test.pat).FindUTF8Submatch(test.textUTF8);
@@ -641,7 +644,7 @@ public class FindTest
     }
 
     // (Go: TestFindStringSubmatch)
-    [Test]
+    [TestMethod]
     public void TestFindSubmatch()
     {
         string[] result = RE2.Compile(test.pat).FindSubmatch(test.text);
@@ -720,7 +723,7 @@ public class FindTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestFindUTF8SubmatchIndex()
     {
         TestFindSubmatchIndexCommon(
@@ -731,7 +734,7 @@ public class FindTest
     }
 
     // (Go: TestFindStringSubmatchIndex)
-    [Test]
+    [TestMethod]
     public void TestFindSubmatchIndex()
     {
         TestFindSubmatchIndexCommon(
@@ -744,7 +747,7 @@ public class FindTest
     // Now come the monster AllSubmatch cases.
 
     // (Go: TestFindAllSubmatch)
-    [Test]
+    [TestMethod]
     public void TestFindAllUTF8Submatch()
     {
         List<byte[][]> result = RE2.Compile(test.pat).FindAllUTF8Submatch(test.textUTF8, -1);
@@ -776,7 +779,7 @@ public class FindTest
     }
 
     // (Go: TestFindAllStringSubmatch)
-    [Test]
+    [TestMethod]
     public void TestFindAllSubmatch()
     {
         List<string[]> result = RE2.Compile(test.pat).FindAllSubmatch(test.text, -1);
@@ -848,7 +851,7 @@ public class FindTest
     }
 
     // (Go: TestFindAllSubmatchIndex)
-    [Test]
+    [TestMethod]
     public void TestFindAllUTF8SubmatchIndex()
     {
         TestFindAllSubmatchIndexCommon(
@@ -859,7 +862,7 @@ public class FindTest
     }
 
     // (Go: TestFindAllStringSubmatchIndex)
-    [Test]
+    [TestMethod]
     public void TestFindAllSubmatchIndex()
     {
         TestFindAllSubmatchIndexCommon(

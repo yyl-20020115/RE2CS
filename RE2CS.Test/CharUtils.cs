@@ -1,4 +1,6 @@
-﻿namespace RE2CS.Tests;
+﻿using System;
+
+namespace RE2CS.Tests;
 
 public static class CharUtils
 {

@@ -4,12 +4,13 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace RE2CS.Tests;
 
 
-[TestFixture]
+[TestClass]
 public class RegexpHashcodeEqualsTest
 {
     public static IEnumerable<object[]> TestCases()
@@ -38,7 +39,7 @@ public class RegexpHashcodeEqualsTest
 
     public int mode;
 
-    [Test]
+    [TestMethod]
     public void TestEquals()
     {
         Regexp ra = Parser.Parse(a, mode);

@@ -4,11 +4,13 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Linq;
 
 namespace RE2CS.Tests;
 
-[TestFixture]
+[TestClass]
 public class CharClassTest
 {
 
@@ -32,7 +34,7 @@ public class CharClassTest
                     + actual);
         }
     }
-    [Test]
+    [TestMethod]
     public void TestCleanClass()
     {
         AssertClass(CreateCharClass().CleanClass());
@@ -97,7 +99,7 @@ public class CharClassTest
         AssertClass(CreateCharClass(50, Unicode.MAX_RUNE).CleanClass(), 50, Unicode.MAX_RUNE);
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendLiteral()
     {
         AssertClass(CreateCharClass().AppendLiteral('a', 0), 'a', 'a');
@@ -117,7 +119,7 @@ public class CharClassTest
         AssertClass(CreateCharClass('a', 'f').AppendLiteral(' ', RE2.FOLD_CASE), 'a', 'f', ' ', ' ');
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendFoldedRange()
     {
         // These cases are derived directly from the program logic:
@@ -142,7 +144,7 @@ public class CharClassTest
             0x1044f); // uppercase Deseret, abutting.
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendClass()
     {
         AssertClass(CreateCharClass().AppendClass(Ints('a', 'z')), 'a', 'z');
@@ -153,7 +155,7 @@ public class CharClassTest
             CreateCharClass('d', 'e').AppendNegatedClass(Ints('b', 'f')), 'd', 'e', 0, 'a', 'g', Unicode.MAX_RUNE);
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendFoldedClass()
     {
         // NB, local variable names use Unicode.
@@ -169,7 +171,7 @@ public class CharClassTest
         AssertClass(CreateCharClass('c', 't').AppendFoldedClass(Ints('a', 'f')), 'c', 't', 'a', 'f', 'A', 'F');
     }
 
-    [Test]
+    [TestMethod]
     public void TestNegateClass()
     {
         AssertClass(CreateCharClass().NegateClass(), '\0', Unicode.MAX_RUNE);
@@ -177,7 +179,7 @@ public class CharClassTest
         AssertClass(CreateCharClass('A', 'Z', 'a', 'z').NegateClass(), '\0', '@', '[', '`', '{', Unicode.MAX_RUNE);
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendTable()
     {
         AssertClass(
@@ -203,7 +205,7 @@ public class CharClassTest
             CreateCharClass().AppendNegatedTable(new int[][] { Ints('b', 'f', 1) }), 0, 'a', 'g', Unicode.MAX_RUNE);
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendGroup()
     {
         AssertClass(CreateCharClass().AppendGroup(CharGroup.PERL_GROUPS[("\\d")], false), '0', '9');
@@ -211,7 +213,7 @@ public class CharClassTest
             CreateCharClass().AppendGroup(CharGroup.PERL_GROUPS[("\\D")], false), 0, '/', ':', Unicode.MAX_RUNE);
     }
 
-    [Test]
+    [TestMethod]
     public void TestToString()
     {
         AssertEquals("[0xa 0xc-0x14]", CreateCharClass(10, 10, 12, 20).ToString());

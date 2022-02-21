@@ -4,7 +4,8 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Text;
 
 namespace RE2CS.Tests;
@@ -15,18 +16,18 @@ namespace RE2CS.Tests;
  *
  * @author afrozm@google.com (Afroz Mohiuddin)
  */
-[TestFixture]
+[TestClass]
 public class MatcherTest
 {
 
-    [Test]
+    [TestMethod]
     public void TestLookingAt()
     {
         ApiTestUtils.VerifyLookingAt("abcdef", "abc", true);
         ApiTestUtils.VerifyLookingAt("ab", "abc", false);
     }
 
-    [Test]
+    [TestMethod]
     public void TestMatches()
     {
         ApiTestUtils.TestMatcherMatches("ab+c", "abbbc", "cbbba");
@@ -35,7 +36,7 @@ public class MatcherTest
         ApiTestUtils.TestMatcherMatches("ab+c", "abbbc", "abbcabc");
     }
 
-    [Test]
+    [TestMethod]
     public void TestReplaceAll()
     {
         ApiTestUtils.TestReplaceAll(
@@ -65,7 +66,7 @@ public class MatcherTest
         ApiTestUtils.TestReplaceAll("aab", "a*?", "<$0>", "<>a<>a<>b<>");
     }
 
-    [Test]
+    [TestMethod]
     public void TestReplaceFirst()
     {
         ApiTestUtils.TestReplaceFirst(
@@ -92,13 +93,13 @@ public class MatcherTest
         ApiTestUtils.TestReplaceFirst("aab", "a*?", "<$0>", "<>aab");
     }
 
-    [Test]
+    [TestMethod]
     public void TestGroupCount()
     {
         ApiTestUtils.TestGroupCount("(a)(b(c))d?(e)", 4);
     }
 
-    [Test]
+    [TestMethod]
     public void TestGroup()
     {
         // ApiTestUtils.testGroup("xabdez", "(a)(b(c)?)d?(e)", new string[] {"abde", "a", "b", null, "e"});
@@ -116,7 +117,7 @@ public class MatcherTest
             });
     }
 
-    [Test]
+    [TestMethod]
     public void TestFind()
     {
         ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 0, "abcde");
@@ -129,7 +130,7 @@ public class MatcherTest
         ApiTestUtils.TestFindNoMatch("abcdefgh", ".*[aeiou]", 7);
     }
 
-    [Test]
+    [TestMethod]
     public void TestInvalidFind()
     {
         try
@@ -143,7 +144,7 @@ public class MatcherTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestInvalidReplacement()
     {
         try
@@ -168,7 +169,7 @@ public class MatcherTest
         Assert.Fail();
     }
 
-    [Test]
+    [TestMethod]
     public void TestInvalidGroupNoMatch()
     {
         try
@@ -183,7 +184,7 @@ public class MatcherTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestInvalidGroupOutOfRange()
     {
         try
@@ -201,7 +202,7 @@ public class MatcherTest
     /**
      * Test the NullReferenceException is thrown on null input.
      */
-    [Test]
+    [TestMethod]
     public void TestThrowsOnNullInputReset()
     {
         // null in constructor.
@@ -217,7 +218,7 @@ public class MatcherTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestThrowsOnNullInputCtor()
     {
         // null in constructor.
@@ -236,7 +237,7 @@ public class MatcherTest
     /**
      * Test that InvalidOperationException is thrown if start/end are called before calling find
      */
-    [Test]
+    [TestMethod]
     public void TestStartEndBeforeFind()
     {
         try
@@ -255,7 +256,7 @@ public class MatcherTest
      * Test for b/6891357. Basically matches should behave like find when it comes to updating the
      * information of the match.
      */
-    [Test]
+    [TestMethod]
     public void TestMatchesUpdatesMatchInformation()
     {
         Matcher m = Pattern.Compile("a+").Matcher("aaa");
@@ -277,7 +278,7 @@ public class MatcherTest
     /**
      * Test for b/6891133. Test matches in case of alternation.
      */
-    [Test]
+    [TestMethod]
     public void TestAlternationMatches()
     {
         string s = "123:foo";
@@ -321,7 +322,7 @@ public class MatcherTest
      * Test for variable Length encoding, test whether RE2's match function gets the required
      * parameter based on UTF16 codes and not chars and Runes.
      */
-    [Test]
+    [TestMethod]
     public void TestMatchEndUTF16()
     {
         // Latin alphabetic chars such as these 5 lower-case, acute vowels have multi-byte UTF-8
@@ -341,7 +342,7 @@ public class MatcherTest
         HelperTestMatchEndUTF16(utf16, 3, 6);
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendTail_StringBuffer()
     {
         Pattern p = Pattern.Compile("cat");
@@ -356,7 +357,7 @@ public class MatcherTest
         AssertEquals("one dog two dogs in the yards in the yard", sb.ToString());
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendTail_StringBuilder()
     {
         Pattern p = Pattern.Compile("cat");
@@ -371,7 +372,7 @@ public class MatcherTest
         AssertEquals("one dog two dogs in the yards in the yard", sb.ToString());
     }
 
-    [Test]
+    [TestMethod]
     public void TestResetOnFindInt_StringBuffer()
     {
         StringBuilder buffer;
@@ -390,7 +391,7 @@ public class MatcherTest
         AssertEquals("2nd time", "zzfoo", buffer.ToString());
     }
 
-    [Test]
+    [TestMethod]
     public void TestResetOnFindInt_StringBuilder()
     {
         StringBuilder buffer;
@@ -414,7 +415,7 @@ public class MatcherTest
         Assert.AreEqual(v1, v2, message);
     }
 
-    [Test]
+    [TestMethod]
     public void TestEmptyReplacementGroups_StringBuffer()
     {
         var buffer = new StringBuilder();
@@ -447,7 +448,7 @@ public class MatcherTest
         AssertEquals("N", buffer.ToString());
     }
 
-    [Test]
+    [TestMethod]
     public void TestEmptyReplacementGroups_StringBuilder()
     {
         StringBuilder buffer = new StringBuilder();
@@ -481,7 +482,7 @@ public class MatcherTest
     }
 
     // This example is documented in the com.google.re2j package.html.
-    [Test]
+    [TestMethod]
     public void TestDocumentedExample()
     {
         Pattern p = Pattern.Compile("b(an)*(.)");
@@ -509,7 +510,7 @@ public class MatcherTest
         Assert.IsFalse(v);
     }
 
-    [Test]
+    [TestMethod]
     public void TestMutableCharSequence()
     {
         Pattern p = Pattern.Compile("b(an)*(.)");
@@ -528,7 +529,7 @@ public class MatcherTest
 
     
 
-    [Test]
+    [TestMethod]
     public void TestNamedGroups()
     {
         Pattern p =
@@ -570,7 +571,7 @@ public class MatcherTest
 
     private void AssertNull(string? v)
     {
-        Assert.Null(v);
+        Assert.IsNull(v);
     }
 
     private string AppendReplacement(Matcher m, string replacement)
@@ -590,7 +591,7 @@ public class MatcherTest
     // pattern.find(input) is true matcher.group(0) will contain "22 b". When retrieving group(1) from this matcher,
     // RE2J re-matches the group, but only considers "22 b" as the input. If it incorrectly treats 'b' as END_OF_LINE
     // and END_OF_TEXT, then group(1) will contain "22 b" when it should actually contain "22".
-    [Test]
+    [TestMethod]
     public void TestGroupZeroWidthAssertions()
     {
         Matcher m = Pattern.Compile("(\\d{2} ?(\\d|[a-z])?)($|[^a-zA-Z])").Matcher("22 bored");
@@ -598,7 +599,7 @@ public class MatcherTest
         Assert.AreEqual(m.Group(1), "22");
     }
 
-    [Test]
+    [TestMethod]
     public void TestPatternLongestMatch()
     {
         string pattern = "(?:a+)|(?:a+ b+)";

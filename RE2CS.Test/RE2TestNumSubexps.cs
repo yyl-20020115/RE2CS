@@ -4,11 +4,11 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RE2CS.Tests;
 
-[TestFixture]
+[TestClass]
 public class RE2TestNumSubexps
 {
     private static readonly string[][] NUM_SUBEXP_CASES = {
@@ -24,10 +24,7 @@ public class RE2TestNumSubexps
     new string[]{"(.*)(\\(a\\)b)(.*)a", "3"},
     };
 
-    public static string[][] TestCases()
-    {
-        return NUM_SUBEXP_CASES;
-    }
+    public static string[][] TestCases() => NUM_SUBEXP_CASES;
 
     private readonly string input;
     private readonly int expected;
@@ -38,7 +35,7 @@ public class RE2TestNumSubexps
         int.TryParse(expected, out this.expected);
     }
 
-    [Test]
+    [TestMethod]
     public void TestNumSubexp()
     {
         AssertEquals(

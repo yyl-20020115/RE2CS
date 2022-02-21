@@ -9,6 +9,7 @@
 
 // While this is a port of production Go source, it is currently
 // only used by ExecTest, which is why it appears beneath javatests/.
+using System;
 using System.Text;
 namespace RE2CS.Tests;
 

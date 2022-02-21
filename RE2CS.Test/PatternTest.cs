@@ -4,8 +4,8 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
-using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace RE2CS.Tests;
 /**
@@ -14,10 +14,11 @@ namespace RE2CS.Tests;
  *
  * @author afrozm@google.com (Afroz Mohiuddin)
  */
+[TestClass]
 public class PatternTest
 {
 
-    [Test]
+    [TestMethod]
     public void TestCompile()
     {
         Pattern p = Pattern.Compile("abc");
@@ -25,7 +26,7 @@ public class PatternTest
         AssertEquals(0, p.Flags);
     }
 
-    [Test]
+    [TestMethod]
     public void TestCompileExceptionWithDuplicateGroups()
     {
         try
@@ -53,14 +54,14 @@ public class PatternTest
         Assert.AreEqual(v1, v2);
     }
 
-    [Test]
+    [TestMethod]
     public void TestToString()
     {
         Pattern p = Pattern.Compile("abc");
         AssertEquals("abc", p.ToString());
     }
 
-    [Test]
+    [TestMethod]
     public void TestCompileFlags()
     {
         Pattern p = Pattern.Compile("abc", 5);
@@ -68,7 +69,7 @@ public class PatternTest
         AssertEquals(5, p.Flags);
     }
 
-    [Test]
+    [TestMethod]
     public void TestSyntaxError()
     {
         try
@@ -95,7 +96,7 @@ public class PatternTest
         Assert.Fail(v);
     }
 
-    [Test]
+    [TestMethod]
     public void TestMatchesNoFlags()
     {
         ApiTestUtils.TestMatches("ab+c", "abbbc", "cbbba");
@@ -108,7 +109,7 @@ public class PatternTest
         ApiTestUtils.TestMatches("\\Q" + source + "\\E", source, "blah");
     }
 
-    [Test]
+    [TestMethod]
     public void TestMatchesWithFlags()
     {
         ApiTestUtils.TestMatchesRE2("ab+c", 0, "abbbc", "cbba");
@@ -142,7 +143,7 @@ public class PatternTest
         Assert.IsTrue(v);
     }
 
-    [Test]
+    [TestMethod]
     public void TestFind()
     {
         TestFind("ab+c", 0, "xxabbbc", "cbbba");
@@ -160,7 +161,7 @@ public class PatternTest
             "z");
     }
 
-    [Test]
+    [TestMethod]
     public void TestSplit()
     {
         ApiTestUtils.TestSplit("/", "abcde", new string[] { "abcde" });
@@ -192,7 +193,7 @@ public class PatternTest
         ApiTestUtils.TestSplit(regexp2, s, new string[] { "b", "", ":and:f" });
     }
 
-    [Test]
+    [TestMethod]
     public void TestGroupCount()
     {
         // It is a simple delegation, but still test it.
@@ -203,7 +204,7 @@ public class PatternTest
         ApiTestUtils.TestGroupCount("(.*)(\\(a\\)b)(.*)a", 3);
     }
 
-    [Test]
+    [TestMethod]
     public void TestNamedGroups()
     {
         AssertNamedGroupsEquals(new Dictionary<string, int>(), "hello");
@@ -217,7 +218,7 @@ public class PatternTest
         Assert.AreEqual(expected, Pattern.Compile(pattern).NamedGroups);
     }
     // See https://github.com/google/re2j/issues/93.
-    [Test]
+    [TestMethod]
     public void TestIssue93()
     {
         Pattern p1 = Pattern.Compile("(a.*?c)|a.*?b");
@@ -230,7 +231,7 @@ public class PatternTest
         Assert.AreEqual(m2.Group(), m1.Group());
     }
 
-    [Test]
+    [TestMethod]
     public void TestQuote()
     {
         ApiTestUtils.TestMatchesRE2(Pattern.Quote("ab+c"), 0, "ab+c", "abc");
@@ -248,7 +249,7 @@ public class PatternTest
         AssertEquals(p.Flags, reserialized.Flags);
     }
 
-    [Test]
+    [TestMethod]
     public void TestSerialize()
     {
         AssertSerializes(Pattern.Compile("ab+c"));
@@ -256,7 +257,7 @@ public class PatternTest
         AssertFalse(Reserialize(Pattern.Compile("abc")).Matcher("def").Find());
     }
 
-    [Test]
+    [TestMethod]
     public void TestEquals()
     {
         Pattern pattern1 = Pattern.Compile("abc");

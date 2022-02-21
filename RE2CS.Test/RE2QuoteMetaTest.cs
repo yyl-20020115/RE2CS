@@ -4,11 +4,11 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RE2CS.Tests;
 
-[TestFixture]
+[TestClass]
 public class RE2QuoteMetaTest
 {
     // (pattern, output, literal, isLiteral)
@@ -45,7 +45,7 @@ public class RE2QuoteMetaTest
         bool.TryParse(this.literal, out this.isLiteral);
     }
 
-    [Test]
+    [TestMethod]
     public void TestQuoteMeta()
     {
         // Verify that quoteMeta returns the expected string.
@@ -88,7 +88,7 @@ public class RE2QuoteMetaTest
         }
     }
 
-    [Test]
+    [TestMethod]
     public void TestLiteralPrefix()
     {
         // Literal method needs to scan the pattern.

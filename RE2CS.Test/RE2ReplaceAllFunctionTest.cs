@@ -4,11 +4,11 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RE2CS.Tests;
 
-[TestFixture]
+[TestClass]
 public class RE2ReplaceAllFunctionTest
 {
     private static ReplaceFunction REPLACE_XSY = (string s) =>
@@ -41,7 +41,7 @@ public class RE2ReplaceAllFunctionTest
         this.expected = expected;
     }
 
-    [Test]
+    [TestMethod]
     public void TestReplaceAllFunc()
     {
         RE2 re = null;

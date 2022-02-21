@@ -4,10 +4,10 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RE2CS.Tests;
-[TestFixture]
+[TestClass]
 public class RE2MatchTest
 {
     public static FindTest.Test[] MatchTests()
@@ -22,7 +22,7 @@ public class RE2MatchTest
         this.test = findTest;
     }
 
-    [Test]
+    [TestMethod]
     public void TestMatch()
     {
         RE2 re = RE2.Compile(test.pat);
@@ -44,7 +44,7 @@ public class RE2MatchTest
     }
 
 
-    [Test]
+    [TestMethod]
     public void TestMatchFunction()
     {
         bool m = RE2.Match(test.pat, test.text);

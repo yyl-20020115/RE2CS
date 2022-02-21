@@ -7,7 +7,11 @@
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/exec_test.go
 
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace RE2CS.Tests;
 
@@ -54,7 +58,7 @@ namespace RE2CS.Tests;
 //
 // At time of writing, re2.txt is 32 MB but compresses to 760 kB,
 // so we store re2.txt.gz _in the repository and decompress it on the fly.
-[TestFixture]
+[TestClass]
 public class ExecTest
 {
     public static void AssertEquals(string v1, string v2)
@@ -66,7 +70,7 @@ public class ExecTest
         Assert.IsTrue(v1.SequenceEqual(v2));
     }
 
-    [Test]
+    [TestMethod]
     public void TestExamplesInDocumentation()
     {
         RE2 re = RE2.Compile("(?i:co(.)a)");
@@ -76,13 +80,13 @@ public class ExecTest
         AssertEquals(new List<string> { "coba", "b" }, new List<string>(x[1]));
     }
 
-    [Test]
+    [TestMethod]
     public void TestRE2Search()
     {
         TestRE2("re2-search.txt");
     }
 
-    [Test]
+    [TestMethod]
     public void testRE2Exhaustive()
     {
         TestRE2("re2-exhaustive.txt.gz"); // takes about 30s
@@ -393,19 +397,19 @@ public class ExecTest
     // POSIX regular expression tests collected by Glenn Fowler at
     // http://www2.research.att.com/~gsf/testregex/.
 
-    [Test]
+    [TestMethod]
     public void TestFowlerBasic()
     {
         TestFowler("basic.dat");
     }
 
-    [Test]
+    [TestMethod]
     public void TestFowlerNullSubexpr()
     {
         TestFowler("nullsubexpr.dat");
     }
 
-    [Test]
+    [TestMethod]
     public void TestFowlerRepetition()
     {
         TestFowler("repetition.dat");

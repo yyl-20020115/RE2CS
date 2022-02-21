@@ -6,7 +6,9 @@
  */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/parse_test.go
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace RE2CS.Tests;
@@ -15,7 +17,7 @@ namespace RE2CS.Tests;
 /**
  * @author adonovan@google.com (Alan Donovan)
  */
-[TestFixture]
+[TestClass]
 public class ParserTest
 {
 
@@ -267,7 +269,7 @@ public class ParserTest
     // - ending a regexp with "\\"
     // - Java UTF-16 things.
 
-    [Test]
+    [TestMethod]
     public void TestParseSimple()
     {
         TestParseDump(PARSE_TESTS, TEST_FLAGS);
@@ -285,7 +287,7 @@ public class ParserTest
     new string[]{ "[[:lower:]]", "cc{0x41-0x5a 0x61-0x7a 0x17f 0x212a}"}
 };
 
-    [Test]
+    [TestMethod]
     public void TestParseFoldCase()
     {
         TestParseDump(FOLDCASE_TESTS, RE2.FOLD_CASE);
@@ -295,7 +297,7 @@ public class ParserTest
         new string[]{ "(|)^$.[*+?]{5,10},\\", "str{(|)^$.[*+?]{5,10},\\}"},
     };
 
-    [Test]
+    [TestMethod]
     public void TestParseLiteral()
     {
         TestParseDump(LITERAL_TESTS, RE2.LITERAL);
@@ -308,7 +310,7 @@ public class ParserTest
     new string[]{ "[a\\n]", "cc{0xa 0x61}"},
       };
 
-    [Test]
+    [TestMethod]
     public void TestParseMatchNL()
     {
         TestParseDump(MATCHNL_TESTS, RE2.MATCH_NL);
@@ -321,7 +323,7 @@ public class ParserTest
     new string[]{ "[a\\n]", "cc{0xa 0x61}"},
       };
 
-    [Test]
+    [TestMethod]
     public void TestParseNoMatchNL()
     {
         TestParseDump(NOMATCHNL_TESTS, 0);
@@ -503,7 +505,7 @@ public class ParserTest
         return Dump(re);
     }
 
-    [Test]
+    [TestMethod]
     public void TestAppendRangeCollapse()
     {
         // AppendRange should collapse each of the new ranges
@@ -578,7 +580,7 @@ public class ParserTest
     "a++", "a**", "a?*", "a+*", "a{1}*", ".{1}{2}.{3}",
     };
 
-    [Test]
+    [TestMethod]
     public void TestParseInvalidRegexps()
     {
         foreach (string regexp in INVALID_REGEXPS) {
@@ -632,7 +634,7 @@ public class ParserTest
         Assert.Fail(v);
     }
 
-    [Test]
+    [TestMethod]
     public void TestToStringEquivalentParse() {
         foreach (string[] tt in PARSE_TESTS) {
             Regexp re = Parser.Parse(tt[0], TEST_FLAGS);

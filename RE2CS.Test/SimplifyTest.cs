@@ -6,11 +6,11 @@
  */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/simplify_test.go
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace RE2CS.Tests;
 
 
-[TestFixture]
+[TestClass]
 public class SimplifyTest
 {
 
@@ -142,10 +142,7 @@ public class SimplifyTest
     new string[]{"(?:(a){0})", "(?:)"},
     };
 
-    public static Object[] GetParameters()
-    {
-        return SIMPLIFY_TESTS;
-    }
+    public static object[] GetParameters() => SIMPLIFY_TESTS;
 
     private readonly string input;
     private readonly string expected;
@@ -156,7 +153,7 @@ public class SimplifyTest
         this.expected = expected;
     }
 
-    [Test]
+    [TestMethod]
     public void TestSimplify()
     {
         Regexp re = Parser.Parse(input, RE2.MATCH_NL | (RE2.PERL & ~RE2.ONE_LINE));

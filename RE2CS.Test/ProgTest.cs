@@ -4,7 +4,7 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace RE2CS.Tests;
 
 // Original Go source here:
@@ -124,7 +124,7 @@ public class ProgTest
         this.expected = expected;
     }
 
-    [Test]
+    [TestMethod]
     public void TestCompile()
     {
         Regexp re = Parser.Parse(input, RE2.PERL);

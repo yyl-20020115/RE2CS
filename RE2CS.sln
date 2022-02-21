@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RE2CS", "RE2CS\RE2CS.csproj", "{CB965B58-4768-4D9D-AAD5-8A770713FB0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RE2CS", "RE2CS\RE2CS.csproj", "{CB965B58-4768-4D9D-AAD5-8A770713FB0A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{7E310EBA-F982-4269-B0C2-CF3AC9D71304}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,8 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{7E
 		TestData\repetition.dat = TestData\repetition.dat
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{E836B5D3-C8F2-4ECC-81A4-5EBCD6F6D4C5}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{9A633502-5E97-4017-8221-7CB6DBA54463}"
 	ProjectSection(SolutionItems) = preProject
 		CONTRIBUTING.md = CONTRIBUTING.md
@@ -25,7 +23,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{9A633502-5
 		RELEASING.md = RELEASING.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BenchMarks", "BenchMarks\BenchMarks.csproj", "{759F0AA6-232C-4E23-8177-B1CC724C1AF1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BenchMarks", "BenchMarks\BenchMarks.csproj", "{759F0AA6-232C-4E23-8177-B1CC724C1AF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RE2CS.Test", "RE2CS.Test\RE2CS.Test.csproj", "{62C46C3D-DD79-45E3-9015-761AFD85CCCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,14 +37,14 @@ Global
 		{CB965B58-4768-4D9D-AAD5-8A770713FB0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB965B58-4768-4D9D-AAD5-8A770713FB0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CB965B58-4768-4D9D-AAD5-8A770713FB0A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E836B5D3-C8F2-4ECC-81A4-5EBCD6F6D4C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E836B5D3-C8F2-4ECC-81A4-5EBCD6F6D4C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E836B5D3-C8F2-4ECC-81A4-5EBCD6F6D4C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E836B5D3-C8F2-4ECC-81A4-5EBCD6F6D4C5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{759F0AA6-232C-4E23-8177-B1CC724C1AF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{759F0AA6-232C-4E23-8177-B1CC724C1AF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{759F0AA6-232C-4E23-8177-B1CC724C1AF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{759F0AA6-232C-4E23-8177-B1CC724C1AF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62C46C3D-DD79-45E3-9015-761AFD85CCCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62C46C3D-DD79-45E3-9015-761AFD85CCCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62C46C3D-DD79-45E3-9015-761AFD85CCCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62C46C3D-DD79-45E3-9015-761AFD85CCCD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

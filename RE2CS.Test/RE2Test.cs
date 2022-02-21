@@ -6,16 +6,17 @@
  */
 // Original Go source here:
 // http://code.google.com/p/go/source/browse/src/pkg/regexp/syntax/all_test.go
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace RE2CS.Tests;
 
 
 /** Tests of RE2 API. */
-[TestFixture]
+[TestClass]
 public class RE2Test
 {
-    [Test]
+    [TestMethod]
     public void TestFullMatch()
     {
         AssertTrue(new RE2("ab+c").Match("abbbbbc", 0, 7, RE2.ANCHOR_BOTH, null, 0));
@@ -26,7 +27,7 @@ public class RE2Test
             new RE2("ab+c").Match(MatcherInput.Utf8("xabbbbbc"), 0, 8, RE2.ANCHOR_BOTH, null, 0));
     }
 
-    [Test]
+    [TestMethod]
     public void TestFindEnd()
     {
         RE2 r = new RE2("abc.*def");

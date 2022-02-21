@@ -4,13 +4,13 @@
  * Use of this source code is governed by a BSD-style
  * license that can be found in the LICENSE file.
  */
-using NUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace RE2CS.Tests;
 
-[TestFixture]
+[TestClass]
 public class RE2ReplaceTest
 {
-    private static readonly Object[][] REPLACE_TESTS = {
+    private static readonly object[][] REPLACE_TESTS = {
     // Test empty input and/or replacement,
     // with pattern that matches the empty string.
     new string[]{"", "", "", "", "false"},
@@ -134,10 +134,7 @@ public class RE2ReplaceTest
     new string[]{"[a-c]*", "x", "abcbcdcdedef", "xdcdedef", "true"},
     };
 
-    public static Object[][] ReplaceTests()
-    {
-        return REPLACE_TESTS;
-    }
+    public static object[][] ReplaceTests() => REPLACE_TESTS;
 
     private readonly string pattern;
     private readonly string replacement;
@@ -155,7 +152,7 @@ public class RE2ReplaceTest
         bool.TryParse(replaceFirst,out this.replaceFirst);
     }
 
-    [Test]
+    [TestMethod]
     public void ReplaceTestHelper()
     {
         RE2 re = null;
