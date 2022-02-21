@@ -262,16 +262,18 @@ public class FindTest
     new Test("(|a)*", "aa", 3, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2),
   };
 
-    public static Test[] TestCases() => FIND_TESTS;
-
-    private readonly Test test;
-
-    public FindTest(Test test) => this.test = test;
-
     // First the simple cases.
 
     [TestMethod]
     public void TestFindUTF8()
+    {
+        for(int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindUTF8(test);
+        }
+    }
+    public void TestFindUTF8(Test test)
     {
         RE2 re = RE2.Compile(test.pat);
         if (!re.ToString().Equals(test.pat))
@@ -309,6 +311,14 @@ public class FindTest
 
     [TestMethod]
     public void TestFind()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFind(test);
+        }
+    }
+    public void TestFind(Test test)
     {
         string result = RE2.Compile(test.pat).Find(test.text);
         if (test.matches.Length == 0 && string.IsNullOrEmpty(result))
@@ -379,12 +389,28 @@ public class FindTest
     [TestMethod]
     public void TestFindUTF8Index()
     {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindUTF8Index(test);
+        }
+    }
+    public void TestFindUTF8Index(Test test)
+    {
         TestFindIndexCommon(
             "testFindUTF8Index", test, RE2.Compile(test.pat).FindUTF8Index(test.textUTF8), true);
     }
 
     [TestMethod]
     public void TestFindIndex()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindIndex(test);
+        }
+    }
+    public void TestFindIndex(Test test)
     {
         int[] result = RE2.Compile(test.pat).FindIndex(test.text);
         TestFindIndexCommon("testFindIndex", test, result, false);
@@ -394,6 +420,14 @@ public class FindTest
 
     [TestMethod]
     public void TestFindAllUTF8()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindAllUTF8(test);
+        }
+    }
+    public void TestFindAllUTF8(Test test)
     {
         List<byte[]> result = RE2.Compile(test.pat).FindAllUTF8(test.textUTF8, -1);
         if (test.matches.Length == 0 && result == null)
@@ -440,6 +474,15 @@ public class FindTest
     [TestMethod]
     public void TestFindAll()
     {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindAll(test);
+        }
+        Assert.IsTrue(true);
+    }
+    public void TestFindAll(Test test)
+    {
         List<string> result = RE2.Compile(test.pat).FindAll(test.text, -1);
         if (test.matches.Length == 0 && result == null)
         {
@@ -474,7 +517,6 @@ public class FindTest
                 }
             }
         }
-        Assert.IsTrue(true);
     }
 
     private void TestFindAllIndexCommon(
@@ -531,6 +573,14 @@ public class FindTest
     [TestMethod]
     public void TestFindAllUTF8Index()
     {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindAllUTF8Index(test);
+        }
+    }
+    public void TestFindAllUTF8Index(Test test)
+    {
         TestFindAllIndexCommon(
             "testFindAllUTF8Index",
             test,
@@ -540,6 +590,14 @@ public class FindTest
 
     [TestMethod]
     public void TestFindAllIndex()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindAllIndex(test);
+        }
+    }
+    public void TestFindAllIndex(Test test)
     {
         TestFindAllIndexCommon(
             "testFindAllIndex", test, RE2.Compile(test.pat).FindAllIndex(test.text, -1), false);
@@ -588,6 +646,14 @@ public class FindTest
 
     [TestMethod]
     public void TestFindUTF8Submatch()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindUTF8Submatch(test);
+        }
+    }
+    public void TestFindUTF8Submatch(Test test)
     {
         byte[][] result = RE2.Compile(test.pat).FindUTF8Submatch(test.textUTF8);
         if (test.matches.Length == 0 && result == null)
@@ -655,6 +721,14 @@ public class FindTest
     // (Go: TestFindStringSubmatch)
     [TestMethod]
     public void TestFindSubmatch()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindSubmatch(test);
+        }
+    }
+    public void TestFindSubmatch(Test test)
     {
         string[] result = RE2.Compile(test.pat).FindSubmatch(test.text);
         if (test.matches.Length == 0 && result == null)
@@ -735,6 +809,14 @@ public class FindTest
     [TestMethod]
     public void TestFindUTF8SubmatchIndex()
     {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindUTF8SubmatchIndex(test);
+        }
+    }
+    public void TestFindUTF8SubmatchIndex(Test test)
+    {
         TestFindSubmatchIndexCommon(
             "testFindSubmatchIndex",
             test,
@@ -745,6 +827,14 @@ public class FindTest
     // (Go: TestFindStringSubmatchIndex)
     [TestMethod]
     public void TestFindSubmatchIndex()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindSubmatchIndex(test);
+        }
+    }
+    public void TestFindSubmatchIndex(Test test)
     {
         TestFindSubmatchIndexCommon(
             "testFindStringSubmatchIndex",
@@ -758,6 +848,14 @@ public class FindTest
     // (Go: TestFindAllSubmatch)
     [TestMethod]
     public void TestFindAllUTF8Submatch()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindAllUTF8Submatch(test);
+        }
+    }
+    public void TestFindAllUTF8Submatch(Test test)
     {
         List<byte[][]> result = RE2.Compile(test.pat).FindAllUTF8Submatch(test.textUTF8, -1);
         if (test.matches.Length == 0 && result == null)
@@ -791,6 +889,14 @@ public class FindTest
     // (Go: TestFindAllStringSubmatch)
     [TestMethod]
     public void TestFindAllSubmatch()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindAllSubmatch(test);
+        }
+    }
+    public void TestFindAllSubmatch(Test test)
     {
         List<string[]> result = RE2.Compile(test.pat).FindAllSubmatch(test.text, -1);
         if (test.matches.Length == 0 && result == null)
@@ -866,6 +972,14 @@ public class FindTest
     [TestMethod]
     public void TestFindAllUTF8SubmatchIndex()
     {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindAllUTF8SubmatchIndex(test);
+        }
+    }
+    public void TestFindAllUTF8SubmatchIndex(Test test)
+    {
         TestFindAllSubmatchIndexCommon(
             "testFindAllUTF8SubmatchIndex",
             test,
@@ -876,6 +990,14 @@ public class FindTest
     // (Go: TestFindAllStringSubmatchIndex)
     [TestMethod]
     public void TestFindAllSubmatchIndex()
+    {
+        for (int i = 0; i < FIND_TESTS.Length; i++)
+        {
+            var test = FIND_TESTS[i];
+            TestFindAllSubmatchIndex(test);
+        }
+    }
+    public void TestFindAllSubmatchIndex(Test test)
     {
         TestFindAllSubmatchIndexCommon(
             "testFindAllSubmatchIndex",

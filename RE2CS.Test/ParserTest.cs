@@ -335,7 +335,7 @@ public class ParserTest
         foreach (string[] test in tests) {
             try
             {
-                Regexp re = Parser.Parse(test[0], flags);
+                var re = Parser.Parse(test[0], flags);
                 string d = Dump(re);
                 Assert.AreEqual(d, test[1], "parse/dump of " + test[0]);
                 //Truth.assertWithMessage("parse/dump of " + test[0]).that(d).isEqualTo(test[1]);
@@ -361,8 +361,7 @@ public class ParserTest
     // might print the same using re's ToString() method.
     private static void DumpRegexp(StringBuilder b, Regexp re)
     {
-        string name = OP_NAMES[re.op];
-        if (name == null)
+        if (OP_NAMES.TryGetValue(re.op,out var name))
         {
             b.Append("op").Append(re.op);
         }
