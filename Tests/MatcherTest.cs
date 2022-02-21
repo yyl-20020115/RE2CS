@@ -38,31 +38,31 @@ public class MatcherTest
     [Test]
     public void TestReplaceAll()
     {
-        ApiTestUtils.testReplaceAll(
+        ApiTestUtils.TestReplaceAll(
             "What the Frog's Eye Tells the Frog's Brain",
             "Frog",
             "Lizard",
             "What the Lizard's Eye Tells the Lizard's Brain");
-        ApiTestUtils.testReplaceAll(
+        ApiTestUtils.TestReplaceAll(
             "What the Frog's Eye Tells the Frog's Brain",
             "F(rog)",
             "\\$Liza\\rd$1",
             "What the $Lizardrog's Eye Tells the $Lizardrog's Brain");
-        ApiTestUtils.testReplaceAll(
+        ApiTestUtils.TestReplaceAll(
             "abcdefghijklmnopqrstuvwxyz123",
             "(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)(.)",
             "$10$20",
             "jb0wo0123");
-        ApiTestUtils.testReplaceAll(
+        ApiTestUtils.TestReplaceAll(
             "\u00e1\u0062\u00e7\u2655", "(.)", "<$1>", "<\u00e1><\u0062><\u00e7><\u2655>");
-        ApiTestUtils.testReplaceAll(
+        ApiTestUtils.TestReplaceAll(
             "\u00e1\u0062\u00e7\u2655", "[\u00e0-\u00e9]", "<$0>", "<\u00e1>\u0062<\u00e7>\u2655");
-        ApiTestUtils.testReplaceAll("hello world", "z*", "x", "xhxexlxlxox xwxoxrxlxdx");
+        ApiTestUtils.TestReplaceAll("hello world", "z*", "x", "xhxexlxlxox xwxoxrxlxdx");
         // test replaceAll with alternation
-        ApiTestUtils.testReplaceAll("123:foo", "(?:\\w+|\\d+:foo)", "x", "x:x");
-        ApiTestUtils.testReplaceAll("123:foo", "(?:\\d+:foo|\\w+)", "x", "x");
-        ApiTestUtils.testReplaceAll("aab", "a*", "<$0>", "<aa><>b<>");
-        ApiTestUtils.testReplaceAll("aab", "a*?", "<$0>", "<>a<>a<>b<>");
+        ApiTestUtils.TestReplaceAll("123:foo", "(?:\\w+|\\d+:foo)", "x", "x:x");
+        ApiTestUtils.TestReplaceAll("123:foo", "(?:\\d+:foo|\\w+)", "x", "x");
+        ApiTestUtils.TestReplaceAll("aab", "a*", "<$0>", "<aa><>b<>");
+        ApiTestUtils.TestReplaceAll("aab", "a*?", "<$0>", "<>a<>a<>b<>");
     }
 
     [Test]

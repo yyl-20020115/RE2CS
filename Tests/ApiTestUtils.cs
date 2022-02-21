@@ -25,33 +25,33 @@ public class ApiTestUtils
     public static void TestMatches(string regexp, string match, string nonMatch)
     {
         string errorString = "Pattern with regexp: " + regexp;
-        assertTrue(
+        AssertTrue(
             "JDK " + errorString + " doesn't match: " + match,
             System.Text.RegularExpressions.Regex.IsMatch(regexp, match));
-        assertFalse(
+        AssertFalse(
             "JDK " + errorString + " matches: " + nonMatch,
             System.Text.RegularExpressions.Regex.IsMatch(regexp, nonMatch));
-        assertTrue(errorString + " doesn't match: " + match, Pattern.Matches(regexp, match));
-        assertFalse(errorString + " matches: " + nonMatch, Pattern.Matches(regexp, nonMatch));
+        AssertTrue(errorString + " doesn't match: " + match, Pattern.Matches(regexp, match));
+        AssertFalse(errorString + " matches: " + nonMatch, Pattern.Matches(regexp, nonMatch));
 
-        assertTrue(
+        AssertTrue(
             errorString + " doesn't match: " + match, Pattern.Matches(regexp, getUtf8Bytes(match)));
-        assertFalse(
+        AssertFalse(
             errorString + " matches: " + nonMatch, Pattern.Matches(regexp, getUtf8Bytes(nonMatch)));
     }
-    public static void assertTrue(bool v)
+    public static void AssertTrue(bool v)
     {
         Assert.IsTrue(v);
     }
-    public static void assertFalse(bool v)
+    public static void AssertFalse(bool v)
     {
         Assert.IsFalse(v);
     }
-    public static void assertTrue(string s, bool v)
+    public static void AssertTrue(string s, bool v)
     {
         Assert.IsTrue(v, s);
     }
-    public static void assertFalse(string s, bool v)
+    public static void AssertFalse(string s, bool v)
     {
         Assert.IsFalse(v, s);
     }
@@ -59,34 +59,35 @@ public class ApiTestUtils
     // Test matches via a matcher.
     public static void TestMatcherMatches(string regexp, string match, string nonMatch)
     {
-        testMatcherMatches(regexp, match);
-        testMatcherNotMatches(regexp, nonMatch);
+        TestMatcherMatches(regexp, match);
+        TestMatcherNotMatches(regexp, nonMatch);
     }
 
-    public static void testMatcherMatches(string regexp, string match)
+    public static void TestMatcherMatches(string regexp, string match)
     {
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile(regexp);
-        assertTrue(
+        var p = new System.Text.RegularExpressions.Regex(regexp);
+
+        AssertTrue(
             "JDK Pattern with regexp: " + regexp + " doesn't match: " + match,
             p.matcher(match).matches());
         Pattern pr = Pattern.Compile(regexp);
-        assertTrue(
+        AssertTrue(
             "Pattern with regexp: " + regexp + " doesn't match: " + match, pr.Matcher(match).Matches());
-        assertTrue(
+        AssertTrue(
             "Pattern with regexp: " + regexp + " doesn't match: " + match,
             pr.Matcher(getUtf8Bytes(match)).Matches());
     }
 
-    public static void testMatcherNotMatches(string regexp, string nonMatch)
+    public static void TestMatcherNotMatches(string regexp, string nonMatch)
     {
-        java.util.regex.Pattern p = java.util.regex.Pattern.compile(regexp);
-        assertFalse(
+        var p = new System.Text.RegularExpressions.Regex(regexp);
+        AssertFalse(
             "JDK Pattern with regexp: " + regexp + " matches: " + nonMatch,
             p.matcher(nonMatch).matches());
         Pattern pr = Pattern.Compile(regexp);
-        assertFalse(
+        AssertFalse(
             "Pattern with regexp: " + regexp + " matches: " + nonMatch, pr.Matcher(nonMatch).Matches());
-        assertFalse(
+        AssertFalse(
             "Pattern with regexp: " + regexp + " matches: " + nonMatch,
             pr.Matcher(getUtf8Bytes(nonMatch)).Matches());
     }
@@ -98,42 +99,43 @@ public class ApiTestUtils
      * We don't check for JDK compatibility here, since the flags are not in a 1-1 correspondence.
      *
      */
-    public static void testMatchesRE2(string regexp, int flags, string match, string nonMatch)
+    public static void TestMatchesRE2(string regexp, int flags, string match, string nonMatch)
     {
         Pattern p = Pattern.Compile(regexp, flags);
         string errorString = "Pattern with regexp: " + regexp + " and flags: " + flags;
-        assertTrue(errorString + " doesn't match: " + match, p.Matches(match));
-        assertTrue(errorString + " doesn't match: " + match, p.Matches(getUtf8Bytes(match)));
-        assertFalse(errorString + " matches: " + nonMatch, p.Matches(nonMatch));
-        assertFalse(errorString + " matches: " + nonMatch, p.Matches(getUtf8Bytes(nonMatch)));
+        AssertTrue(errorString + " doesn't match: " + match, p.Matches(match));
+        AssertTrue(errorString + " doesn't match: " + match, p.Matches(getUtf8Bytes(match)));
+        AssertFalse(errorString + " matches: " + nonMatch, p.Matches(nonMatch));
+        AssertFalse(errorString + " matches: " + nonMatch, p.Matches(getUtf8Bytes(nonMatch)));
     }
 
     /**
      * Tests that both RE2 and JDK split the string on the regex in the same way, and that that way
      * matches our expectations.
      */
-    public static void testSplit(string regexp, string text, string[] expected)
+    public static void TestSplit(string regexp, string text, string[] expected)
     {
-        testSplit(regexp, text, 0, expected);
+        TestSplit(regexp, text, 0, expected);
     }
 
-    public static void testSplit(string regexp, string text, int limit, string[] expected)
+    public static void TestSplit(string regexp, string text, int limit, string[] expected)
     {
-        Truth.assertThat(java.util.regex.Pattern.compile(regexp).split(text, limit))
-            .isEqualTo(expected);
-        Truth.assertThat(Pattern.Compile(regexp).Split(text, limit)).isEqualTo(expected);
+        var p = new System.Text.RegularExpressions.Regex(regexp);
+        Assert.AreEqual( p.Split(text, limit),expected);
+
+        Assert.AreEqual(Pattern.Compile(regexp).Split(text, limit),expected);
     }
 
     // Helper methods for RE2Matcher's test.
 
     // Tests that both RE2 and JDK's Matchers do the same replaceFist.
-    public static void testReplaceAll(string orig, string regex, string repl, string actual)
+    public static void TestReplaceAll(string orig, string regex, string repl, string actual)
     {
         Pattern p = Pattern.Compile(regex);
         string replaced;
-        foreach (MatcherInput input in Arrays.asList(MatcherInput.Utf16(orig), MatcherInput.Utf8(orig)))
+        foreach (MatcherInput input in new[] { MatcherInput.Utf16(orig), MatcherInput.Utf8(orig) })
         {
-            Matcher m = p.matcher(input);
+            Matcher m = p.Matcher(input);
             replaced = m.ReplaceAll(repl);
             assertEquals(actual, replaced);
         }
@@ -150,7 +152,7 @@ public class ApiTestUtils
     {
         Pattern p = Pattern.Compile(regex);
         string replaced;
-        foreach (MatcherInput input in Arrays.asList(MatcherInput.Utf16(orig), MatcherInput.Utf8(orig)))
+        foreach (MatcherInput input in new[] { MatcherInput.Utf16(orig), MatcherInput.Utf8(orig) })
         {
             Matcher m = p.Matcher(orig);
             replaced = m.ReplaceFirst(repl);
@@ -196,10 +198,10 @@ public class ApiTestUtils
     {
         // RE2
         Pattern p = Pattern.Compile(regexp);
-        foreach(MatcherInput input in Arrays.asList(MatcherInput.Utf16(text), MatcherInput.Utf8(text)))
+        foreach(MatcherInput input in new[] { MatcherInput.Utf16(text), MatcherInput.Utf8(text) })
         {
             Matcher matchString = p.matcher(input);
-            assertTrue(matchString.Find());
+            AssertTrue(matchString.Find());
             assertEquals(output[0], matchString.Group());
             for (int i = 0; i < output.Length; i++)
             {
@@ -213,7 +215,7 @@ public class ApiTestUtils
         java.util.regex.Matcher matchStringj = pj.matcher(text);
         // java.util.regex.Matcher matchBytes =
         //   p.matcher(text.getBytes(Charsets.UTF_8));
-        assertTrue(matchStringj.find());
+        AssertTrue(matchStringj.find());
         // assertEquals(true, matchBytes.find());
         assertEquals(output[0], matchStringj.group());
         // assertEquals(output[0], matchBytes.group());
@@ -228,11 +230,11 @@ public class ApiTestUtils
     {
         // RE2
         Pattern p = Pattern.Compile(regexp);
-        foreach (MatcherInput input in Arrays.asList(MatcherInput.Utf16(text), MatcherInput.Utf8(text)))
+        foreach (MatcherInput input in new []{ MatcherInput.Utf16(text), MatcherInput.Utf8(text) })
         {
             Matcher matchString = p.matcher(input);
             // RE2Matcher matchBytes = p.matcher(text.getBytes(Charsets.UTF_8));
-            assertTrue(matchString.Find(start));
+            AssertTrue(matchString.Find(start));
             // assertTrue(matchBytes.find(start));
             assertEquals(output, matchString.Group());
             // assertEquals(output, matchBytes.group());
@@ -241,7 +243,7 @@ public class ApiTestUtils
         // JDK
         java.util.regex.Pattern pj = java.util.regex.Pattern.compile(regexp);
         java.util.regex.Matcher matchStringj = pj.matcher(text);
-        assertTrue(matchStringj.find(start));
+        AssertTrue(matchStringj.find(start));
         assertEquals(output, matchStringj.group());
     }
 
@@ -249,18 +251,18 @@ public class ApiTestUtils
     {
         // RE2
         Pattern p = Pattern.Compile(regexp);
-        foreach (MatcherInput input in Arrays.asList(MatcherInput.Utf16(text), MatcherInput.Utf8(text)))
+        foreach (MatcherInput input in new[] { MatcherInput.Utf16(text), MatcherInput.Utf8(text) })
         {
             Matcher matchString = p.matcher(input);
             // RE2Matcher matchBytes = p.matcher(text.getBytes(Charsets.UTF_8));
-            assertFalse(matchString.Find(start));
+            AssertFalse(matchString.Find(start));
             // assertFalse(matchBytes.find(start));
         }
 
         // JDK
         java.util.regex.Pattern pj = java.util.regex.Pattern.compile(regexp);
         java.util.regex.Matcher matchStringj = pj.matcher(text);
-        assertFalse(matchStringj.find(start));
+        AssertFalse(matchStringj.find(start));
     }
 
     public static void testInvalidGroup(string text, string regexp, int group)

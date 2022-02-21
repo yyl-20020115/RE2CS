@@ -111,18 +111,18 @@ public class PatternTest
     [Test]
     public void TestMatchesWithFlags()
     {
-        ApiTestUtils.testMatchesRE2("ab+c", 0, "abbbc", "cbba");
-        ApiTestUtils.testMatchesRE2("ab+c", Pattern.CASE_INSENSITIVE, "abBBc", "cbbba");
-        ApiTestUtils.testMatchesRE2("ab.*c", 0, "abxyzc", "ab\nxyzc");
-        ApiTestUtils.testMatchesRE2("ab.*c", Pattern.DOTALL, "ab\nxyzc", "aB\nxyzC");
-        ApiTestUtils.testMatchesRE2(
+        ApiTestUtils.TestMatchesRE2("ab+c", 0, "abbbc", "cbba");
+        ApiTestUtils.TestMatchesRE2("ab+c", Pattern.CASE_INSENSITIVE, "abBBc", "cbbba");
+        ApiTestUtils.TestMatchesRE2("ab.*c", 0, "abxyzc", "ab\nxyzc");
+        ApiTestUtils.TestMatchesRE2("ab.*c", Pattern.DOTALL, "ab\nxyzc", "aB\nxyzC");
+        ApiTestUtils.TestMatchesRE2(
             "ab.*c", Pattern.DOTALL | Pattern.CASE_INSENSITIVE, "aB\nxyzC", "z");
-        ApiTestUtils.testMatchesRE2("^ab.*c$", 0, "abc", "xyz\nabc\ndef");
+        ApiTestUtils.TestMatchesRE2("^ab.*c$", 0, "abc", "xyz\nabc\ndef");
 
-        ApiTestUtils.testMatchesRE2("^ab.*c$", Pattern.MULTILINE, "abc", "xyz\nabc\ndef");
-        ApiTestUtils.testMatchesRE2("^ab.*c$", Pattern.MULTILINE, "abc", "");
-        ApiTestUtils.testMatchesRE2("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE, "ab\nc", "AB\nc");
-        ApiTestUtils.testMatchesRE2(
+        ApiTestUtils.TestMatchesRE2("^ab.*c$", Pattern.MULTILINE, "abc", "xyz\nabc\ndef");
+        ApiTestUtils.TestMatchesRE2("^ab.*c$", Pattern.MULTILINE, "abc", "");
+        ApiTestUtils.TestMatchesRE2("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE, "ab\nc", "AB\nc");
+        ApiTestUtils.TestMatchesRE2(
             "^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE | Pattern.CASE_INSENSITIVE, "AB\nc", "z");
     }
 
@@ -163,17 +163,17 @@ public class PatternTest
     [Test]
     public void TestSplit()
     {
-        ApiTestUtils.testSplit("/", "abcde", new string[] { "abcde" });
-        ApiTestUtils.testSplit("/", "a/b/cc//d/e//", new string[] { "a", "b", "cc", "", "d", "e" });
-        ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 3, new string[] { "a", "b", "cc//d/e//" });
-        ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 4, new string[] { "a", "b", "cc", "/d/e//" });
-        ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 5, new string[] { "a", "b", "cc", "", "d/e//" });
-        ApiTestUtils.testSplit("/", "a/b/cc//d/e//", 6, new string[] { "a", "b", "cc", "", "d", "e//" });
-        ApiTestUtils.testSplit(
+        ApiTestUtils.TestSplit("/", "abcde", new string[] { "abcde" });
+        ApiTestUtils.TestSplit("/", "a/b/cc//d/e//", new string[] { "a", "b", "cc", "", "d", "e" });
+        ApiTestUtils.TestSplit("/", "a/b/cc//d/e//", 3, new string[] { "a", "b", "cc//d/e//" });
+        ApiTestUtils.TestSplit("/", "a/b/cc//d/e//", 4, new string[] { "a", "b", "cc", "/d/e//" });
+        ApiTestUtils.TestSplit("/", "a/b/cc//d/e//", 5, new string[] { "a", "b", "cc", "", "d/e//" });
+        ApiTestUtils.TestSplit("/", "a/b/cc//d/e//", 6, new string[] { "a", "b", "cc", "", "d", "e//" });
+        ApiTestUtils.TestSplit(
             "/", "a/b/cc//d/e//", 7, new string[] { "a", "b", "cc", "", "d", "e", "/" });
-        ApiTestUtils.testSplit(
+        ApiTestUtils.TestSplit(
             "/", "a/b/cc//d/e//", 8, new string[] { "a", "b", "cc", "", "d", "e", "", "" });
-        ApiTestUtils.testSplit(
+        ApiTestUtils.TestSplit(
             "/", "a/b/cc//d/e//", 9, new string[] { "a", "b", "cc", "", "d", "e", "", "" });
 
         // The tests below are listed at
@@ -183,13 +183,13 @@ public class PatternTest
         string regexp1 = ":";
         string regexp2 = "o";
 
-        ApiTestUtils.testSplit(regexp1, s, 2, new string[] { "boo", "and:foo" });
-        ApiTestUtils.testSplit(regexp1, s, 5, new string[] { "boo", "and", "foo" });
-        ApiTestUtils.testSplit(regexp1, s, -2, new string[] { "boo", "and", "foo" });
-        ApiTestUtils.testSplit(regexp2, s, 5, new string[] { "b", "", ":and:f", "", "" });
-        ApiTestUtils.testSplit(regexp2, s, -2, new string[] { "b", "", ":and:f", "", "" });
-        ApiTestUtils.testSplit(regexp2, s, 0, new string[] { "b", "", ":and:f" });
-        ApiTestUtils.testSplit(regexp2, s, new string[] { "b", "", ":and:f" });
+        ApiTestUtils.TestSplit(regexp1, s, 2, new string[] { "boo", "and:foo" });
+        ApiTestUtils.TestSplit(regexp1, s, 5, new string[] { "boo", "and", "foo" });
+        ApiTestUtils.TestSplit(regexp1, s, -2, new string[] { "boo", "and", "foo" });
+        ApiTestUtils.TestSplit(regexp2, s, 5, new string[] { "b", "", ":and:f", "", "" });
+        ApiTestUtils.TestSplit(regexp2, s, -2, new string[] { "b", "", ":and:f", "", "" });
+        ApiTestUtils.TestSplit(regexp2, s, 0, new string[] { "b", "", ":and:f" });
+        ApiTestUtils.TestSplit(regexp2, s, new string[] { "b", "", ":and:f" });
     }
 
     [Test]
@@ -233,7 +233,7 @@ public class PatternTest
     [Test]
     public void TestQuote()
     {
-        ApiTestUtils.testMatchesRE2(Pattern.Quote("ab+c"), 0, "ab+c", "abc");
+        ApiTestUtils.TestMatchesRE2(Pattern.Quote("ab+c"), 0, "ab+c", "abc");
     }
 
     private Pattern Reserialize(Pattern o)
