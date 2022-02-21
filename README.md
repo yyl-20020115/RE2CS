@@ -1,8 +1,7 @@
 RE2/CS: linear time regular expression matching in C#
 
-DO NOT USE!
-
-PORTING IN PROGRESS!
+ALL TESTS HAVE PASSED!
+READY FOR USE!
 
 ====================
 

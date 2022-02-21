@@ -92,15 +92,15 @@ public class UNIXBufferedReader :StreamReader
             // Should we refill the buffer?
             if (inext >= buflen)
             {
-                int n;
-                do
-                {
-                    n = this.Read(buf, 0, buf.Length);
-                } while (n == 0);
+                int n = this.Read(buf, 0, buf.Length);
                 if (n > 0)
                 {
                     buflen = n;
                     inext = 0;
+                }
+                else
+                {
+                    return null;
                 }
             }
             // Did we reach end-of-file?
