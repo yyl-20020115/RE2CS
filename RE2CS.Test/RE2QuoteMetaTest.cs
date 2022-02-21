@@ -27,26 +27,25 @@ public class RE2QuoteMetaTest
     },
   };
 
-    public static string[][] TestCases()
-    {
-        return META_TESTS;
-    }
+    
 
-    private readonly string pattern;
-    private readonly string output;
-    private readonly string literal;
-    private readonly bool isLiteral;
+    //private readonly string pattern;
+    //private readonly string output;
+    //private readonly string literal;
+    //private readonly bool isLiteral;
 
-    public RE2QuoteMetaTest(string pattern, string output, string literal, string isLiteral)
-    {
-        this.pattern = pattern;
-        this.output = output;
-        this.literal = literal;
-        bool.TryParse(this.literal, out this.isLiteral);
-    }
-
+ 
     [TestMethod]
     public void TestQuoteMeta()
+    {
+        for(int i = 0; i < META_TESTS.Length; i++)
+        {
+            var test = META_TESTS[i];
+            TestQuoteMeta(i, test[0], test[1], test[2]);
+        }
+        Assert.IsTrue(true);
+    }
+    public void TestQuoteMeta(int i,string pattern,string output,string literal)
     {
         // Verify that quoteMeta returns the expected string.
         string quoted = RE2.QuoteMeta(pattern);
@@ -90,6 +89,16 @@ public class RE2QuoteMetaTest
 
     [TestMethod]
     public void TestLiteralPrefix()
+    {
+        for (int i = 0; i < META_TESTS.Length; i++)
+        {
+            var test = META_TESTS[i];
+            bool.TryParse(test[3], out var b);
+            TestLiteralPrefix(i, test[0], test[1], test[2],b);
+        }
+        Assert.IsTrue(true);
+    }
+    public void TestLiteralPrefix(int i, string pattern, string output, string literal, bool isLiteral)
     {
         // Literal method needs to scan the pattern.
         RE2 re = RE2.Compile(pattern);

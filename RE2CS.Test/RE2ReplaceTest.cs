@@ -10,7 +10,7 @@ namespace RE2CS.Tests;
 [TestClass]
 public class RE2ReplaceTest
 {
-    private static readonly object[][] REPLACE_TESTS = {
+    private static readonly string[][] REPLACE_TESTS = {
     // Test empty input and/or replacement,
     // with pattern that matches the empty string.
     new string[]{"", "", "", "", "false"},
@@ -134,26 +134,26 @@ public class RE2ReplaceTest
     new string[]{"[a-c]*", "x", "abcbcdcdedef", "xdcdedef", "true"},
     };
 
-    public static object[][] ReplaceTests() => REPLACE_TESTS;
-
-    private readonly string pattern;
-    private readonly string replacement;
-    private readonly string source;
-    private readonly string expected;
-    private bool replaceFirst;
-
-    public RE2ReplaceTest(
-        string pattern, string replacement, string source, string expected, string replaceFirst)
-    {
-        this.pattern = pattern;
-        this.replacement = replacement;
-        this.source = source;
-        this.expected = expected;
-        bool.TryParse(replaceFirst,out this.replaceFirst);
-    }
 
     [TestMethod]
-    public void ReplaceTestHelper()
+    public void ReplaceTest()
+    {
+    //private readonly string pattern;
+    //private readonly string replacement;
+    //private readonly string source;
+    //private readonly string expected;
+    //private bool replaceFirst;
+        for(int i = 0; i < REPLACE_TESTS.Length; i++)
+        {
+            var t=REPLACE_TESTS[i];
+            bool.TryParse(t[4], out var b);
+
+            this.ReplaceTest(i, t[0], t[1], t[2], t[3], b);
+        }
+        Assert.IsTrue(true);
+    }
+    public void ReplaceTest(int i,string pattern,
+        string replacement, string source, string expected,bool replaceFirst)
     {
         RE2 re = null;
         try

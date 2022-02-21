@@ -25,24 +25,21 @@ public class RE2ReplaceAllFunctionTest
         new string[] { "[a-c]*", "defabcdef", "xydxyexyfxabcydxyexyfxy"},
       };
 
-    public static string[][] TestCases()
-    {
-        return REPLACE_FUNC_TESTS;
-    }
-
-    private readonly string pattern;
-    private readonly string input;
-    private readonly string expected;
-
-    public RE2ReplaceAllFunctionTest(string pattern, string input, string expected)
-    {
-        this.pattern = pattern;
-        this.input = input;
-        this.expected = expected;
-    }
 
     [TestMethod]
     public void TestReplaceAllFunc()
+    {
+    //private readonly string pattern;
+    //private readonly string input;
+    //private readonly string expected;
+        for(int i = 0; i < REPLACE_FUNC_TESTS.Length; i++)
+        {
+            var t = REPLACE_FUNC_TESTS[i];
+            TestReplaceAllFunc(i, t[0], t[1], t[2]);
+        }
+        Assert.IsTrue(true);
+    }
+    public void TestReplaceAllFunc(int i,string pattern,string input,string expected)
     {
         RE2 re = null;
         try
