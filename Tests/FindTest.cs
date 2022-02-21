@@ -62,14 +62,14 @@ public class FindTest
         // Each element is an even-Length array of indices into textUTF8.  Not null.
         public readonly int[][] matches;
 
-        public byte[] submatchBytes(int i, int j)
+        public byte[] SubmatchBytes(int i, int j)
         {
             return Utils.Subarray(textUTF8, matches[i][2 * j], matches[i][2 * j + 1]);
         }
 
-        public string submatchString(int i, int j)
+        public string SubmatchString(int i, int j)
         {
-            return GoTestUtils.FromUTF8(submatchBytes(i, j)); // yikes
+            return GoTestUtils.FromUTF8(SubmatchBytes(i, j)); // yikes
         }
 
         //@Override
@@ -257,27 +257,21 @@ public class FindTest
     new Test("(|a)*", "aa", 3, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2),
   };
 
-    public static Test[] testCases()
-    {
-        return FIND_TESTS;
-    }
+    public static Test[] TestCases() => FIND_TESTS;
 
     private readonly Test test;
 
-    public FindTest(Test test)
-    {
-        this.test = test;
-    }
+    public FindTest(Test test) => this.test = test;
 
     // First the simple cases.
 
     [Test]
-    public void testFindUTF8()
+    public void TestFindUTF8()
     {
         RE2 re = RE2.Compile(test.pat);
         if (!re.ToString().Equals(test.pat))
         {
-            fail(string.Format("RE2.ToString() = \"{0}\"; should be \"{1}\"", re.ToString(), test.pat));
+            Fail(string.Format("RE2.ToString() = \"{0}\"; should be \"{1}\"", re.ToString(), test.pat));
         }
         byte[] result = re.FindUTF8(test.textUTF8);
         if (test.matches.Length == 0 && GoTestUtils.Len(result) == 0)
@@ -286,18 +280,18 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.Format("findUTF8: expected no match; got one: {0}", test));
+            Fail(string.Format("findUTF8: expected no match; got one: {0}", test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.Format("findUTF8: expected match; got none: {1}", test));
+            Fail(string.Format("findUTF8: expected match; got none: {1}", test));
         }
         else
         {
-            byte[] expect = test.submatchBytes(0, 0);
+            byte[] expect = test.SubmatchBytes(0, 0);
             if (!Enumerable.SequenceEqual(expect, result))
             {
-                fail(
+                Fail(
                     string.Format(
                         "findUTF8: expected {0}; got {1}: {2}",
                         GoTestUtils.FromUTF8(expect),
@@ -308,38 +302,38 @@ public class FindTest
     }
 
     [Test]
-    public void testFind()
+    public void TestFind()
     {
         string result = RE2.Compile(test.pat).Find(test.text);
-        if (test.matches.Length == 0 && result.isEmpty())
+        if (test.matches.Length == 0 && string.IsNullOrEmpty(result))
         {
             // ok
         }
-        else if (test.matches.Length == 0 && !result.isEmpty())
+        else if (test.matches.Length == 0 && !string.IsNullOrEmpty(result))
         {
-            fail(string.format("find: expected no match; got one: %s", test));
+            Fail(string.Format("find: expected no match; got one: {0}", test));
         }
-        else if (test.matches.Length > 0 && result.isEmpty())
+        else if (test.matches.Length > 0 && string.IsNullOrEmpty(result))
         {
             // Tricky because an empty result has two meanings:
             // no match or empty match.
             int[] match = test.matches[0];
             if (match[0] != match[1])
             {
-                fail(string.format("find: expected match; got none: %s", test));
+                Fail(string.Format("find: expected match; got none: {0}", test));
             }
         }
         else
         {
-            string expect = test.submatchString(0, 0);
+            string expect = test.SubmatchString(0, 0);
             if (!expect.Equals(result))
             {
-                fail(string.format("find: expected %s got %s: %s", expect, result, test));
+                Fail(string.Format("find: expected {0} got {1}: {2}", expect, result, test));
             }
         }
     }
 
-    private void testFindIndexCommon(
+    private void TestFindIndexCommon(
         string testName, Test test, int[] result, bool resultIndicesAreUTF8)
     {
         if (test.matches.Length == 0 && GoTestUtils.Len(result) == 0)
@@ -348,11 +342,11 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("%s: expected no match; got one: %s", testName, test));
+            Fail(string.Format("{0}: expected no match; got one: {1}", testName, test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("%s: expected match; got none: %s", testName, test));
+            Fail(string.Format("{0}: expected match; got none: {1}", testName, test));
         }
         else
         {
@@ -363,35 +357,35 @@ public class FindTest
             int[] expect = test.matches[0]; // UTF-8 indices
             if (expect[0] != result[0] || expect[1] != result[1])
             {
-                fail(
-                    string.format(
-                        "%s: expected %s got %s: %s",
+                Fail(
+                    string.Format(
+                        "{0}: expected {1} got {2}: {3}",
                         testName,
-                        Arrays.ToString(expect),
-                        Arrays.ToString(result),
+                        (expect),
+                        (result),
                         test));
             }
         }
     }
 
     [Test]
-    public void testFindUTF8Index()
+    public void TestFindUTF8Index()
     {
-        testFindIndexCommon(
+        TestFindIndexCommon(
             "testFindUTF8Index", test, RE2.Compile(test.pat).FindUTF8Index(test.textUTF8), true);
     }
 
     [Test]
-    public void testFindIndex()
+    public void TestFindIndex()
     {
         int[] result = RE2.Compile(test.pat).FindIndex(test.text);
-        testFindIndexCommon("testFindIndex", test, result, false);
+        TestFindIndexCommon("testFindIndex", test, result, false);
     }
 
     // Now come the simple All cases.
 
     [Test]
-    public void testFindAllUTF8()
+    public void TestFindAllUTF8()
     {
         List<byte[]> result = RE2.Compile(test.pat).FindAllUTF8(test.textUTF8, -1);
         if (test.matches.Length == 0 && result == null)
@@ -400,34 +394,34 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("findAllUTF8: expected no match; got one: %s", test));
+            Fail(string.Format("findAllUTF8: expected no match; got one: {0}", test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            throw new AssertionError("findAllUTF8: expected match; got none: " + test);
+            throw new Exception("findAllUTF8: expected match; got none: " + test);
         }
         else
         {
             if (test.matches.Length != result.Count)
             {
-                fail(
-                    string.format(
-                        "findAllUTF8: expected %d matches; got %d: %s",
+                Fail(
+                    string.Format(
+                        "findAllUTF8: expected {0} matches; got {1}: {2}",
                         test.matches.Length,
                         result.Count,
                         test));
             }
             for (int i = 0; i < test.matches.Length; i++)
             {
-                byte[] expect = test.submatchBytes(i, 0);
-                if (!Arrays.Equals(expect, result.get(i)))
+                byte[] expect = test.SubmatchBytes(i, 0);
+                if (!Enumerable.SequenceEqual(expect, result[i]))
                 {
-                    fail(
-                        string.format(
-                            "findAllUTF8: match %d: expected %s; got %s: %s",
+                    Fail(
+                        string.Format(
+                            "findAllUTF8: match {0}: expected {0}; got {0}: {0}",
                             i / 2,
                             GoTestUtils.FromUTF8(expect),
-                            GoTestUtils.fromUTF8(result.get(i)),
+                            GoTestUtils.FromUTF8(result[i]),
                             test));
                 }
             }
@@ -435,7 +429,7 @@ public class FindTest
     }
 
     [Test]
-    public void testFindAll()
+    public void TestFindAll()
     {
         List<string> result = RE2.Compile(test.pat).FindAll(test.text, -1);
         if (test.matches.Length == 0 && result == null)
@@ -444,35 +438,36 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("findAll: expected no match; got one: %s", test));
+            Fail(string.Format("findAll: expected no match; got one: {0}", test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("findAll: expected match; got none: %s", test));
+            Fail(string.Format("findAll: expected match; got none: {0}", test));
         }
         else
         {
             if (test.matches.Length != result.Count)
             {
-                fail(
-                    string.format(
-                        "findAll: expected %d matches; got %d: %s",
+                Fail(
+                    string.Format(
+                        "findAll: expected {0} matches; got {1}: {2}",
                         test.matches.Length,
                         result.Count,
                         test));
             }
             for (int i = 0; i < test.matches.Length; i++)
             {
-                string expect = test.submatchString(i, 0);
-                if (!expect.Equals(result.get(i)))
+                string expect = test.SubmatchString(i, 0);
+                if (!expect.Equals(result[i]))
                 {
-                    fail(string.format("findAll: expected %s; got %s: %s", expect, result, test));
+                    Fail(string.Format("findAll: expected {0}; got {0}: {0}",
+                        expect, result, test));
                 }
             }
         }
     }
 
-    private void testFindAllIndexCommon(
+    private void TestFindAllIndexCommon(
         string testName, Test test, List<int[]> result, bool resultIndicesAreUTF8)
     {
         if (test.matches.Length == 0 && result == null)
@@ -481,19 +476,19 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("%s: expected no match; got one: %s", testName, test));
+            Fail(string.Format("{0}: expected no match; got one: {1}", testName, test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("%s: expected match; got none: %s", testName, test));
+            Fail(string.Format("{0}: expected match; got none: {1}", testName, test));
         }
         else
         {
             if (test.matches.Length != result.Count)
             {
-                fail(
-                    string.format(
-                        "%s: expected %d matches; got %d: %s",
+                Fail(
+                    string.Format(
+                        "{0}: expected {1} matches; got {2}: {3}",
                         testName,
                         test.matches.Length,
                         result.Count,
@@ -502,20 +497,20 @@ public class FindTest
             for (int k = 0; k < test.matches.Length; k++)
             {
                 int[] e = test.matches[k];
-                int[] res = result.get(k);
+                int[] res = result[k];
                 if (!resultIndicesAreUTF8)
                 {
                     res = GoTestUtils.Utf16IndicesToUtf8(res, test.text);
                 }
                 if (e[0] != res[0] || e[1] != res[1])
                 {
-                    fail(
-                        string.format(
-                            "%s: match %d: expected %s; got %s: %s",
+                    Fail(
+                        string.Format(
+                            "{0}: match {1}: expected {2}; got {3}: {4}",
                             testName,
                             k,
-                            Arrays.ToString(e), // (only 1st two elements matter here)
-                            Arrays.ToString(res),
+                            (e), // (only 1st two elements matter here)
+                            (res),
                             test));
                 }
             }
@@ -523,9 +518,9 @@ public class FindTest
     }
 
     [Test]
-    public void testFindAllUTF8Index()
+    public void TestFindAllUTF8Index()
     {
-        testFindAllIndexCommon(
+        TestFindAllIndexCommon(
             "testFindAllUTF8Index",
             test,
             RE2.Compile(test.pat).FindAllUTF8Index(test.textUTF8, -1),
@@ -533,22 +528,22 @@ public class FindTest
     }
 
     [Test]
-    public void testFindAllIndex()
+    public void TestFindAllIndex()
     {
-        testFindAllIndexCommon(
+        TestFindAllIndexCommon(
             "testFindAllIndex", test, RE2.Compile(test.pat).FindAllIndex(test.text, -1), false);
     }
 
     // Now come the Submatch cases.
 
-    private void testSubmatchBytes(string testName, FindTest.Test test, int n, byte[][] result)
+    private void TestSubmatchBytes(string testName, FindTest.Test test, int n, byte[][] result)
     {
         int[] submatches = test.matches[n];
         if (submatches.Length != GoTestUtils.Len(result) * 2)
         {
-            fail(
-                string.format(
-                    "%s %d: expected %d submatches; got %d: %s",
+            Fail(
+                string.Format(
+                    "{0} {1}: expected {2} submatches; got {3}: {4}",
                     testName,
                     n,
                     submatches.Length / 2,
@@ -561,16 +556,16 @@ public class FindTest
             {
                 if (result[k] != null)
                 {
-                    fail(string.format("%s %d: expected null got %s: %s", testName, n, result, test));
+                    Fail(string.Format("{0} {1}: expected null got {2}: {3}", testName, n, result, test));
                 }
                 continue;
             }
-            byte[] expect = test.submatchBytes(n, k);
-            if (!Arrays.Equals(expect, result[k]))
+            byte[] expect = test.SubmatchBytes(n, k);
+            if (!Enumerable.SequenceEqual(expect, result[k]))
             {
-                fail(
-                    string.format(
-                        "%s %d: expected %s; got %s: %s",
+                Fail(
+                    string.Format(
+                        "{0} {1}: expected {2}; got {3}: {4}",
                         testName,
                         n,
                         GoTestUtils.FromUTF8(expect),
@@ -581,7 +576,7 @@ public class FindTest
     }
 
     [Test]
-    public void testFindUTF8Submatch()
+    public void TestFindUTF8Submatch()
     {
         byte[][] result = RE2.Compile(test.pat).FindUTF8Submatch(test.textUTF8);
         if (test.matches.Length == 0 && result == null)
@@ -590,27 +585,27 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("expected no match; got one: %s", test));
+            Fail(string.Format("expected no match; got one: {0}", test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("expected match; got none: %s", test));
+            Fail(string.Format("expected match; got none: {0}", test));
         }
         else
         {
-            testSubmatchBytes("testFindUTF8Submatch", test, 0, result);
+            TestSubmatchBytes("testFindUTF8Submatch", test, 0, result);
         }
     }
 
     // (Go: testSubmatchString)
-    private void testSubmatch(string testName, Test test, int n, string[] result)
+    private void TestSubmatch(string testName, Test test, int n, string[] result)
     {
         int[] submatches = test.matches[n];
         if (submatches.Length != GoTestUtils.Len(result) * 2)
         {
-            fail(
-                string.format(
-                    "%s %d: expected %d submatches; got %d: %s",
+            Fail(
+                string.Format(
+                    "{0} {1}: expected {2} submatches; got {3}: {4}",
                     testName,
                     n,
                     submatches.Length / 2,
@@ -621,25 +616,25 @@ public class FindTest
         {
             if (submatches[k] == -1)
             {
-                if (result[k / 2] != null && !result[k / 2].isEmpty())
+                if (result[k / 2] != null && result[k / 2]!="")
                 {
-                    fail(
-                        string.format(
-                            "%s %d: expected null got %s: %s", testName, n, Arrays.ToString(result), test));
+                    Fail(
+                        string.Format(
+                            "{0} {1}: expected null got {2}: {3}", testName, n, (result), test));
                 }
                 continue;
             }
-            System.err.println(testName + "  " + test + " " + n + " " + k + " ");
-            string expect = test.submatchString(n, k / 2);
+            Console.Error.WriteLine(testName + "  " + test + " " + n + " " + k + " ");
+            string expect = test.SubmatchString(n, k / 2);
             if (!expect.Equals(result[k / 2]))
             {
-                fail(
-                    string.format(
-                        "%s %d: expected %s got %s: %s",
+                Fail(
+                    string.Format(
+                        "{0} {1}: expected {2} got {3}: {4}",
                         testName,
                         n,
                         expect,
-                        Arrays.ToString(result),
+                        (result),
                         test));
             }
         }
@@ -647,7 +642,7 @@ public class FindTest
 
     // (Go: TestFindStringSubmatch)
     [Test]
-    public void testFindSubmatch()
+    public void TestFindSubmatch()
     {
         string[] result = RE2.Compile(test.pat).FindSubmatch(test.text);
         if (test.matches.Length == 0 && result == null)
@@ -656,27 +651,27 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("expected no match; got one: %s", test));
+            Fail(string.Format("expected no match; got one: {0}", test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("expected match; got none: %s", test));
+            Fail(string.Format("expected match; got none: {0}", test));
         }
         else
         {
-            testSubmatch("testFindSubmatch", test, 0, result);
+            TestSubmatch("testFindSubmatch", test, 0, result);
         }
     }
 
-    private void testSubmatchIndices(
+    private void TestSubmatchIndices(
         string testName, Test test, int n, int[] result, bool resultIndicesAreUTF8)
     {
         int[] expect = test.matches[n];
         if (expect.Length != GoTestUtils.Len(result))
         {
-            fail(
-                string.format(
-                    "%s %d: expected %d matches; got %d: %s",
+            Fail(
+                string.Format(
+                    "{0} {1}: expected {2} matches; got {3}: {4}",
                     testName,
                     n,
                     expect.Length / 2,
@@ -692,19 +687,19 @@ public class FindTest
         {
             if (expect[k] != result[k])
             {
-                fail(
-                    string.format(
-                        "%s %d: submatch error: expected %s got %s: %s",
+                Fail(
+                    string.Format(
+                        "{0} {1}: submatch error: expected {2} got {3}: {4}",
                         testName,
                         n,
-                        Arrays.ToString(expect),
-                        Arrays.ToString(result),
+                        (expect),
+                        (result),
                         test));
             }
         }
     }
 
-    private void testFindSubmatchIndexCommon(
+    private void TestFindSubmatchIndexCommon(
         string testName, Test test, int[] result, bool resultIndicesAreUTF8)
     {
         if (test.matches.Length == 0 && result == null)
@@ -713,22 +708,22 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("%s: expected no match; got one: %s", testName, test));
+            Fail(string.Format("{0}: expected no match; got one: {1}", testName, test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("%s: expected match; got none: %s", testName, test));
+            Fail(string.Format("{0}: expected match; got none: {1}", testName, test));
         }
         else
         {
-            testSubmatchIndices(testName, test, 0, result, resultIndicesAreUTF8);
+            TestSubmatchIndices(testName, test, 0, result, resultIndicesAreUTF8);
         }
     }
 
     [Test]
-    public void testFindUTF8SubmatchIndex()
+    public void TestFindUTF8SubmatchIndex()
     {
-        testFindSubmatchIndexCommon(
+        TestFindSubmatchIndexCommon(
             "testFindSubmatchIndex",
             test,
             RE2.Compile(test.pat).FindUTF8SubmatchIndex(test.textUTF8),
@@ -737,9 +732,9 @@ public class FindTest
 
     // (Go: TestFindStringSubmatchIndex)
     [Test]
-    public void testFindSubmatchIndex()
+    public void TestFindSubmatchIndex()
     {
-        testFindSubmatchIndexCommon(
+        TestFindSubmatchIndexCommon(
             "testFindStringSubmatchIndex",
             test,
             RE2.Compile(test.pat).FindSubmatchIndex(test.text),
@@ -750,7 +745,7 @@ public class FindTest
 
     // (Go: TestFindAllSubmatch)
     [Test]
-    public void testFindAllUTF8Submatch()
+    public void TestFindAllUTF8Submatch()
     {
         List<byte[][]> result = RE2.Compile(test.pat).FindAllUTF8Submatch(test.textUTF8, -1);
         if (test.matches.Length == 0 && result == null)
@@ -759,30 +754,30 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("expected no match; got one: %s", test));
+            Fail(string.Format("expected no match; got one: {0}", test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("expected match; got none: %s", test));
+            Fail(string.Format("expected match; got none: {0}", test));
         }
         else if (test.matches.Length != result.Count)
         {
-            fail(
-                string.format(
-                    "expected %d matches; got %d: %s", test.matches.Length, result.Count, test));
+            Fail(
+                string.Format(
+                    "expected {0} matches; got {1}: {2}", test.matches.Length, result.Count, test));
         }
         else
         {
             for (int k = 0; k < test.matches.Length; ++k)
             {
-                testSubmatchBytes("testFindAllSubmatch", test, k, result.get(k));
+                TestSubmatchBytes("testFindAllSubmatch", test, k, result[k]);
             }
         }
     }
 
     // (Go: TestFindAllStringSubmatch)
     [Test]
-    public void testFindAllSubmatch()
+    public void TestFindAllSubmatch()
     {
         List<string[]> result = RE2.Compile(test.pat).FindAllSubmatch(test.text, -1);
         if (test.matches.Length == 0 && result == null)
@@ -791,29 +786,29 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("expected no match; got one: %s", test));
+            Fail(string.Format("expected no match; got one:{0}", test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("expected match; got none: %s", test));
+            Fail(string.Format("expected match; got none: {0}", test));
         }
         else if (test.matches.Length != result.Count)
         {
-            fail(
-                string.format(
-                    "expected %d matches; got %d: %s", test.matches.Length, result.Count, test));
+            Fail(
+                string.Format(
+                    "expected {0} matches; got {1}: {2}", test.matches.Length, result.Count, test));
         }
         else
         {
             for (int k = 0; k < test.matches.Length; ++k)
             {
-                testSubmatch("testFindAllStringSubmatch", test, k, result.get(k));
+                TestSubmatch("testFindAllStringSubmatch", test, k, result[k]);
             }
         }
     }
 
     // (Go: testFindSubmatchIndex)
-    private void testFindAllSubmatchIndexCommon(
+    private void TestFindAllSubmatchIndexCommon(
         string testName, Test test, List<int[]> result, bool resultIndicesAreUTF8)
     {
         if (test.matches.Length == 0 && result == null)
@@ -822,17 +817,17 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("%s: expected no match; got one: %s", testName, test));
+            Fail(string.Format("{0}: expected no match; got one: {1}", testName, test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("%s: expected match; got none: %s", testName, test));
+            Fail(string.Format("{0}: expected match; got none: {1}", testName, test));
         }
         else if (test.matches.Length != result.Count)
         {
-            fail(
-                string.format(
-                    "%s: expected %d matches; got %d: %s",
+            Fail(
+                string.Format(
+                    "{0}: expected {1} matches; got {2}: {3}",
                     testName,
                     test.matches.Length,
                     result.Count,
@@ -842,21 +837,21 @@ public class FindTest
         {
             for (int k = 0; k < test.matches.Length; ++k)
             {
-                testSubmatchIndices(testName, test, k, result.get(k), resultIndicesAreUTF8);
+                TestSubmatchIndices(testName, test, k, result[k], resultIndicesAreUTF8);
             }
         }
     }
 
-    private void fail(object p)
+    private void Fail(string p)
     {
-        throw new NotImplementedException();
+        Assert.Fail(p);
     }
 
     // (Go: TestFindAllSubmatchIndex)
     [Test]
-    public void testFindAllUTF8SubmatchIndex()
+    public void TestFindAllUTF8SubmatchIndex()
     {
-        testFindAllSubmatchIndexCommon(
+        TestFindAllSubmatchIndexCommon(
             "testFindAllUTF8SubmatchIndex",
             test,
             RE2.Compile(test.pat).FindAllUTF8SubmatchIndex(test.textUTF8, -1),
@@ -865,9 +860,9 @@ public class FindTest
 
     // (Go: TestFindAllStringSubmatchIndex)
     [Test]
-    public void testFindAllSubmatchIndex()
+    public void TestFindAllSubmatchIndex()
     {
-        testFindAllSubmatchIndexCommon(
+        TestFindAllSubmatchIndexCommon(
             "testFindAllSubmatchIndex",
             test,
             RE2.Compile(test.pat).FindAllSubmatchIndex(test.text, -1),
