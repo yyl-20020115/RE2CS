@@ -5,15 +5,6 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RE2CS", "RE2CS\RE2CS.csproj", "{CB965B58-4768-4D9D-AAD5-8A770713FB0A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestData", "TestData", "{7E310EBA-F982-4269-B0C2-CF3AC9D71304}"
-	ProjectSection(SolutionItems) = preProject
-		TestData\basic.dat = TestData\basic.dat
-		TestData\nullsubexpr.dat = TestData\nullsubexpr.dat
-		TestData\re2-exhaustive.txt.gz = TestData\re2-exhaustive.txt.gz
-		TestData\re2-search.txt = TestData\re2-search.txt
-		TestData\repetition.dat = TestData\repetition.dat
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{9A633502-5E97-4017-8221-7CB6DBA54463}"
 	ProjectSection(SolutionItems) = preProject
 		CONTRIBUTING.md = CONTRIBUTING.md

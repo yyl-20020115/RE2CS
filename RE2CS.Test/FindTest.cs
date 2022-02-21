@@ -150,11 +150,9 @@ public class FindTest
     new Test("\\b", "xx", 2, 0, 0, 2, 2),
     new Test("\\b", "x y", 4, 0, 0, 1, 1, 2, 2, 3, 3),
     new Test("\\b", "xx yy", 4, 0, 0, 2, 2, 3, 3, 5, 5),
-    //FIXME:
-    //new Test("\\B", "x", 0), //has to change:was 0
+    new Test("\\B", "x", 0), //has to change:was 0
     new Test("\\B", "xx", 1, 1, 1),
-    //FIXME:
-    //new Test("\\B", "x y", 0), //has to change:was 0
+    new Test("\\B", "x y", 0), //has to change:was 0
     new Test("\\B", "xx yy", 2, 1, 1, 4, 4),
 
     // RE2 tests

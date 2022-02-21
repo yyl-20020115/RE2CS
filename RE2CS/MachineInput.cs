@@ -212,7 +212,7 @@ public abstract class MachineInput
             pos += start;
             int r1 = pos > 0 && pos <= str.Length ?
                 str.CodePointBefore(pos) : -1;
-            int r2 = pos < str.Length ? str[pos-1] : -1;
+            int r2 = pos < str.Length ? char.ConvertToUtf32(str,pos)  : -1;
             return Utils.EmptyOpContext(r1, r2);
         }
         public override int EndPos() => this.end;
@@ -223,9 +223,10 @@ public abstract class MachineInput
             //BUG: string.IndexOf:
             //    "\\a\\f\\n\\r\\t\\v".IndexOf("\\a\\f\\n\\r\\t\\v") 
             //    return 1
-            if (hayStack == needle && pos!=i)
+            if (i >= 0 && (i<pos || i + needle.Length > hayStack.Length))
             {
-                i = IndexOfFallback(hayStack,needle,pos);
+                //NOTICE: this is wrong, so we have to use fall back
+                i = IndexOfFallback(hayStack, needle, pos);
             }
 
             return i;

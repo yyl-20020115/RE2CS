@@ -10,7 +10,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 
 namespace RE2CS.Tests;
@@ -79,35 +81,51 @@ public class ExecTest
     [TestMethod]
     public void TestRE2Search()
     {
-        TestRE2("re2-search.txt");
+        var file = "re2-search.txt";
+        using var reader = new StreamReader(file, System.Text.Encoding.UTF8);
+
+        TestRE2(file,reader);
     }
 
     [TestMethod]
-    public void testRE2Exhaustive()
+    public void TestLineEnd()
     {
-        TestRE2("re2-exhaustive.txt.gz"); // takes about 30s
+        var full = ".*\n.*";
+
+        var re = RE2.Compile(full);
+
+        Assert.IsTrue(re.Match("a\nb"));
+        Assert.IsTrue(re.Match("a"+Environment.NewLine+"b"));
+
+        full = ".*\r.*";
+        re = RE2.Compile(full);
+
+        Assert.IsFalse(re.Match("a\nb"));
+        Assert.IsTrue(re.Match("a" + Environment.NewLine + "b"));
+
+    }
+    [TestMethod]
+    public void TestRE2Exhaustive()
+    {
+        var file = "re2-exhaustive.txt.gz";
+        using var fs = new FileStream(file, FileMode.Open);
+        using var gz = new GZipStream(fs, CompressionMode.Decompress, true);
+        using var reader = new UNIXBufferedReader(gz, System.Text.Encoding.UTF8);
+
+        TestRE2(file,reader); // takes about 30s
     }
 
 
-    public void TestRE2(string file)
+    public void TestRE2(string file,StreamReader reader)
     {
-        //InputStream _in = ExecTest.getResourceAsStream("/" + file);
-        //// TODO(adonovan): call _in.close() on all paths.
-        //if (file.EndsWith(".gz"))
-        //{
-        //    _in = new GZIPInputStream(_in);
-        //    file = file.Substring(0, file.Length - ".gz".Length); // for errors
-        //}
-
         int lineno = 0;
-        UNIXBufferedReader r = new UNIXBufferedReader(new StreamReader(file,System.Text.Encoding.UTF8));
         List<string> strings = new List<string>();
         int input = 0; // next index within strings to read
         bool inStrings = false;
         RE2 re = null, refull = null;
         int nfail = 0, ncase = 0;
-        string line;
-        while ((line = r.readLine()) != null)
+        string? line;
+        while ((line = reader.ReadLine()) != null)
         {
             lineno++;
             if (line=="")
@@ -123,7 +141,7 @@ public class ExecTest
             if ('A' <= first && first <= 'Z')
             {
                 // Test name.
-                Console.Error.WriteLine(line);
+                Debug.WriteLine(line);
                 continue;
             }
             else if (line.Equals("strings"))
@@ -146,10 +164,23 @@ public class ExecTest
             }
             else if (first == '"')
             {
-                string q;
+                string q ="";
+                var allow_multiline = false;
+#if false
+                if (line.Length<2||line[line.Length-1]!='\"')
+                {
+
+                    //skip one line
+                    var following_line = reader.ReadLine();
+                    if (following_line == null) break;
+                    lineno++;
+                    line = line + "\n" + following_line;
+                    allow_multiline = true;
+                }
+#endif       
                 try
                 {
-                    q = Strconv.Unquote(line);
+                    q = Strconv.Unquote(line,allow_multiline);
                 }
                 catch (Exception e)
                 {
@@ -175,7 +206,7 @@ public class ExecTest
                         // We don't and likely never will support \C; keep going.
                         continue;
                     }
-                    Console.Error.WriteLine("{0}:{1}: compile {2}: {3}\n", file, lineno, q, e.Message);
+                    Debug.WriteLine("{0}:{1}: compile {2}: {3}\n", file, lineno, q, e.Message);
                     if (++nfail >= 100)
                     {
                         Fail("stopping after " + nfail + " errors");
@@ -217,7 +248,7 @@ public class ExecTest
                     // runes, so it disagrees.  Skip those cases.
                     continue;
                 }
-                List<string> res = line.Split(':').ToList();// Splitter.on(';').splitToList(line);
+                List<string> res = line.Split(';').ToList();// Splitter.on(';').splitToList(line);
                 if (res.Count != 4)
                 {
                     Fail(string.Format("{0}:{1}: have {2} test results, want {3}", file, lineno, res.Count, 4));
@@ -236,9 +267,9 @@ public class ExecTest
                         have = Utf16IndicesToUtf8(have, text);
                     }
                     int[] want = ParseResult(file, lineno, res[i]); // UTF-8 indices
-                    if (!Enumerable.SequenceEqual(want, have))
+                    if (want!=null && have!=null && !Enumerable.SequenceEqual(want, have))
                     {
-                        Console.Error.WriteLine(
+                        Debug.WriteLine(
                             "{0}:{1}: {2}[partial={3},longest={4}].findSubmatchIndex({5}) = " + "{6}, want {7}\n",
                             file,
                             lineno,
@@ -259,7 +290,7 @@ public class ExecTest
                     bool b = regexp.Match(text);
                     if (b != (want != null))
                     {
-                        Console.Error.WriteLine(
+                        Debug.WriteLine(
                             "{0}:{1}: {2}[partial={3},longest={4}].match({5}) = " + "{6}, want {7}\n",
                             file,
                             lineno,
@@ -269,7 +300,7 @@ public class ExecTest
                             text,
                             b,
                             !b);
-                        if (++nfail >= 100)
+                        if (++nfail >= 200)
                         {
                             Fail("stopping after " + nfail + " errors");
                         }
@@ -297,7 +328,7 @@ public class ExecTest
         }
         else
         {
-            Console.Error.WriteLine("{0} cases tested\n", ncase);
+            Debug.WriteLine("{0} cases tested\n", ncase);
         }
     }
 
@@ -374,8 +405,8 @@ public class ExecTest
                         Fail(string.Format("{0}:{1}: invalid pair {2}", file, lineno, pair));
                     }
                     int lo = -1, hi = -2;
-                    int.TryParse(pair.Substring(0, k-0), out hi);
-                    int.TryParse(pair.Substring(k + 1), out lo);
+                    int.TryParse(pair.Substring(0, k-0), out lo);
+                    int.TryParse(pair.Substring(k + 1), out hi);
                     if (lo > hi)
                     {
                         Fail(string.Format("{0}:{1}: invalid pair {2}", file, lineno, pair));
@@ -417,13 +448,12 @@ public class ExecTest
     {
 
         // TODO(adonovan): call _in.close() on all paths.
-        UNIXBufferedReader r = new UNIXBufferedReader(
-            new StreamReader(file,System.Text.Encoding.UTF8));
+        using var reader = new StreamReader(file,System.Text.Encoding.UTF8);
         int lineno = 0;
         int nerr = 0;
-        string line;
+        string? line;
         string lastRegexp = "";
-        while ((line = r.readLine()) != null)
+        while ((line = reader.ReadLine()) != null)
         {
             lineno++;
             // if (line.isEmpty()) {
@@ -450,7 +480,7 @@ public class ExecTest
                 }
                 if (field[i].Equals("NIL"))
                 {
-                    Console.Error.WriteLine("{0}:{1}: skip: {2}\n", file, lineno, line);
+                    Debug.WriteLine("{0}:{1}: skip: {2}\n", file, lineno, line);
                     continue;
                 }
             }
@@ -545,7 +575,7 @@ public class ExecTest
                         int i = flag.IndexOf(':', 1);
                         if (i < 0)
                         {
-                            Console.Error.WriteLine("skip: {0}\n", line);
+                            Debug.WriteLine("skip: {0}\n", line);
                             continue;
                         }
                         flag = flag.Substring(1 + i + 1);
@@ -564,7 +594,7 @@ public class ExecTest
                 case '7':
                 case '8':
                 case '9':
-                    Console.Error.WriteLine("skip: {0}\n", line);
+                    Debug.WriteLine("skip: {0}\n", line);
                     continue;
             }
 
@@ -572,7 +602,7 @@ public class ExecTest
             // formats.
             if (field.Count < 4)
             {
-                Console.Error.WriteLine("{0}:{1}: too few fields: {2}\n", file, lineno, line);
+                Debug.WriteLine("{0}:{1}: too few fields: {2}\n", file, lineno, line);
                 nerr++;
                 continue;
             }
@@ -587,7 +617,7 @@ public class ExecTest
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine("{0}:{1}: cannot unquote {2}\n", file, lineno, f);
+                    Debug.WriteLine("{0}:{1}: cannot unquote {2}\n", file, lineno, f);
                     nerr++;
                 }
                 f = "\"" + field[2] + "\"";
@@ -597,7 +627,7 @@ public class ExecTest
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine("{0}:{1}: cannot unquote {2}\n", file, lineno, f);
+                    Debug.WriteLine("{0}:{1}: cannot unquote {2}\n", file, lineno, f);
                     nerr++;
                 }
             }
@@ -623,7 +653,7 @@ public class ExecTest
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine("{0}:{1}: cannot parse result {2}\n", file, lineno, field[3]);
+                Debug.WriteLine("{0}:{1}: cannot parse result {2}\n", file, lineno, field[3]);
                 nerr++;
                 continue;
             }
@@ -662,21 +692,21 @@ public class ExecTest
                 {
                     if (shouldCompileMatch[0])
                     {
-                        Console.Error.WriteLine("{0}:{1}: {2} did not compile\n", file, lineno, pattern);
+                        Debug.WriteLine("{0}:{1}: {2} did not compile\n", file, lineno, pattern);
                         nerr++;
                     }
                     continue;
                 }
                 if (!shouldCompileMatch[0])
                 {
-                    Console.Error.WriteLine("{0}:{1}: {2} should not compile\n", file, lineno, pattern);
+                    Debug.WriteLine("{0}:{1}: {2} should not compile\n", file, lineno, pattern);
                     nerr++;
                     continue;
                 }
                 bool match = re.Match(text);
                 if (match != shouldCompileMatch[1])
                 {
-                    Console.Error.WriteLine(
+                    Debug.WriteLine(
                         "{0}:{1}: {2}.match({3}) = {4}, want {5}\n", file, lineno, pattern, text, match, !match);
                     nerr++;
                     continue;
@@ -688,7 +718,7 @@ public class ExecTest
                 }
                 if ((haveArray.Length > 0) != match)
                 {
-                    Console.Error.WriteLine(
+                    Debug.WriteLine(
                         "{0}:{1}: {2}.match({3}) = {4}, " + "but {5}.findSubmatchIndex({6}) = {7}\n",
                         file,
                         lineno,
@@ -707,9 +737,9 @@ public class ExecTest
                 {
                     have.Add(haveArray[i]);
                 }
-                if (!have.Equals(pos))
+                if (!Enumerable.SequenceEqual(have, pos))//; have.Equals(pos))
                 {
-                    Console.Error.WriteLine(
+                    Debug.WriteLine(
                         "{0}:{1}: {2}.findSubmatchIndex({3}) = {4}, want {5}\n",
                         file,
                         lineno,
@@ -734,7 +764,6 @@ public class ExecTest
     }
 
     private static List<int> ParseFowlerResult(string s, bool[] shouldCompileMatch)
-
     {
         string olds = s;
         //   Field 4: the test outcome. This is either one of the posix error

@@ -154,7 +154,7 @@ public static class Strconv
     // that s quotes.  (If s is single-quoted, it would be a Go
     // character literal; Unquote returns the corresponding
     // one-character string.)
-    public static string Unquote(string s)
+    public static string Unquote(string s, bool allow_multiline = false)
     {
         int n = s.Length;
         if (n < 2) {
@@ -177,7 +177,7 @@ public static class Strconv
         {
             throw new InvalidOperationException("invalid quotation mark");
         }
-        if (s.IndexOf('\n') >= 0)
+        if (s.IndexOf('\n') >= 0 && !allow_multiline)
         {
             throw new InvalidOperationException("multiline string literal");
         }

@@ -372,9 +372,9 @@ public static class UnicodeTables
     {
         return new int[][] {
       new[]{0x0041, 0x005A, 1},
-new[]{0x00C0, 0x00D6, 1},
-new[]{0x00D8, 0x00DE, 1},
-new[]{0x0100, 0x0136, 2},
+      new[]{0x00C0, 0x00D6, 1},
+      new[]{0x00D8, 0x00DE, 1},
+      new[]{0x0100, 0x0136, 2},
       new[]{0x0139, 0x0147, 2},
       new[]{0x014A, 0x0178, 2},
       new[]{0x0179, 0x017D, 2},

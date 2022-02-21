@@ -17,19 +17,11 @@ public class PatternSyntaxException : Exception
     private readonly string error; // the nature of the error
     private readonly string input; // the partial input at the point of error.
 
-    public PatternSyntaxException(string error, string input)
-          : base("error parsing regexp: " + error + ": `" + input + "`")
+    public PatternSyntaxException(string error, string input = "")
+          : base("error parsing regexp: " + error + (String.IsNullOrEmpty(input) ? "": ": `" + input + "`"))
     {
         this.error = error;
         this.input = input;
-    }
-
-    public PatternSyntaxException(string error)
-           : base("error parsing regexp: " + error)
-    {
-
-        this.error = error;
-        this.input = "";
     }
 
     /**

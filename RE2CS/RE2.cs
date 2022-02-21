@@ -280,7 +280,7 @@ public class RE2
         }
 
         m.Init(ncap);
-        int[] cap = m.Match(_in, pos, anchor) ? m.Submatches() : null;
+        var cap = m.Match(_in, pos, anchor) ? m.Submatches() : null;
         PutMachine(m, isNew);
         return cap;
     }

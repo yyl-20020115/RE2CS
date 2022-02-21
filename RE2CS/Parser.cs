@@ -930,6 +930,7 @@ public class Parser
                     break;
 
                 case '.':
+                //for_dot:
                     if ((flags & RE2.DOT_NL) != 0)
                     {
                         Op(Regexp.Op.ANY_CHAR);
@@ -1003,8 +1004,11 @@ public class Parser
                                     Op(Regexp.Op.NO_WORD_BOUNDARY);
                                     goto outswitch;
                                 case 'C':
-                                    // any byte; not supported
-                                    throw new PatternSyntaxException(ERR_INVALID_ESCAPE, "\\C");
+                                    //NOTICE:use any char instead
+                                    //Op(Regexp.Op.ANY_CHAR_NOT_NL);
+                                    //goto outswitch;
+                                // any byte; not supported
+                                throw new PatternSyntaxException(ERR_INVALID_ESCAPE, "\\C");
                                 case 'Q':
                                     {
                                         // \Q ... \E: the ... is always literals
@@ -1718,23 +1722,15 @@ public class Parser
         {
             if(UnicodeTables.FOLD_CATEGORIES.TryGetValue(name,out var cat))
             {
-                return Pair<int[][], int[][]>.of(table, cat);
             }
-            else
-            {
-
-            }
+            return Pair<int[][], int[][]>.of(table, cat);
         }
         if (UnicodeTables.SCRIPTS.TryGetValue(name,out table))
         {
             if(UnicodeTables.FOLD_SCRIPT.TryGetValue(name,out var script))
             {
-                return Pair<int[][], int[][]>.of(table, script);
             }
-            else
-            {
-
-            }
+            return Pair<int[][], int[][]>.of(table, script);
         }
         return null;
     }
