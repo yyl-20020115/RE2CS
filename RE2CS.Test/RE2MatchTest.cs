@@ -22,10 +22,6 @@ public class RE2MatchTest
     }
     public void TestMatch(FindTest.Test test)
     {
-        if (test.pat == "\\a\\f\\n\\r\\t\\v")
-        {
-            //TODO: why failed?
-        }
         RE2 re = RE2.Compile(test.pat);
         bool m = re.Match(test.text);
         if (m != (test.matches.Length > 0))

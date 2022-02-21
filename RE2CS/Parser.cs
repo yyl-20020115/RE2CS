@@ -837,7 +837,7 @@ public class Parser
         public int Pop()
         {
             int r = char.ConvertToUtf32(str,_pos);// str.codePointAt(Pos);
-            _pos += new Rune(r).Utf16SequenceLength;//. Character.charCount(r);
+            _pos += (r > char.MaxValue ? 2 : 1);// new Rune(r).Utf16SequenceLength;//. Character.charCount(r);
             return r;
         }
 
@@ -1612,7 +1612,7 @@ public class Parser
             // If you want a backspace, embed a literal backspace
             // character or use \x08.
             case 'a':
-                return 7; // No \a in Java
+                return '\a'; // No \a in Java
             case 'f':
                 return '\f';
             case 'n':

@@ -219,7 +219,16 @@ public abstract class MachineInput
 
         private int IndexOf(string hayStack, string needle, int pos)
         {
-            return hayStack.IndexOf(needle, pos);
+            var i = hayStack.IndexOf(needle, pos);
+            //BUG: string.IndexOf:
+            //    "\\a\\f\\n\\r\\t\\v".IndexOf("\\a\\f\\n\\r\\t\\v") 
+            //    return 1
+            if (hayStack == needle && pos!=i)
+            {
+                i = IndexOfFallback(hayStack,needle,pos);
+            }
+
+            return i;
             //return indexOfFallback(hayStack, needle, pos);
         }
 

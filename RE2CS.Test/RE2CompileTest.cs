@@ -50,17 +50,29 @@ public class RE2CompileTest
         };
     }
 
-    private string input;
-    private string expectedError;
+    //private string input;
+    //private string expectedError;
 
-    public RE2CompileTest(string input, string expectedError)
-    {
-        this.input = input;
-        this.expectedError = expectedError;
-    }
+    //public RE2CompileTest(string input, string expectedError)
+    //{
+    //    this.input = input;
+    //    this.expectedError = expectedError;
+    //}
 
     [TestMethod]
     public void TestCompile()
+    {
+        var tests = TestData();
+
+        for(int i=0; i<tests.Length; i++)
+        {
+            var test = tests[i];
+            this.TestCompile(test[0], test[1]);
+        }
+
+        Assert.IsTrue(true);
+    }
+    public void TestCompile(string input,string expectedError)
     {
         try
         {
