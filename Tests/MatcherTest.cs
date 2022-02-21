@@ -95,7 +95,7 @@ public class MatcherTest
     [Test]
     public void TestGroupCount()
     {
-        ApiTestUtils.testGroupCount("(a)(b(c))d?(e)", 4);
+        ApiTestUtils.TestGroupCount("(a)(b(c))d?(e)", 4);
     }
 
     [Test]
@@ -124,9 +124,9 @@ public class MatcherTest
         ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 2, "cde");
         ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 3, "de");
         ApiTestUtils.TestFind("abcdefgh", ".*[aeiou]", 4, "e");
-        ApiTestUtils.testFindNoMatch("abcdefgh", ".*[aeiou]", 5);
-        ApiTestUtils.testFindNoMatch("abcdefgh", ".*[aeiou]", 6);
-        ApiTestUtils.testFindNoMatch("abcdefgh", ".*[aeiou]", 7);
+        ApiTestUtils.TestFindNoMatch("abcdefgh", ".*[aeiou]", 5);
+        ApiTestUtils.TestFindNoMatch("abcdefgh", ".*[aeiou]", 6);
+        ApiTestUtils.TestFindNoMatch("abcdefgh", ".*[aeiou]", 7);
     }
 
     [Test]
@@ -173,7 +173,7 @@ public class MatcherTest
     {
         try
         {
-            ApiTestUtils.testInvalidGroup("abc", "xxx", 0);
+            ApiTestUtils.TestInvalidGroup("abc", "xxx", 0);
             Fail();
         }
         catch (Exception e)
@@ -188,7 +188,7 @@ public class MatcherTest
     {
         try
         {
-            ApiTestUtils.testInvalidGroup("abc", "abc", 1);
+            ApiTestUtils.TestInvalidGroup("abc", "abc", 1);
             Fail();
         }
         catch (IndexOutOfRangeException e)

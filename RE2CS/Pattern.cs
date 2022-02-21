@@ -163,7 +163,7 @@ public class Pattern
     public Matcher Matcher(byte[] input) => new Matcher(this, MatcherInput.Utf8(input));
 
     // This is visible for testing.
-    Matcher Matcher(MatcherInput input) => new Matcher(this, input);
+    public Matcher Matcher(MatcherInput input) => new Matcher(this, input);
 
     /**
      * Splits input around instances of the regular expression. It returns an array giving the strings

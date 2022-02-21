@@ -196,11 +196,11 @@ public class PatternTest
     public void TestGroupCount()
     {
         // It is a simple delegation, but still test it.
-        ApiTestUtils.testGroupCount("(.*)ab(.*)a", 2);
-        ApiTestUtils.testGroupCount("(.*)(ab)(.*)a", 3);
-        ApiTestUtils.testGroupCount("(.*)((a)b)(.*)a", 4);
-        ApiTestUtils.testGroupCount("(.*)(\\(ab)(.*)a", 3);
-        ApiTestUtils.testGroupCount("(.*)(\\(a\\)b)(.*)a", 3);
+        ApiTestUtils.TestGroupCount("(.*)ab(.*)a", 2);
+        ApiTestUtils.TestGroupCount("(.*)(ab)(.*)a", 3);
+        ApiTestUtils.TestGroupCount("(.*)((a)b)(.*)a", 4);
+        ApiTestUtils.TestGroupCount("(.*)(\\(ab)(.*)a", 3);
+        ApiTestUtils.TestGroupCount("(.*)(\\(a\\)b)(.*)a", 3);
     }
 
     [Test]
