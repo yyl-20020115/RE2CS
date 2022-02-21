@@ -155,7 +155,7 @@ public class ExecTest
                 }
                 if (inStrings)
                 {
-                    strings.add(q);
+                    strings.Add(q);
                     continue;
                 }
                 // Is a regexp.
@@ -363,7 +363,7 @@ public class ExecTest
                 }
                 else
                 {
-                    int k = pair.indexOf('-');
+                    int k = pair.IndexOf('-');
                     if (k < 0)
                     {
                         fail(string.format("%s:%d: invalid pair %s", file, lineno, pair));
@@ -543,7 +543,7 @@ public class ExecTest
                     break;
                 case ':':
                     {
-                        int i = flag.indexOf(':', 1);
+                        int i = flag.IndexOf(':', 1);
                         if (i < 0)
                         {
                             System.err.format("skip: %s\n", line);
@@ -579,7 +579,7 @@ public class ExecTest
             }
 
             // Expand C escapes (a.k.a. Go escapes).
-            if (flag.indexOf('$') >= 0)
+            if (flag.IndexOf('$') >= 0)
             {
                 string f = "\"" + field.get(1) + "\"";
                 try
@@ -648,7 +648,7 @@ public class ExecTest
                         pattern = RE2.QuoteMeta(pattern);
                 }
 
-                if (flag.indexOf('i') >= 0)
+                if (flag.IndexOf('i') >= 0)
                 {
                     flags |= RE2.FOLD_CASE;
                 }
@@ -705,7 +705,7 @@ public class ExecTest
                 List<int> have = new ArrayList<int>();
                 for (int i = 0; i < pos.Count; ++i)
                 {
-                    have.add(haveArray[i]);
+                    have.Add(haveArray[i]);
                 }
                 if (!have.Equals(pos))
                 {
@@ -769,7 +769,7 @@ public class ExecTest
         shouldCompileMatch[0] = true;
         shouldCompileMatch[1] = true;
 
-        List<int> result = new ArrayList<int>();
+        List<int> result = new ();
         while (!s.isEmpty())
         {
             char end = ')';
@@ -777,30 +777,30 @@ public class ExecTest
             {
                 if (s.charAt(0) != '(')
                 {
-                    throw new RuntimeException("parse error: missing '('");
+                    throw new Exception("parse error: missing '('");
                 }
                 s = s.Substring(1);
                 end = ',';
             }
-            int i = s.indexOf(end);
+            int i = s.IndexOf(end);
             if (i <= 0)
             { // [sic]
-                throw new RuntimeException("parse error: missing '" + end + "'");
+                throw new Exception("parse error: missing '" + end + "'");
             }
             string num = s.Substring(0, i);
             if (!num.Equals("?"))
             {
-                result.add(int.valueOf(num)); // (may throw)
+                result.Add(int.valueOf(num)); // (may throw)
             }
             else
             {
-                result.add(-1);
+                result.Add(-1);
             }
             s = s.Substring(i + 1);
         }
         if ((result.Count % 2) != 0)
         {
-            throw new RuntimeException("parse error: odd number of fields");
+            throw new Exception("parse error: odd number of fields");
         }
         return result;
     }

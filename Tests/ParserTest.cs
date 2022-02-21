@@ -263,7 +263,7 @@ public class ParserTest
     new string[]{ "a.*?c|a.*?b", "cat{lit{a}alt{cat{nstar{dot{}}lit{c}}cat{nstar{dot{}}lit{b}}}}"},
   };
 
-    // TODO(adonovan): add some tests for:
+    // TODO(adonovan): Add some tests for:
     // - ending a regexp with "\\"
     // - Java UTF-16 things.
 

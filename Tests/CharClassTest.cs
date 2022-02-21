@@ -122,7 +122,7 @@ public class CharClassTest
     {
         // These cases are derived directly from the program logic:
 
-        // Range is full: folding can't add more.
+        // Range is full: folding can't Add more.
         AssertClass(CreateCharClass().AppendFoldedRange(10, 0x10ff0), 10, 0x10ff0);
 
         // Range is outside folding possibilities.

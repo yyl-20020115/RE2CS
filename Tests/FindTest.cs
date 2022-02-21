@@ -46,12 +46,16 @@ public class FindTest
                     j += runLength;
                     if (j > x.Length)
                     {
-                        fail("invalid build entry");
+                        Fail("invalid build entry");
                     }
                 }
             }
         }
 
+        void Fail(string s)
+        {
+            Assert.Fail(s);
+        }
         public readonly string pat;
         public readonly string text;
         public readonly byte[] textUTF8;
@@ -71,7 +75,7 @@ public class FindTest
         //@Override
         public override string ToString()
         {
-            return string.format("pat=%s text=%s", pat, text);
+            return string.Format("pat={0} text={1}", pat, text);
         }
     }
 
@@ -273,7 +277,7 @@ public class FindTest
         RE2 re = RE2.Compile(test.pat);
         if (!re.ToString().Equals(test.pat))
         {
-            fail(string.format("RE2.ToString() = \"%s\"; should be \"%s\"", re.ToString(), test.pat));
+            fail(string.Format("RE2.ToString() = \"{0}\"; should be \"{1}\"", re.ToString(), test.pat));
         }
         byte[] result = re.FindUTF8(test.textUTF8);
         if (test.matches.Length == 0 && GoTestUtils.Len(result) == 0)
@@ -282,20 +286,20 @@ public class FindTest
         }
         else if (test.matches.Length == 0 && result != null)
         {
-            fail(string.format("findUTF8: expected no match; got one: %s", test));
+            fail(string.Format("findUTF8: expected no match; got one: {0}", test));
         }
         else if (test.matches.Length > 0 && result == null)
         {
-            fail(string.format("findUTF8: expected match; got none: %s", test));
+            fail(string.Format("findUTF8: expected match; got none: {1}", test));
         }
         else
         {
             byte[] expect = test.submatchBytes(0, 0);
-            if (!Arrays.Equals(expect, result))
+            if (!Enumerable.SequenceEqual(expect, result))
             {
                 fail(
-                    string.format(
-                        "findUTF8: expected %s; got %s: %s",
+                    string.Format(
+                        "findUTF8: expected {0}; got {1}: {2}",
                         GoTestUtils.FromUTF8(expect),
                         GoTestUtils.FromUTF8(result),
                         test));
