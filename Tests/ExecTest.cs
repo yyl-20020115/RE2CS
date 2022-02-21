@@ -205,7 +205,7 @@ public class ExecTest
                 }
                 string text = strings.get(input++);
                 bool multibyte = !isSingleBytes(text);
-                if (multibyte && re.toString().contains("\\B"))
+                if (multibyte && re.ToString().contains("\\B"))
                 {
                     // C++ RE2's \B considers every position _in the input, which
                     // is a stream of bytes, so it sees 'not word boundary' _in the
@@ -242,8 +242,8 @@ public class ExecTest
                             partial,
                             longest,
                             text,
-                            Arrays.toString(have),
-                            Arrays.toString(want));
+                            Arrays.ToString(have),
+                            Arrays.ToString(want));
                         if (++nfail >= 100)
                         {
                             fail("stopping after " + nfail + " errors");
@@ -697,7 +697,7 @@ public class ExecTest
                         match,
                         pattern,
                         text,
-                        Arrays.toString(haveArray));
+                        Arrays.ToString(haveArray));
                     nerr++;
                     continue;
                 }

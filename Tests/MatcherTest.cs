@@ -326,7 +326,7 @@ public class MatcherTest
                 .appendCodePoint(0x10000)
                 .appendCodePoint(0x10001)
                 .appendCodePoint(0x10002)
-                .toString();
+                .ToString();
         assertEquals(utf16, "\uD800\uDC00\uD800\uDC01\uD800\uDC02");
         helperTestMatchEndUTF16(utf16, 3, 6);
     }
@@ -336,14 +336,14 @@ public class MatcherTest
     {
         Pattern p = Pattern.Compile("cat");
         Matcher m = p.Matcher("one cat two cats in the yard");
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         while (m.Find())
         {
             m.appendReplacement(sb, "dog");
         }
         m.appendTail(sb);
         m.appendTail(sb);
-        assertEquals("one dog two dogs in the yards in the yard", sb.toString());
+        assertEquals("one dog two dogs in the yards in the yard", sb.ToString());
     }
 
     [Test]
@@ -358,26 +358,26 @@ public class MatcherTest
         }
         m.AppendTail(sb);
         m.AppendTail(sb);
-        assertEquals("one dog two dogs in the yards in the yard", sb.toString());
+        assertEquals("one dog two dogs in the yards in the yard", sb.ToString());
     }
 
     [Test]
     public void testResetOnFindInt_StringBuffer()
     {
-        StringBuffer buffer;
+        StringBuilder buffer;
         Matcher matcher = Pattern.Compile("a").Matcher("zza");
 
         assertTrue(matcher.Find());
 
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         matcher.appendReplacement(buffer, "foo");
-        assertEquals("1st time", "zzfoo", buffer.toString());
+        assertEquals("1st time", "zzfoo", buffer.ToString());
 
         assertTrue(matcher.Find(0));
 
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         matcher.appendReplacement(buffer, "foo");
-        assertEquals("2nd time", "zzfoo", buffer.toString());
+        assertEquals("2nd time", "zzfoo", buffer.ToString());
     }
 
     [Test]
@@ -390,46 +390,46 @@ public class MatcherTest
 
         buffer = new StringBuilder();
         matcher.AppendReplacement(buffer, "foo");
-        assertEquals("1st time", "zzfoo", buffer.toString());
+        assertEquals("1st time", "zzfoo", buffer.ToString());
 
         assertTrue(matcher.Find(0));
 
         buffer = new StringBuilder();
         matcher.AppendReplacement(buffer, "foo");
-        assertEquals("2nd time", "zzfoo", buffer.toString());
+        assertEquals("2nd time", "zzfoo", buffer.ToString());
     }
 
     [Test]
     public void testEmptyReplacementGroups_StringBuffer()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         Matcher matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("abc");
         assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2-$3");
-        assertEquals("a--b", buffer.toString());
+        assertEquals("a--b", buffer.ToString());
         matcher.appendTail(buffer);
-        assertEquals("a--bc", buffer.toString());
+        assertEquals("a--bc", buffer.ToString());
 
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("ab");
         assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2-$3");
         matcher.appendTail(buffer);
-        assertEquals("a-b-", buffer.toString());
+        assertEquals("a-b-", buffer.ToString());
 
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         matcher = Pattern.Compile("(^b)?(b)?c").Matcher("abc");
         assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2");
         matcher.appendTail(buffer);
-        assertEquals("a-b", buffer.toString());
+        assertEquals("a-b", buffer.ToString());
 
-        buffer = new StringBuffer();
+        buffer = new StringBuilder();
         matcher = Pattern.Compile("^(.)[^-]+(-.)?(.*)").Matcher("Name");
         assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1$2");
         matcher.appendTail(buffer);
-        assertEquals("N", buffer.toString());
+        assertEquals("N", buffer.ToString());
     }
 
     [Test]
@@ -439,30 +439,30 @@ public class MatcherTest
         Matcher matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("abc");
         assertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1-$2-$3");
-        assertEquals("a--b", buffer.toString());
+        assertEquals("a--b", buffer.ToString());
         matcher.AppendTail(buffer);
-        assertEquals("a--bc", buffer.toString());
+        assertEquals("a--bc", buffer.ToString());
 
         buffer = new StringBuilder();
         matcher = Pattern.Compile("(a)(b$)?(b)?").Matcher("ab");
         assertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1-$2-$3");
         matcher.AppendTail(buffer);
-        assertEquals("a-b-", buffer.toString());
+        assertEquals("a-b-", buffer.ToString());
 
         buffer = new StringBuilder();
         matcher = Pattern.Compile("(^b)?(b)?c").Matcher("abc");
         assertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1-$2");
         matcher.AppendTail(buffer);
-        assertEquals("a-b", buffer.toString());
+        assertEquals("a-b", buffer.ToString());
 
         buffer = new StringBuilder();
         matcher = Pattern.Compile("^(.)[^-]+(-.)?(.*)").Matcher("Name");
         assertTrue(matcher.Find());
         matcher.AppendReplacement(buffer, "$1$2");
         matcher.AppendTail(buffer);
-        assertEquals("N", buffer.toString());
+        assertEquals("N", buffer.ToString());
     }
 
     // This example is documented in the com.google.re2j package.html.
@@ -539,7 +539,7 @@ public class MatcherTest
     {
         StringBuilder b = new StringBuilder();
         m.AppendReplacement(b, replacement);
-        return b.toString();
+        return b.ToString();
     }
 
     // See https://github.com/google/re2j/issues/96.

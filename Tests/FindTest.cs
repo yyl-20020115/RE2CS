@@ -34,7 +34,7 @@ public class FindTest
         {
             this.pat = pat;
             this.text = text;
-            this.textUTF8 = GoTestUtils.utf8(text);
+            this.textUTF8 = GoTestUtils.Utf8(text);
             this.matches = new int[n][];
             if (n > 0)
             {
@@ -65,7 +65,7 @@ public class FindTest
 
         public string submatchString(int i, int j)
         {
-            return GoTestUtils.fromUTF8(submatchBytes(i, j)); // yikes
+            return GoTestUtils.FromUTF8(submatchBytes(i, j)); // yikes
         }
 
         //@Override
@@ -271,12 +271,12 @@ public class FindTest
     public void testFindUTF8()
     {
         RE2 re = RE2.Compile(test.pat);
-        if (!re.toString().Equals(test.pat))
+        if (!re.ToString().Equals(test.pat))
         {
-            fail(string.format("RE2.toString() = \"%s\"; should be \"%s\"", re.toString(), test.pat));
+            fail(string.format("RE2.ToString() = \"%s\"; should be \"%s\"", re.ToString(), test.pat));
         }
         byte[] result = re.FindUTF8(test.textUTF8);
-        if (test.matches.Length == 0 && GoTestUtils.len(result) == 0)
+        if (test.matches.Length == 0 && GoTestUtils.Len(result) == 0)
         {
             // ok
         }
@@ -296,8 +296,8 @@ public class FindTest
                 fail(
                     string.format(
                         "findUTF8: expected %s; got %s: %s",
-                        GoTestUtils.fromUTF8(expect),
-                        GoTestUtils.fromUTF8(result),
+                        GoTestUtils.FromUTF8(expect),
+                        GoTestUtils.FromUTF8(result),
                         test));
             }
         }
@@ -338,7 +338,7 @@ public class FindTest
     private void testFindIndexCommon(
         string testName, Test test, int[] result, bool resultIndicesAreUTF8)
     {
-        if (test.matches.Length == 0 && GoTestUtils.len(result) == 0)
+        if (test.matches.Length == 0 && GoTestUtils.Len(result) == 0)
         {
             // ok
         }
@@ -354,7 +354,7 @@ public class FindTest
         {
             if (!resultIndicesAreUTF8)
             {
-                result = GoTestUtils.utf16IndicesToUtf8(result, test.text);
+                result = GoTestUtils.Utf16IndicesToUtf8(result, test.text);
             }
             int[] expect = test.matches[0]; // UTF-8 indices
             if (expect[0] != result[0] || expect[1] != result[1])
@@ -363,8 +363,8 @@ public class FindTest
                     string.format(
                         "%s: expected %s got %s: %s",
                         testName,
-                        Arrays.toString(expect),
-                        Arrays.toString(result),
+                        Arrays.ToString(expect),
+                        Arrays.ToString(result),
                         test));
             }
         }
@@ -422,7 +422,7 @@ public class FindTest
                         string.format(
                             "findAllUTF8: match %d: expected %s; got %s: %s",
                             i / 2,
-                            GoTestUtils.fromUTF8(expect),
+                            GoTestUtils.FromUTF8(expect),
                             GoTestUtils.fromUTF8(result.get(i)),
                             test));
                 }
@@ -501,7 +501,7 @@ public class FindTest
                 int[] res = result.get(k);
                 if (!resultIndicesAreUTF8)
                 {
-                    res = GoTestUtils.utf16IndicesToUtf8(res, test.text);
+                    res = GoTestUtils.Utf16IndicesToUtf8(res, test.text);
                 }
                 if (e[0] != res[0] || e[1] != res[1])
                 {
@@ -510,8 +510,8 @@ public class FindTest
                             "%s: match %d: expected %s; got %s: %s",
                             testName,
                             k,
-                            Arrays.toString(e), // (only 1st two elements matter here)
-                            Arrays.toString(res),
+                            Arrays.ToString(e), // (only 1st two elements matter here)
+                            Arrays.ToString(res),
                             test));
                 }
             }
@@ -540,7 +540,7 @@ public class FindTest
     private void testSubmatchBytes(string testName, FindTest.Test test, int n, byte[][] result)
     {
         int[] submatches = test.matches[n];
-        if (submatches.Length != GoTestUtils.len(result) * 2)
+        if (submatches.Length != GoTestUtils.Len(result) * 2)
         {
             fail(
                 string.format(
@@ -548,10 +548,10 @@ public class FindTest
                     testName,
                     n,
                     submatches.Length / 2,
-                    GoTestUtils.len(result),
+                    GoTestUtils.Len(result),
                     test));
         }
-        for (int k = 0; k < GoTestUtils.len(result); k++)
+        for (int k = 0; k < GoTestUtils.Len(result); k++)
         {
             if (submatches[k * 2] == -1)
             {
@@ -569,8 +569,8 @@ public class FindTest
                         "%s %d: expected %s; got %s: %s",
                         testName,
                         n,
-                        GoTestUtils.fromUTF8(expect),
-                        GoTestUtils.fromUTF8(result[k]),
+                        GoTestUtils.FromUTF8(expect),
+                        GoTestUtils.FromUTF8(result[k]),
                         test));
             }
         }
@@ -602,7 +602,7 @@ public class FindTest
     private void testSubmatch(string testName, Test test, int n, string[] result)
     {
         int[] submatches = test.matches[n];
-        if (submatches.Length != GoTestUtils.len(result) * 2)
+        if (submatches.Length != GoTestUtils.Len(result) * 2)
         {
             fail(
                 string.format(
@@ -610,7 +610,7 @@ public class FindTest
                     testName,
                     n,
                     submatches.Length / 2,
-                    GoTestUtils.len(result),
+                    GoTestUtils.Len(result),
                     test));
         }
         for (int k = 0; k < submatches.Length; k += 2)
@@ -621,7 +621,7 @@ public class FindTest
                 {
                     fail(
                         string.format(
-                            "%s %d: expected null got %s: %s", testName, n, Arrays.toString(result), test));
+                            "%s %d: expected null got %s: %s", testName, n, Arrays.ToString(result), test));
                 }
                 continue;
             }
@@ -635,7 +635,7 @@ public class FindTest
                         testName,
                         n,
                         expect,
-                        Arrays.toString(result),
+                        Arrays.ToString(result),
                         test));
             }
         }
@@ -668,7 +668,7 @@ public class FindTest
         string testName, Test test, int n, int[] result, bool resultIndicesAreUTF8)
     {
         int[] expect = test.matches[n];
-        if (expect.Length != GoTestUtils.len(result))
+        if (expect.Length != GoTestUtils.Len(result))
         {
             fail(
                 string.format(
@@ -676,13 +676,13 @@ public class FindTest
                     testName,
                     n,
                     expect.Length / 2,
-                    GoTestUtils.len(result) / 2,
+                    GoTestUtils.Len(result) / 2,
                     test));
             return;
         }
         if (!resultIndicesAreUTF8)
         {
-            result = GoTestUtils.utf16IndicesToUtf8(result, test.text);
+            result = GoTestUtils.Utf16IndicesToUtf8(result, test.text);
         }
         for (int k = 0; k < expect.Length; ++k)
         {
@@ -693,8 +693,8 @@ public class FindTest
                         "%s %d: submatch error: expected %s got %s: %s",
                         testName,
                         n,
-                        Arrays.toString(expect),
-                        Arrays.toString(result),
+                        Arrays.ToString(expect),
+                        Arrays.ToString(result),
                         test));
             }
         }

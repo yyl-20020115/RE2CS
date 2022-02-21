@@ -13,22 +13,22 @@ public static class GoTestUtils
 {
     // Other utilities:
 
-    public static int len(Object[] array)
+    public static int Len(object[] array)
     {
         return array == null ? 0 : array.Length;
     }
 
-    public static int len(int[] array)
+    public static int Len(int[] array)
     {
         return array == null ? 0 : array.Length;
     }
 
-    public static int len(byte[] array)
+    public static int Len(byte[] array)
     {
         return array == null ? 0 : array.Length;
     }
 
-    public static byte[] utf8(string s)
+    public static byte[] Utf8(string s)
     {
         try
         {
@@ -41,7 +41,7 @@ public static class GoTestUtils
     }
 
     // Beware: logically this operation can fail, but Java doesn't detect it.
-    public static string fromUTF8(byte[] b)
+    public static string FromUTF8(byte[] b)
     {
         try
         {
@@ -57,7 +57,7 @@ public static class GoTestUtils
     // corresponding indices in the UTF-8 encoding of |text|.
     //
     // TODO(adonovan): eliminate duplication w.r.t. ExecTest.
-    public static int[] utf16IndicesToUtf8(int[] idx16, string text)
+    public static int[] Utf16IndicesToUtf8(int[] idx16, string text)
     {
         try
         {
