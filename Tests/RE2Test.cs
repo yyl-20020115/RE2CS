@@ -21,9 +21,9 @@ public class RE2Test
         assertTrue(new RE2("ab+c").match("abbbbbc", 0, 7, RE2.ANCHOR_BOTH, null, 0));
         assertFalse(new RE2("ab+c").match("xabbbbbc", 0, 8, RE2.ANCHOR_BOTH, null, 0));
 
-        assertTrue(new RE2("ab+c").match(MatcherInput.utf8("abbbbbc"), 0, 7, RE2.ANCHOR_BOTH, null, 0));
+        assertTrue(new RE2("ab+c").match(MatcherInput.Utf8("abbbbbc"), 0, 7, RE2.ANCHOR_BOTH, null, 0));
         assertFalse(
-            new RE2("ab+c").match(MatcherInput.utf8("xabbbbbc"), 0, 8, RE2.ANCHOR_BOTH, null, 0));
+            new RE2("ab+c").match(MatcherInput.Utf8("xabbbbbc"), 0, 8, RE2.ANCHOR_BOTH, null, 0));
     }
 
     [Test]
@@ -32,7 +32,7 @@ public class RE2Test
         RE2 r = new RE2("abc.*def");
         string s = "yyyabcxxxdefzzz";
         foreach (MatcherInput input in new List<MatcherInput>()
-            { MatcherInput.utf8(s), MatcherInput.utf16(s) })
+            { MatcherInput.Utf8(s), MatcherInput.Utf16(s) })
         {
             assertTrue(r.match(input, 0, 15, RE2.UNANCHORED, null, 0));
             assertTrue(r.match(input, 0, 12, RE2.UNANCHORED, null, 0));

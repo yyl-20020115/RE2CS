@@ -6,7 +6,7 @@
  */
 namespace RE2CS;
 
-public enum Encodings
+public enum Encodings : uint
 {
     UTF_16,
     UTF_8,
@@ -20,92 +20,52 @@ public abstract class MatcherInput
     /**
      * Return the MatcherInput for UTF_16 encoding.
      */
-    public static MatcherInput utf16(string charSequence)
-    {
-        return new Utf16MatcherInput(charSequence);
-    }
+    public static MatcherInput Utf16(string charSequence) => new Utf16MatcherInput(charSequence);
 
     /**
      * Return the MatcherInput for UTF_8 encoding.
      */
-    public static MatcherInput utf8(byte[] bytes)
-    {
-        return new Utf8MatcherInput(bytes);
-    }
+    public static MatcherInput Utf8(byte[] bytes) => new Utf8MatcherInput(bytes);
 
     /**
      * Return the MatcherInput for UTF_8 encoding.
      */
-    public static MatcherInput utf8(string input)
-    {
-        return new Utf8MatcherInput(
+    public static MatcherInput Utf8(string input) => new Utf8MatcherInput(
             System.Text.Encoding.UTF8.GetBytes(input));
-    }
 
-    public abstract Encodings getEncoding();
+    public abstract Encodings Encoding { get; }
 
-    public abstract string asCharSequence();
+    public abstract string AsCharSequence();
 
-    public abstract byte[] asBytes();
+    public abstract byte[] AsBytes();
 
-    public abstract int length();
+    public abstract int Length { get; }
 
     public class Utf8MatcherInput : MatcherInput
     {
-        public byte[] bytes;
+        public readonly byte[] bytes;
 
-        public Utf8MatcherInput(byte[] bytes)
-        {
-            this.bytes = bytes;
-        }
+        public Utf8MatcherInput(byte[] bytes) => this.bytes = bytes;
 
-        public override Encodings getEncoding()
-        {
-            return Encodings.UTF_8;
-        }
+        public override Encodings Encoding => Encodings.UTF_8;
 
-        public override string asCharSequence()
-        {
-
-            return System.Text.Encoding.UTF8.GetString(this.bytes);
-        }
-        public override byte[] asBytes()
-        {
-            return bytes;
-        }
-        public override int length()
-        {
-            return bytes.Length;
-        }
+        public override string AsCharSequence() => System.Text.Encoding.UTF8.GetString(this.bytes);
+        public override byte[] AsBytes() => bytes;
+        public override int Length => bytes.Length;
     }
 
     public class Utf16MatcherInput : MatcherInput
     {
-        public string charSequence;
+        public readonly string charSequence;
 
-        public Utf16MatcherInput(string charSequence)
-        {
-            this.charSequence = charSequence;
-        }
+        public Utf16MatcherInput(string charSequence) => this.charSequence = charSequence;
 
-        public override Encodings getEncoding()
-        {
-            return Encodings.UTF_16;
-        }
+        public override Encodings Encoding => Encodings.UTF_16;
 
-        public override string asCharSequence()
-        {
-            return charSequence;
-        }
+        public override string AsCharSequence() => charSequence;
 
-        public override byte[] asBytes()
-        {
-            return System.Text.Encoding.Unicode.GetBytes(charSequence);
-        }
+        public override byte[] AsBytes() => System.Text.Encoding.Unicode.GetBytes(charSequence);
 
-        public override int length()
-        {
-            return charSequence.Length;
-        }
+        public override int Length => charSequence.Length;
     }
 }

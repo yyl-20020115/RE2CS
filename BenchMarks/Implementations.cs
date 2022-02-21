@@ -33,17 +33,17 @@ public abstract class Matcher
 
         public override bool find()
         {
-            return matcher.find();
+            return matcher.Find();
         }
 
         public override bool matches()
         {
-            return matcher.matches();
+            return matcher.Matches();
         }
 
         public override String group()
         {
-            return matcher.group();
+            return matcher.Group();
         }
     }
 

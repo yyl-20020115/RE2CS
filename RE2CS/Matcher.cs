@@ -48,7 +48,7 @@ public class Matcher
     // The number of submatches (groups) in the pattern.
     private readonly int _groupCount;
 
-    private MatcherInput _matcherInput;
+    private MatcherInput? _matcherInput;
 
     // The input length in UTF16 codes.
     private int _inputLength;
@@ -68,12 +68,8 @@ public class Matcher
 
     public Matcher(Pattern pattern)
     {
-        if (pattern == null)
-        {
-            throw new ArgumentNullException("pattern is null");
-        }
-        this._pattern = pattern;
-        RE2 re2 = pattern.re2();
+        this._pattern = pattern ?? throw new ArgumentNullException(nameof(pattern));
+        var re2 = pattern.re2();
         _groupCount = re2.numberOfCapturingGroups();
         _groups = new int[2 + 2 * _groupCount];
         _namedGroups = re2.namedGroups;
@@ -83,29 +79,26 @@ public class Matcher
     public Matcher(Pattern pattern, string input)
         : this(pattern)
     {
-        reset(input);
+        Reset(input);
     }
 
     public Matcher(Pattern pattern, MatcherInput input)
         : this(pattern)
     {
-        reset(input);
+        Reset(input);
     }
 
     /** Returns the {@code Pattern} associated with this {@code Matcher}. */
-    public Pattern pattern()
-    {
-        return _pattern;
-    }
+    public Pattern Pattern => _pattern;
 
     /**
      * Resets the {@code Matcher}, rewinding input and discarding any match information.
      *
      * @return the {@code Matcher} itself, for chained method calls
      */
-    public Matcher reset()
+    public Matcher Reset()
     {
-        _inputLength = _matcherInput.length();
+        _inputLength = _matcherInput.Length;
         _appendPos = 0;
         _hasMatch = false;
         _hasGroups = false;
@@ -118,10 +111,7 @@ public class Matcher
      * @param input the new input string
      * @return the {@code Matcher} itself, for chained method calls
      */
-    public Matcher reset(string input)
-    {
-        return reset(MatcherInput.utf16(input));
-    }
+    public Matcher Reset(string input) => Reset(MatcherInput.Utf16(input));
 
     /**
      * Resets the {@code Matcher} and changes the input.
@@ -129,19 +119,12 @@ public class Matcher
      * @param bytes utf8 bytes of the input string.
      * @return the {@code Matcher} itself, for chained method calls
      */
-    public Matcher reset(byte[] bytes)
-    {
-        return reset(MatcherInput.utf8(bytes));
-    }
+    public Matcher Reset(byte[] bytes) => Reset(MatcherInput.Utf8(bytes));
 
-    private Matcher reset(MatcherInput input)
+    private Matcher Reset(MatcherInput input)
     {
-        if (input == null)
-        {
-            throw new ArgumentNullException("input is null");
-        }
-        _matcherInput = input;
-        reset();
+        _matcherInput = input ?? throw new ArgumentNullException("input is null");
+        Reset();
         return this;
     }
 
@@ -150,21 +133,13 @@ public class Matcher
      *
      * @throws InvalidOperationException if there is no match
      */
-    public int start()
-    {
-        return start(0);
-    }
 
     /**
      * Returns the end position of the most recent match.
      *
      * @throws InvalidOperationException if there is no match
      */
-    public int end()
-    {
-        return end(0);
-    }
-
+    
     /**
      * Returns the start position of a subgroup of the most recent match.
      *
@@ -172,9 +147,9 @@ public class Matcher
      * @throws InvalidOperationException if there is no match
      * @throws IndexOutOfBoundsException if {@code group < 0} or {@code group > groupCount()}
      */
-    public int start(int group)
+    public int Start(int group = 0)
     {
-        loadGroup(group);
+        LoadGroup(group);
         return _groups[2 * group];
     }
 
@@ -191,7 +166,7 @@ public class Matcher
         {
             throw new ArgumentException("group '" + group + "' not found");
         }
-        return start(g);
+        return Start(g);
     }
 
     /**
@@ -201,9 +176,9 @@ public class Matcher
      * @throws InvalidOperationException if there is no match
      * @throws IndexOutOfBoundsException if {@code group < 0} or {@code group > groupCount()}
      */
-    public int end(int group)
+    public int End(int group = 0)
     {
-        loadGroup(group);
+        LoadGroup(group);
         return _groups[2 * group + 1];
     }
 
@@ -214,25 +189,13 @@ public class Matcher
      * @param group the group name
      * @throws ArgumentException if no group with that name exists
      */
-    public int end(string group)
-    {
-        int g = _namedGroups[group];
-        if (g == null)
-        {
-            throw new ArgumentException("group '" + group + "' not found");
-        }
-        return end(g);
-    }
+    public int End(string group) => !_namedGroups.TryGetValue(group, out var g) ? throw new ArgumentException("group '" + group + "' not found") : End(g);
 
     /**
      * Returns the most recent match.
      *
      * @throws InvalidOperationException if there is no match
      */
-    public string group()
-    {
-        return group(0);
-    }
 
     /**
      * Returns the subgroup of the most recent match.
@@ -240,16 +203,16 @@ public class Matcher
      * @throws InvalidOperationException if there is no match
      * @throws IndexOutOfBoundsException if {@code group < 0} or {@code group > groupCount()}
      */
-    public string group(int group)
+    public string? Group(int group = 0)
     {
-        int _start = start(group);
-        int _end = end(group);
+        int _start = Start(group);
+        int _end = End(group);
         if (_start < 0 && _end < 0)
         {
             // Means the subpattern didn't get matched at all.
             return null;
         }
-        return substring(_start, _end);
+        return Substring(_start, _end);
     }
 
     /**
@@ -258,27 +221,20 @@ public class Matcher
      * @param group the group name
      * @throws ArgumentException if no group with that name exists
      */
-    public string group(string _group)
-    {
-        if (!_namedGroups.ContainsKey(_group))
-        {
-            throw new ArgumentException("group '" + _group + "' not found");
-        }
-        return group(_namedGroups[_group]);
-    }
+    public string? Group(string _group) 
+        => !_namedGroups.TryGetValue(_group, out var g)
+        ? throw new ArgumentException("group '" + _group + "' not found") 
+        : this.Group(g);
 
     /**
      * Returns the number of subgroups in this pattern.
      *
      * @return the number of subgroups; the overall match (group 0) does not count
      */
-    public int groupCount()
-    {
-        return _groupCount;
-    }
+    public int GroupCount => _groupCount;
 
     /** Helper: finds subgroup information if needed for group. */
-    private void loadGroup(int group)
+    private void LoadGroup(int group)
     {
         if (group < 0 || group > _groupCount)
         {
@@ -323,10 +279,7 @@ public class Matcher
      *
      * @return true if the entire input matches the pattern
      */
-    public bool matches()
-    {
-        return genMatch(0, RE2.ANCHOR_BOTH);
-    }
+    public bool Matches() => GenMatch(0, RE2.ANCHOR_BOTH);
 
     /**
      * Matches the beginning of input against the pattern (anchored start). If there is a match,
@@ -334,10 +287,7 @@ public class Matcher
      *
      * @return true if the beginning of the input matches the pattern
      */
-    public bool lookingAt()
-    {
-        return genMatch(0, RE2.ANCHOR_START);
-    }
+    public bool LookingAt() => GenMatch(0, RE2.ANCHOR_START);
 
     /**
      * Matches the input against the pattern (unanchored). The search begins at the end of the last
@@ -346,7 +296,7 @@ public class Matcher
      *
      * @return true if it finds a match
      */
-    public bool find()
+    public bool Find()
     {
         int start = 0;
         if (_hasMatch)
@@ -357,7 +307,7 @@ public class Matcher
                 start++;
             }
         }
-        return genMatch(start, RE2.UNANCHORED);
+        return GenMatch(start, RE2.UNANCHORED);
     }
 
     /**
@@ -368,22 +318,22 @@ public class Matcher
      * @return true if it finds a match
      * @throws IndexOutOfBoundsException if start is not a valid input position
      */
-    public bool find(int start)
+    public bool Find(int start)
     {
         if (start < 0 || start > _inputLength)
         {
             throw new  IndexOutOfRangeException("start index out of bounds: " + start);
         }
-        reset();
-        return genMatch(start, 0);
+        Reset();
+        return GenMatch(start, 0);
     }
 
     /** Helper: does match starting at start, with RE2 anchor flag. */
-    private bool genMatch(int startByte, int anchor)
+    private bool GenMatch(int startByte, int anchor)
     {
         // TODO(rsc): Is matches/lookingAt supposed to reset the Append or input positions?
         // From the JDK docs, looks like no.
-        bool ok = _pattern.re2().match(_matcherInput, startByte, _inputLength, anchor, _groups, 1);
+        var ok = _pattern.re2().match(_matcherInput!, startByte, _inputLength, anchor, _groups, 1);
         if (!ok)
         {
             return false;
@@ -396,23 +346,20 @@ public class Matcher
     }
 
     /** Helper: return substring for [start, end). */
-    public string substring(int start, int end)
+    public string Substring(int start, int end)
     {
         // UTF_8 is matched in binary mode. So slice the bytes.
-        if (_matcherInput.getEncoding() == Encodings.UTF_8)
+        if (_matcherInput.Encoding == Encodings.UTF_8)
         {
-            return Encoding.UTF8.GetString(_matcherInput.asBytes(), start, end - start);
+            return Encoding.UTF8.GetString(_matcherInput.AsBytes(), start, end - start);
         }
 
         // This is fast for both StringBuilder and string.
-        return _matcherInput.asCharSequence().Substring(start, end);
+        return _matcherInput.AsCharSequence().Substring(start, end);
     }
 
     /** Helper for Pattern: return input length. */
-    public int get_inputLength()
-    {
-        return _inputLength;
-    }
+    public int InputLength => _inputLength;
 
     /**
      * Quotes '\' and '$' in {@code s}, so that the returned string could be used in
@@ -421,23 +368,23 @@ public class Matcher
      * @param s the string to be quoted
      * @return the quoted string
      */
-    public static string quoteReplacement(string s)
+    public static string QuoteReplacement(string s)
     {
         if (s.IndexOf('\\') < 0 && s.IndexOf('$') < 0)
         {
             return s;
         }
-        StringBuilder sb = new StringBuilder();
+        var builder = new StringBuilder();
         for (int i = 0; i < s.Length; ++i)
         {
             char c = s[i];
             if (c == '\\' || c == '$')
             {
-                sb.Append('\\');
+                builder.Append('\\');
             }
-            sb.Append(c);
+            builder.Append(c);
         }
-        return sb.ToString();
+        return builder.ToString();
     }
 
     /**
@@ -462,13 +409,13 @@ public class Matcher
      * @throws InvalidOperationException if there was no most recent match
      * @throws IndexOutOfBoundsException if replacement refers to an invalid group
      */
-    public Matcher appendReplacement(StringBuffer sb, string replacement)
-    {
-        var result = new StringBuilder();
-        appendReplacement(result, replacement);
-        sb.Append(result);
-        return this;
-    }
+    //public Matcher appendReplacement(StringBuffer sb, string replacement)
+    //{
+    //    var result = new StringBuilder();
+    //    appendReplacement(result, replacement);
+    //    sb.Append(result);
+    //    return this;
+    //}
 
     /**
      * Appends to {@code sb} two strings: the text from the Append position up to the beginning of the
@@ -492,20 +439,20 @@ public class Matcher
      * @throws InvalidOperationException if there was no most recent match
      * @throws IndexOutOfBoundsException if replacement refers to an invalid group
      */
-    public Matcher appendReplacement(StringBuilder sb, string replacement)
+    public Matcher AppendReplacement(StringBuilder builder, string replacement)
     {
-        int s = start();
-        int e = end();
+        int s = Start();
+        int e = End();
         if (_appendPos < s)
         {
-            sb.Append(substring(_appendPos, s));
+            builder.Append(Substring(_appendPos, s));
         }
         _appendPos = e;
-        appendReplacementInternal(sb, replacement);
+        AppendReplacementInternal(builder, replacement);
         return this;
     }
 
-    private void appendReplacementInternal(StringBuilder sb, string replacement)
+    private void AppendReplacementInternal(StringBuilder builder, string replacement)
     {
         int last = 0;
         int i = 0;
@@ -516,7 +463,7 @@ public class Matcher
             {
                 if (last < i)
                 {
-                    sb.Append(replacement.Substring(last, i));
+                    builder.Append(replacement.Substring(last, i));
                 }
                 i++;
                 last = i;
@@ -530,7 +477,7 @@ public class Matcher
                     int n = c - '0';
                     if (last < i)
                     {
-                        sb.Append(replacement.Substring(last, i));
+                        builder.Append(replacement.Substring(last, i));
                     }
                     for (i += 2; i < m; i++)
                     {
@@ -545,10 +492,10 @@ public class Matcher
                     {
                         throw new IndexOutOfRangeException("n > number of groups: " + n);
                     }
-                    string _group = group(n);
+                    var _group = Group(n);
                     if (_group != null)
                     {
-                        sb.Append(_group);
+                        builder.Append(_group);
                     }
                     last = i;
                     i--;
@@ -558,7 +505,7 @@ public class Matcher
                 {
                     if (last < i)
                     {
-                        sb.Append(replacement.Substring(last, i));
+                        builder.Append(replacement.Substring(last, i));
                     }
                     i++; // skip {
                     int j = i + 1;
@@ -573,14 +520,14 @@ public class Matcher
                         throw new ArgumentException("named capture group is missing trailing '}'");
                     }
                     string groupName = replacement.Substring(i + 1, j);
-                    sb.Append(group(groupName));
+                    builder.Append(Group(groupName));
                     last = j + 1;
                 }
             }
         }
         if (last < m)
         {
-            sb.Append(replacement, last, m);
+            builder.Append(replacement, last, m);
         }
     }
 
@@ -591,11 +538,11 @@ public class Matcher
      * @param sb the {@link StringBuffer} to Append to
      * @return the argument {@code sb}, for method chaining
      */
-    public StringBuffer appendTail(StringBuffer sb)
-    {
-        sb.Append(substring(_appendPos, _inputLength));
-        return sb;
-    }
+    //public StringBuffer appendTail(StringBuffer sb)
+    //{
+    //    sb.Append(substring(_appendPos, _inputLength));
+    //    return sb;
+    //}
 
     /**
      * Appends to {@code sb} the substring of the input from the Append position to the end of the
@@ -604,10 +551,10 @@ public class Matcher
      * @param sb the {@link StringBuilder} to Append to
      * @return the argument {@code sb}, for method chaining
      */
-    public StringBuilder appendTail(StringBuilder sb)
+    public StringBuilder AppendTail(StringBuilder builder)
     {
-        sb.Append(substring(_appendPos, _inputLength));
-        return sb;
+        builder.Append(Substring(_appendPos, _inputLength));
+        return builder;
     }
 
     /**
@@ -618,10 +565,7 @@ public class Matcher
      * @return the input string with the matches replaced
      * @throws IndexOutOfBoundsException if replacement refers to an invalid group
      */
-    public string replaceAll(string replacement)
-    {
-        return replace(replacement, true);
-    }
+    public string ReplaceAll(string replacement) => Replace(replacement, true);
 
     /**
      * Returns the input with the first match replaced by {@code replacement}, interpreted as for
@@ -631,25 +575,22 @@ public class Matcher
      * @return the input string with the first match replaced
      * @throws IndexOutOfBoundsException if replacement refers to an invalid group
      */
-    public string replaceFirst(string replacement)
-    {
-        return replace(replacement, false);
-    }
+    public string ReplaceFirst(string replacement) => Replace(replacement, false);
 
     /** Helper: replaceAll/replaceFirst hybrid. */
-    private string replace(string replacement, bool all)
+    private string Replace(string replacement, bool all)
     {
-        reset();
-        StringBuffer sb = new StringBuffer();
-        while (find())
+        Reset();
+        var sb = new StringBuilder();
+        while (Find())
         {
-            appendReplacement(sb, replacement);
+            AppendReplacement(sb, replacement);
             if (!all)
             {
                 break;
             }
         }
-        appendTail(sb);
-        return sb.toString();
+        AppendTail(sb);
+        return sb.ToString();
     }
 }

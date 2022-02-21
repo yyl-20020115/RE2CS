@@ -98,7 +98,7 @@ public class RE2
     //// RE2 instance members.
 
     public readonly string expr; // as passed to Compile
-    public readonly Prog prog; // compiled program
+    public readonly Program prog; // compiled program
     public readonly int cond; // EMPTY_* bitmask: empty-width conditions
                               // required at start of match
     public readonly int numSubexp;
@@ -131,7 +131,7 @@ public class RE2
         this.prefixRune = re2.prefixRune;
     }
 
-    private RE2(string expr, Prog prog, int numSubexp, bool longest)
+    private RE2(string expr, Program prog, int numSubexp, bool longest)
     {
         this.expr = expr;
         this.prog = prog;
@@ -185,7 +185,7 @@ public class RE2
         Regexp re = Parser.parse(expr, mode);
         int maxCap = re.maxCap(); // (may shrink during simplify)
         re = Simplify.simplify(re);
-        Prog prog = Compiler.compileRegexp(re);
+        Program prog = Compiler.CompileRegexp(re);
         RE2 re2 = new RE2(expr, prog, maxCap, longest);
         StringBuilder prefixBuilder = new StringBuilder();
         re2.prefixComplete = prog.prefix(prefixBuilder);
@@ -222,7 +222,7 @@ public class RE2
         Machine head;
         do
         {
-            head = pooled.get();
+            head = pooled.Value;
         } while (head != null && !pooled.compareAndSet(head, head.next));
         return head;
     }
@@ -230,7 +230,7 @@ public class RE2
     // Clears the memory associated with this machine.
     public void reset()
     {
-        pooled.set(null);
+        pooled.Value = null;//.set(null);
     }
 
     // put() returns a machine to |this|'s machine cache.  There is no attempt to
@@ -245,7 +245,7 @@ public class RE2
         Machine head;
         do
         {
-            head = pooled.get();
+            head = pooled.Value;
             if (!isNew && head != null)
             {
                 // If an element had a null next pointer and it was previously _in the stack, another thread
@@ -286,8 +286,8 @@ public class RE2
             isNew = true;
         }
 
-        m.init(ncap);
-        int[] cap = m.match(_in, pos, anchor) ? m.submatches() : null;
+        m.Init(ncap);
+        int[] cap = m.Match(_in, pos, anchor) ? m.Submatches() : null;
         put(m, isNew);
         return cap;
     }
@@ -297,12 +297,12 @@ public class RE2
      */
     public bool match(string s)
     {
-        return doExecute(MachineInput.fromUTF16(s), 0, UNANCHORED, 0) != null;
+        return doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 0) != null;
     }
 
     public bool match(string input, int start, int end, int anchor, int[] group, int ngroup)
     {
-        return match(MatcherInput.utf16(input), start, end, anchor, group, ngroup);
+        return match(MatcherInput.Utf16(input), start, end, anchor, group, ngroup);
     }
 
     /**
@@ -333,9 +333,9 @@ public class RE2
         // That is, I believe doExecute needs to know the bounds of the whole input
         // as well as the bounds of the subpiece that is being searched.
         MachineInput machineInput =
-            input.getEncoding() == Encodings.UTF_16
-                ? MachineInput.fromUTF16(input.asCharSequence(), 0, end)
-                : MachineInput.fromUTF8(input.asBytes(), 0, end);
+            input.Encoding == Encodings.UTF_16
+                ? MachineInput.FromUTF16(input.AsCharSequence(), 0, end)
+                : MachineInput.FromUTF8(input.AsBytes(), 0, end);
         int[] groupMatch = doExecute(machineInput, start, anchor, 2 * ngroup);
 
         if (groupMatch == null)
@@ -356,7 +356,7 @@ public class RE2
     // This is visible for testing.
     public bool matchUTF8(byte[] b)
     {
-        return doExecute(MachineInput.fromUTF8(b), 0, UNANCHORED, 0) != null;
+        return doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 0) != null;
     }
 
     /**
@@ -435,7 +435,7 @@ public class RE2
         int lastMatchEnd = 0; // end position of the most recent match
         int searchPos = 0; // position where we next look for a match
         StringBuilder buf = new StringBuilder();
-        MachineInput input = MachineInput.fromUTF16(src);
+        MachineInput input = MachineInput.FromUTF16(src);
         int numReplaces = 0;
         while (searchPos <= src.Length)
         {
@@ -467,7 +467,7 @@ public class RE2
             lastMatchEnd = a[1];
 
             // Advance past this match; always advance at least one character.
-            int width = input.step(searchPos) & 0x7;
+            int width = input.Step(searchPos) & 0x7;
             if (searchPos + width > a[1])
             {
                 searchPos += width;
@@ -549,7 +549,7 @@ public class RE2
     // Find matches _in input.
     private void allMatches(MachineInput input, int n, DeliverFunc deliver)
     {
-        int end = input.endPos();
+        int end = input.EndPos();
         if (n < 0)
         {
             n = end + 1;
@@ -572,7 +572,7 @@ public class RE2
                     // after a previous match, so ignore it.
                     accept = false;
                 }
-                int r = input.step(pos);
+                int r = input.Step(pos);
                 if (r < 0)
                 { // EOF
                     pos = end + 1;
@@ -642,7 +642,7 @@ public class RE2
     // This is visible for testing.
     public byte[] findUTF8(byte[] b)
     {
-        int[] a = doExecute(MachineInput.fromUTF8(b), 0, UNANCHORED, 2);
+        int[] a = doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 2);
         if (a == null)
         {
             return null;
@@ -660,7 +660,7 @@ public class RE2
     // This is visible for testing.
     public int[] findUTF8Index(byte[] b)
     {
-        int[] a = doExecute(MachineInput.fromUTF8(b), 0, UNANCHORED, 2);
+        int[] a = doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 2);
         if (a == null)
         {
             return null;
@@ -680,7 +680,7 @@ public class RE2
     // This is visible for testing.
     public string find(string s)
     {
-        int[] a = doExecute(MachineInput.fromUTF16(s), 0, UNANCHORED, 2);
+        int[] a = doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 2);
         if (a == null)
         {
             return "";
@@ -699,7 +699,7 @@ public class RE2
     // This is visible for testing.
     public int[] findIndex(string s)
     {
-        return doExecute(MachineInput.fromUTF16(s), 0, UNANCHORED, 2);
+        return doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 2);
     }
 
     /**
@@ -713,7 +713,7 @@ public class RE2
     // This is visible for testing.
     public byte[][] findUTF8Submatch(byte[] b)
     {
-        int[] a = doExecute(MachineInput.fromUTF8(b), 0, UNANCHORED, prog.numCap);
+        int[] a = doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, prog.numCap);
         if (a == null)
         {
             return null;
@@ -740,7 +740,7 @@ public class RE2
     // This is visible for testing.
     public int[] findUTF8SubmatchIndex(byte[] b)
     {
-        return pad(doExecute(MachineInput.fromUTF8(b), 0, UNANCHORED, prog.numCap));
+        return pad(doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, prog.numCap));
     }
 
     /**
@@ -754,7 +754,7 @@ public class RE2
     // This is visible for testing.
     public string[] findSubmatch(string s)
     {
-        int[] a = doExecute(MachineInput.fromUTF16(s), 0, UNANCHORED, prog.numCap);
+        int[] a = doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, prog.numCap);
         if (a == null)
         {
             return null;
@@ -781,7 +781,7 @@ public class RE2
     // This is visible for testing.
     public int[] findSubmatchIndex(string s)
     {
-        return pad(doExecute(MachineInput.fromUTF16(s), 0, UNANCHORED, prog.numCap));
+        return pad(doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, prog.numCap));
     }
 
     /**
@@ -800,7 +800,7 @@ public class RE2
     {
         List<byte[]> result = new();
         allMatches(
-            MachineInput.fromUTF8(b),
+            MachineInput.FromUTF8(b),
             n, null
         //        new DeliverFunc() {
 
@@ -830,7 +830,7 @@ public class RE2
     {
         List<int[]> result = new();
         allMatches(
-            MachineInput.fromUTF8(b),
+            MachineInput.FromUTF8(b),
             n, null
         //new DeliverFunc() {
 
@@ -860,7 +860,7 @@ public class RE2
     {
         List<string> result = new();
         allMatches(
-            MachineInput.fromUTF16(s),
+            MachineInput.FromUTF16(s),
             n, null
         //new DeliverFunc() {
 
@@ -890,7 +890,7 @@ public class RE2
     {
         List<int[]> result = new();
         allMatches(
-            MachineInput.fromUTF16(s),
+            MachineInput.FromUTF16(s),
             n, null
         //new DeliverFunc() {
 
@@ -920,7 +920,7 @@ public class RE2
     {
         List<byte[][]> result = new();
         allMatches(
-            MachineInput.fromUTF8(b),
+            MachineInput.FromUTF8(b),
             n, null
         //new DeliverFunc() {
 
@@ -958,7 +958,7 @@ public class RE2
     {
         List<int[]> result = new();
         allMatches(
-            MachineInput.fromUTF8(b),
+            MachineInput.FromUTF8(b),
             n, null
         //new DeliverFunc() {
 
@@ -988,7 +988,7 @@ public class RE2
     {
         List<string[]> result = new ();
         allMatches(
-            MachineInput.fromUTF16(s),
+            MachineInput.FromUTF16(s),
             n, null
         //        new DeliverFunc() {
 
@@ -1026,7 +1026,7 @@ public class RE2
     {
         List<int[]> result = new ();
         allMatches(
-            MachineInput.fromUTF16(s),
+            MachineInput.FromUTF16(s),
             n, null
         //new DeliverFunc() {
 

@@ -43,7 +43,7 @@ public static class Utils
 
     // Appends a RE2 literal to |out| for rune |rune|,
     // with regexp metacharacters escaped.
-    public static void escapeRune(StringBuilder result, int rune)
+    public static void EscapeRune(StringBuilder result, int rune)
     {
         if (Unicode.isPrint(rune))
         {
@@ -230,4 +230,21 @@ public static class Utils
         return s.GetHashCode(EqualityComparer<int>.Default);
     }
 
+    public static int CodePointBefore(this string s, int i)
+    {
+        if (i > 0)
+        {
+            char c = s[--i];
+            if (char.IsLowSurrogate(c))
+            {
+                char d = s[--i];
+                if (char.IsHighSurrogate(d))
+                {
+                    return char.ConvertToUtf32(d, c);
+                }
+            }
+            return c;
+        }
+        return -1;
+    }
 }

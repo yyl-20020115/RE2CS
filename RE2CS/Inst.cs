@@ -28,6 +28,7 @@ public class Inst
     public const int RUNE1 = 9;
     public const int RUNE_ANY = 10;
     public const int RUNE_ANY_NOT_NL = 11;
+    public static bool IsRuneOp(int op) => RUNE <= op && op <= RUNE_ANY_NOT_NL;
 
     public int op;
     public int _out; // all but MATCH, FAIL
@@ -36,19 +37,15 @@ public class Inst
                  // otherwise a list of [lo,hi] pairs.  hi is *inclusive*.
                  // REVIEWERS: why not half-open intervals?
 
-    public Inst(int op)
+    public Inst(int op = NOP)
     {
         this.op = op;
-    }
-
-    public static bool isRuneOp(int op)
-    {
-        return RUNE <= op && op <= RUNE_ANY_NOT_NL;
+        this.runes = Array.Empty<int>();
     }
 
     // MatchRune returns true if the instruction matches (and consumes) r.
     // It should only be called when op == InstRune.
-    public bool matchRune(int r)
+    public bool MatchRune(int r)
     {
         // Special case: single-rune slice is from literal string, not char
         // class.
@@ -130,12 +127,12 @@ public class Inst
                     return "rune <null>"; // can't happen
                 }
                 return "rune "
-                    + escapeRunes(runes)
+                    + EscapeRunes(runes)
                     + (((arg & RE2.FOLD_CASE) != 0) ? "/i" : "")
                     + " -> "
                     + _out;
             case RUNE1:
-                return "rune1 " + escapeRunes(runes) + " -> " + _out;
+                return "rune1 " + EscapeRunes(runes) + " -> " + _out;
             case RUNE_ANY:
                 return "any -> " + _out;
             case RUNE_ANY_NOT_NL:
@@ -146,15 +143,15 @@ public class Inst
     }
 
     // Returns an RE2 expression matching exactly |runes|.
-    private static string escapeRunes(int[] runes)
+    private static string EscapeRunes(int[] runes)
     {
-        var _out = new StringBuilder();
-        _out.Append('"');
+        var builder = new StringBuilder();
+        builder.Append('"');
         foreach (int rune in runes)
         {
-            Utils.escapeRune(_out, rune);
+            Utils.EscapeRune(builder, rune);
         }
-        _out.Append('"');
-        return _out.ToString();
+        builder.Append('"');
+        return builder.ToString();
     }
 }

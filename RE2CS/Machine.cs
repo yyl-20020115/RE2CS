@@ -24,8 +24,8 @@ public class Machine
         public Thread(int n)
         {
             this.cap = new int[n];
+            this.inst = new (n);
         }
-
     }
 
     // A queue is a 'sparse array' holding pending threads of execution.  See:
@@ -45,53 +45,44 @@ public class Machine
             this.denseThreads = new Thread[n];
         }
 
-        public bool contains(int pc)
+        public bool Contains(int pc)
         {
-            int j = sparse[pc];
+            var j = sparse[pc];
             return j < size && densePcs[j] == pc;
         }
 
-        public bool isEmpty()
-        {
-            return size == 0;
-        }
+        public bool IsEmpty() => size == 0;
 
-        public int add(int pc)
+        public int Add(int pc)
         {
-            int j = size++;
+            var j = size++;
             sparse[pc] = j;
             denseThreads[j] = null;
             densePcs[j] = pc;
             return j;
         }
 
-        public void clear()
-        {
-            size = 0;
-        }
+        public void Clear() => this.size = 0;
 
         public override string ToString()
         {
-            var _out = new StringBuilder();
-            _out.Append('{');
+            var builder = new StringBuilder();
+            builder.Append('{');
             for (int i = 0; i < size; ++i)
             {
-                if (i != 0)
-                {
-                    _out.Append(", ");
-                }
-                _out.Append(densePcs[i]);
+                if (i > 0) builder.Append(", ");
+                builder.Append(densePcs[i]);
             }
-            _out.Append('}');
-            return _out.ToString();
+            builder.Append('}');
+            return builder.ToString();
         }
     }
 
     // Corresponding compiled regexp.
-    private RE2 re2;
+    private readonly RE2 re2;
 
     // Compiled program.
-    private readonly Prog prog;
+    private readonly Program prog;
 
     // Two queues for runq, nextq.
     private readonly Queue q0, q1;
@@ -111,7 +102,7 @@ public class Machine
     // Make sure to include new fields _in the copy constructor
 
     // Pointer to form a linked stack for the pool of Machines. Not included _in copy constructor.
-    public Machine next;
+    public Machine? next;
 
     /**
      * Constructs a matching Machine for the specified {@code RE2}.
@@ -120,8 +111,8 @@ public class Machine
     {
         this.prog = re2.prog;
         this.re2 = re2;
-        this.q0 = new Queue(prog.numInst());
-        this.q1 = new Queue(prog.numInst());
+        this.q0 = new (prog.numInst());
+        this.q1 = new (prog.numInst());
         this.matchcap = new int[prog.numCap < 2 ? 2 : prog.numCap];
     }
 
@@ -141,54 +132,51 @@ public class Machine
     }
 
     // init() reinitializes an existing Machine for re-use on a new input.
-    public void init(int ncap)
+    public void Init(int ncap)
     {
         // Length change need new arrays
         this.ncap = ncap;
         if (ncap > matchcap.Length)
         {
-            initNewCap(ncap);
+            InitNewCap(ncap);
         }
         else
         {
-            resetCap(ncap);
+            ResetCap(ncap);
         }
     }
 
-    private void resetCap(int ncap)
+    private void ResetCap(int ncap)
     {
         // same size just reset to 0
         for (int i = 0; i < poolSize; i++)
         {
-            Thread t = pool[i];
+            var t = pool[i];
             Array.Fill(t.cap, 0,0, ncap);
         }
     }
 
-    private void initNewCap(int ncap)
+    private void InitNewCap(int ncap)
     {
         for (int i = 0; i < poolSize; i++)
         {
-            Thread t = pool[i];
+            var t = pool[i];
             t.cap = new int[ncap];
         }
         this.matchcap = new int[ncap];
     }
 
-    public int[] submatches()
+    public int[] Submatches()
     {
-        if (ncap == 0)
-        {
-            return Utils.EMPTY_INTS;
-        }
+        if (ncap == 0) return Utils.EMPTY_INTS;
         var mc = new int[ncap];
-        matchcap.CopyTo(mc, 0);
+        Array.Copy(matchcap, 0, mc, 0, ncap);
         return mc;
     }
 
     // alloc() allocates a new thread with the given instruction.
     // It uses the free pool if possible.
-    private Thread alloc(Inst inst)
+    private Thread Alloc(Inst inst)
     {
         Thread t;
         if (poolSize > 0)
@@ -198,19 +186,19 @@ public class Machine
         }
         else
         {
-            t = new Thread(matchcap.Length);
+            t = new (matchcap.Length);
         }
         t.inst = inst;
         return t;
     }
 
     // Frees all threads on the thread queue, returning them to the free pool.
-    private void free(Queue queue)
+    private void Free(Queue queue)
     {
-        free(queue, 0);
+        Free(queue, 0);
     }
 
-    private void free(Queue queue, int from)
+    private void Free(Queue queue, int from)
     {
         int numberOfThread = queue.size - from;
         int requiredPoolLength = poolSize + numberOfThread;
@@ -224,18 +212,18 @@ public class Machine
 
         for (int i = from; i < queue.size; ++i)
         {
-            Thread t = queue.denseThreads[i];
+            var t = queue.denseThreads[i];
             if (t != null)
             {
                 pool[poolSize] = t;
                 poolSize++;
             }
         }
-        queue.clear();
+        queue.Clear();
     }
 
     // free() returns t to the free pool.
-    private void free(Thread t)
+    private void Free(Thread t)
     {
         if (pool.Length <= poolSize)
         {
@@ -252,7 +240,7 @@ public class Machine
     // RE2 Anchor |anchor|.
     // It reports whether a match was found.
     // If so, matchcap holds the submatch information.
-    public bool match(MachineInput _in, int pos, int anchor)
+    public bool Match(MachineInput _in, int pos, int anchor)
     {
         int startCond = re2.cond;
         if (startCond == Utils.EMPTY_ALL)
@@ -266,14 +254,14 @@ public class Machine
         matched = false;
         Array.Fill(matchcap, -1, 0, prog.numCap);
         Queue runq = q0, nextq = q1;
-        int r = _in.step(pos);
+        int r = _in.Step(pos);
         int rune = r >> 3;
         int width = r & 7;
         int rune1 = -1;
         int width1 = 0;
         if (r != MachineInput.EOF)
         {
-            r = _in.step(pos + width);
+            r = _in.Step(pos + width);
             rune1 = r >> 3;
             width1 = r & 7;
         }
@@ -284,12 +272,11 @@ public class Machine
         }
         else
         {
-            flag = _in.context(pos);
+            flag = _in.Context(pos);
         }
         for (; ; )
         {
-
-            if (runq.isEmpty())
+            if (runq.IsEmpty())
             {
                 if ((startCond & Utils.EMPTY_BEGIN_TEXT) != 0 && pos != 0)
                 {
@@ -301,19 +288,19 @@ public class Machine
                     // Have match; finished exploring alternatives.
                     break;
                 }
-                if (!string.IsNullOrEmpty(re2.prefix) && rune1 != re2.prefixRune && _in.canCheckPrefix())
+                if (!string.IsNullOrEmpty(re2.prefix) && rune1 != re2.prefixRune && _in.CanCheckPrefix())
                 {
                     // Match requires literal prefix; fast search for it.
-                    int advance = _in.index(re2, pos);
+                    int advance = _in.Index(re2, pos);
                     if (advance < 0)
                     {
                         break;
                     }
                     pos += advance;
-                    r = _in.step(pos);
+                    r = _in.Step(pos);
                     rune = r >> 3;
                     width = r & 7;
-                    r = _in.step(pos + width);
+                    r = _in.Step(pos + width);
                     rune1 = r >> 3;
                     width1 = r & 7;
                 }
@@ -329,8 +316,8 @@ public class Machine
                 Add(runq, prog.start, pos, matchcap, flag, null);
             }
             int nextPos = pos + width;
-            flag = _in.context(nextPos);
-            step(runq, nextq, pos, nextPos, rune, flag, anchor, pos == _in.endPos());
+            flag = _in.Context(nextPos);
+            Step(runq, nextq, pos, nextPos, rune, flag, anchor, pos == _in.EndPos());
             if (width == 0)
             { // EOF
                 break;
@@ -346,7 +333,7 @@ public class Machine
             width = width1;
             if (rune != -1)
             {
-                r = _in.step(pos + width);
+                r = _in.Step(pos + width);
                 rune1 = r >> 3;
                 width1 = r & 7;
             }
@@ -354,7 +341,7 @@ public class Machine
             runq = nextq;
             nextq = tmpq;
         }
-        free(nextq);
+        Free(nextq);
         return matched;
     }
 
@@ -365,7 +352,7 @@ public class Machine
     // |nextCond| gives the setting for the EMPTY_* flags after |c|.
     // |anchor| is the anchoring flag and |atEnd| signals if we are at the end of
     // the input string.
-    private void step(
+    private void Step(
         Queue runq,
         Queue nextq,
         int pos,
@@ -378,14 +365,14 @@ public class Machine
         bool longest = re2.longest;
         for (int j = 0; j < runq.size; ++j)
         {
-            Thread t = runq.denseThreads[j];
+            var t = runq.denseThreads[j];
             if (t == null)
             {
                 continue;
             }
             if (longest && matched && ncap > 0 && matchcap[0] < t.cap[0])
             {
-                free(t);
+                Free(t);
                 continue;
             }
             Inst i = t.inst;
@@ -406,13 +393,13 @@ public class Machine
                     }
                     if (!longest)
                     {
-                        free(runq, j + 1);
+                        Free(runq, j + 1);
                     }
                     matched = true;
                     break;
 
                 case Inst.RUNE:
-                    add = i.matchRune(c);
+                    add = i.MatchRune(c);
                     break;
 
                 case Inst.RUNE1:
@@ -436,11 +423,11 @@ public class Machine
             }
             if (t != null)
             {
-                free(t);
+                Free(t);
                 runq.denseThreads[j] = null;
             }
         }
-        runq.clear();
+        runq.Clear();
     }
 
     // add() adds an entry to |q| for |pc|, unless the |q| already has such an
@@ -448,18 +435,18 @@ public class Machine
     // from |pc| by following empty-width conditions satisfied by |cond|.  |pos|
     // gives the current position _in the input.  |cond| is a bitmask of EMPTY_*
     // flags.
-    private Thread Add(Queue q, int pc, int pos, int[] cap, int cond, Thread t)
+    private Thread? Add(Queue q, int pc, int pos, int[] cap, int cond, Thread? t)
     {
         if (pc == 0)
         {
             return t;
         }
-        if (q.contains(pc))
+        if (q.Contains(pc))
         {
             return t;
         }
-        int d = q.add(pc);
-        Inst inst = prog.inst[pc];
+        int d = q.Add(pc);
+        var inst = prog.inst[pc];
         switch (inst.op)
         {
             default:
@@ -506,7 +493,7 @@ public class Machine
             case Inst.RUNE_ANY_NOT_NL:
                 if (t == null)
                 {
-                    t = alloc(inst);
+                    t = Alloc(inst);
                 }
                 else
                 {

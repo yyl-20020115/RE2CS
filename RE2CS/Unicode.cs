@@ -128,12 +128,12 @@ public static class Unicode
         // No folding specified.  This is a one- or two-element
         // equivalence class containing rune and toLower(rune)
         // and toUpper(rune) if they are different from rune.
-        int l = Characters.toLowerCase(r);
+        int l = Characters.ToLowerCase(r);
         if (l != r)
         {
             return l;
         }
-        return Characters.toUpperCase(r);
+        return Characters.ToUpperCase(r);
     }
 
 }

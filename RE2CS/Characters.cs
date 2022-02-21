@@ -11,10 +11,10 @@ namespace RE2CS;
 
 public static class Characters
 {
-    public static int toLowerCase(int codePoint)
+    public static int ToLowerCase(int codePoint)
         => char.ConvertToUtf32(char.ConvertFromUtf32(codePoint).ToLower(), 0);
 
-    public static int toUpperCase(int codePoint)
+    public static int ToUpperCase(int codePoint)
         => char.ConvertToUtf32(char.ConvertFromUtf32(codePoint).ToUpper(), 0);
 
 }

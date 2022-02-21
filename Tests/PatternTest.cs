@@ -124,8 +124,8 @@ public class PatternTest
 
     private void testFind(string regexp, int flag, string match, string nonMatch)
     {
-        assertTrue(Pattern.compile(regexp, flag).matcher(match).find());
-        assertFalse(Pattern.compile(regexp, flag).matcher(nonMatch).find());
+        assertTrue(Pattern.compile(regexp, flag).matcher(match).Find());
+        assertFalse(Pattern.compile(regexp, flag).matcher(nonMatch).Find());
     }
 
     [Test]
@@ -211,11 +211,11 @@ public class PatternTest
         Pattern p2 = Pattern.compile("a.*?c|a.*?b");
 
         Matcher m1 = p1.matcher("abc");
-        m1.find();
+        m1.Find();
         Matcher m2 = p2.matcher("abc");
-        m2.find();
+        m2.Find();
 
-        assertThat(m2.group()).isEqualTo(m1.group());
+        assertThat(m2.Group()).isEqualTo(m1.Group());
     }
 
     [Test]
@@ -256,7 +256,7 @@ public class PatternTest
     {
         assertSerializes(Pattern.compile("ab+c"));
         assertSerializes(Pattern.compile("^ab.*c$", Pattern.DOTALL | Pattern.MULTILINE));
-        assertFalse(reserialize(Pattern.compile("abc")).matcher("def").find());
+        assertFalse(reserialize(Pattern.compile("abc")).matcher("def").Find());
     }
 
     [Test]

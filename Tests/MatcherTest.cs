@@ -242,7 +242,7 @@ public class MatcherTest
         try
         {
             Matcher m = Pattern.compile("a").matcher("abaca");
-            m.start();
+            m.Start();
             fail();
         }
         catch (InvalidOperationException ise)
@@ -259,9 +259,9 @@ public class MatcherTest
     public void testMatchesUpdatesMatchInformation()
     {
         Matcher m = Pattern.compile("a+").matcher("aaa");
-        if (m.matches())
+        if (m.Matches())
         {
-            assertEquals("aaa", m.group(0));
+            assertEquals("aaa", m.Group(0));
         }
     }
 
@@ -277,8 +277,8 @@ public class MatcherTest
     public void testAlternationMatches()
     {
         string s = "123:foo";
-        assertTrue(Pattern.compile("(?:\\w+|\\d+:foo)").matcher(s).matches());
-        assertTrue(Pattern.compile("(?:\\d+:foo|\\w+)").matcher(s).matches());
+        assertTrue(Pattern.compile("(?:\\w+|\\d+:foo)").matcher(s).Matches());
+        assertTrue(Pattern.compile("(?:\\d+:foo|\\w+)").matcher(s).Matches());
     }
 
     void helperTestMatchEndUTF16(string s, int num, int end)
@@ -300,7 +300,7 @@ public class MatcherTest
         Matcher m = pat.matcher(s);
 
         int found = 0;
-        while (m.find()) {
+        while (m.Find()) {
             found++;
         }
         assertEquals(
@@ -337,7 +337,7 @@ public class MatcherTest
         Pattern p = Pattern.compile("cat");
         Matcher m = p.matcher("one cat two cats in the yard");
         StringBuffer sb = new StringBuffer();
-        while (m.find())
+        while (m.Find())
         {
             m.appendReplacement(sb, "dog");
         }
@@ -352,12 +352,12 @@ public class MatcherTest
         Pattern p = Pattern.compile("cat");
         Matcher m = p.matcher("one cat two cats in the yard");
         StringBuilder sb = new StringBuilder();
-        while (m.find())
+        while (m.Find())
         {
-            m.appendReplacement(sb, "dog");
+            m.AppendReplacement(sb, "dog");
         }
-        m.appendTail(sb);
-        m.appendTail(sb);
+        m.AppendTail(sb);
+        m.AppendTail(sb);
         assertEquals("one dog two dogs in the yards in the yard", sb.toString());
     }
 
@@ -367,13 +367,13 @@ public class MatcherTest
         StringBuffer buffer;
         Matcher matcher = Pattern.compile("a").matcher("zza");
 
-        assertTrue(matcher.find());
+        assertTrue(matcher.Find());
 
         buffer = new StringBuffer();
         matcher.appendReplacement(buffer, "foo");
         assertEquals("1st time", "zzfoo", buffer.toString());
 
-        assertTrue(matcher.find(0));
+        assertTrue(matcher.Find(0));
 
         buffer = new StringBuffer();
         matcher.appendReplacement(buffer, "foo");
@@ -386,16 +386,16 @@ public class MatcherTest
         StringBuilder buffer;
         Matcher matcher = Pattern.compile("a").matcher("zza");
 
-        assertTrue(matcher.find());
+        assertTrue(matcher.Find());
 
         buffer = new StringBuilder();
-        matcher.appendReplacement(buffer, "foo");
+        matcher.AppendReplacement(buffer, "foo");
         assertEquals("1st time", "zzfoo", buffer.toString());
 
-        assertTrue(matcher.find(0));
+        assertTrue(matcher.Find(0));
 
         buffer = new StringBuilder();
-        matcher.appendReplacement(buffer, "foo");
+        matcher.AppendReplacement(buffer, "foo");
         assertEquals("2nd time", "zzfoo", buffer.toString());
     }
 
@@ -404,7 +404,7 @@ public class MatcherTest
     {
         StringBuffer buffer = new StringBuffer();
         Matcher matcher = Pattern.compile("(a)(b$)?(b)?").matcher("abc");
-        assertTrue(matcher.find());
+        assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2-$3");
         assertEquals("a--b", buffer.toString());
         matcher.appendTail(buffer);
@@ -412,21 +412,21 @@ public class MatcherTest
 
         buffer = new StringBuffer();
         matcher = Pattern.compile("(a)(b$)?(b)?").matcher("ab");
-        assertTrue(matcher.find());
+        assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2-$3");
         matcher.appendTail(buffer);
         assertEquals("a-b-", buffer.toString());
 
         buffer = new StringBuffer();
         matcher = Pattern.compile("(^b)?(b)?c").matcher("abc");
-        assertTrue(matcher.find());
+        assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1-$2");
         matcher.appendTail(buffer);
         assertEquals("a-b", buffer.toString());
 
         buffer = new StringBuffer();
         matcher = Pattern.compile("^(.)[^-]+(-.)?(.*)").matcher("Name");
-        assertTrue(matcher.find());
+        assertTrue(matcher.Find());
         matcher.appendReplacement(buffer, "$1$2");
         matcher.appendTail(buffer);
         assertEquals("N", buffer.toString());
@@ -437,31 +437,31 @@ public class MatcherTest
     {
         StringBuilder buffer = new StringBuilder();
         Matcher matcher = Pattern.compile("(a)(b$)?(b)?").matcher("abc");
-        assertTrue(matcher.find());
-        matcher.appendReplacement(buffer, "$1-$2-$3");
+        assertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1-$2-$3");
         assertEquals("a--b", buffer.toString());
-        matcher.appendTail(buffer);
+        matcher.AppendTail(buffer);
         assertEquals("a--bc", buffer.toString());
 
         buffer = new StringBuilder();
         matcher = Pattern.compile("(a)(b$)?(b)?").matcher("ab");
-        assertTrue(matcher.find());
-        matcher.appendReplacement(buffer, "$1-$2-$3");
-        matcher.appendTail(buffer);
+        assertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1-$2-$3");
+        matcher.AppendTail(buffer);
         assertEquals("a-b-", buffer.toString());
 
         buffer = new StringBuilder();
         matcher = Pattern.compile("(^b)?(b)?c").matcher("abc");
-        assertTrue(matcher.find());
-        matcher.appendReplacement(buffer, "$1-$2");
-        matcher.appendTail(buffer);
+        assertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1-$2");
+        matcher.AppendTail(buffer);
         assertEquals("a-b", buffer.toString());
 
         buffer = new StringBuilder();
         matcher = Pattern.compile("^(.)[^-]+(-.)?(.*)").matcher("Name");
-        assertTrue(matcher.find());
-        matcher.appendReplacement(buffer, "$1$2");
-        matcher.appendTail(buffer);
+        assertTrue(matcher.Find());
+        matcher.AppendReplacement(buffer, "$1$2");
+        matcher.AppendTail(buffer);
         assertEquals("N", buffer.toString());
     }
 
@@ -471,21 +471,21 @@ public class MatcherTest
     {
         Pattern p = Pattern.compile("b(an)*(.)");
         Matcher m = p.matcher("by, band, banana");
-        assertTrue(m.lookingAt());
-        m.reset();
-        assertTrue(m.find());
-        assertEquals("by", m.group(0));
-        assertNull(m.group(1));
-        assertEquals("y", m.group(2));
-        assertTrue(m.find());
-        assertEquals("band", m.group(0));
-        assertEquals("an", m.group(1));
-        assertEquals("d", m.group(2));
-        assertTrue(m.find());
-        assertEquals("banana", m.group(0));
-        assertEquals("an", m.group(1));
-        assertEquals("a", m.group(2));
-        assertFalse(m.find());
+        assertTrue(m.LookingAt());
+        m.Reset();
+        assertTrue(m.Find());
+        assertEquals("by", m.Group(0));
+        assertNull(m.Group(1));
+        assertEquals("y", m.Group(2));
+        assertTrue(m.Find());
+        assertEquals("band", m.Group(0));
+        assertEquals("an", m.Group(1));
+        assertEquals("d", m.Group(2));
+        assertTrue(m.Find());
+        assertEquals("banana", m.Group(0));
+        assertEquals("an", m.Group(1));
+        assertEquals("a", m.Group(2));
+        assertFalse(m.Find());
     }
 
     [Test]
@@ -494,7 +494,7 @@ public class MatcherTest
         Pattern p = Pattern.compile("b(an)*(.)");
         StringBuilder b = new StringBuilder("by, band, banana");
         Matcher m = p.matcher(b);
-        assertTrue(m.find(0));
+        assertTrue(m.Find(0));
         int start = b.indexOf("ban");
         b.replace(b.indexOf("ban"), start + 3, "b");
         assertTrue(m.find(b.indexOf("ban")));
@@ -507,26 +507,26 @@ public class MatcherTest
             Pattern.compile(
                 "(?P<baz>f(?P<foo>b*a(?P<another>r+)){0,10})" + "(?P<bag>bag)?(?P<nomatch>zzz)?");
         Matcher m = p.matcher("fbbarrrrrbag");
-        assertTrue(m.matches());
-        assertEquals("fbbarrrrr", m.group("baz"));
-        assertEquals("bbarrrrr", m.group("foo"));
-        assertEquals("rrrrr", m.group("another"));
+        assertTrue(m.Matches());
+        assertEquals("fbbarrrrr", m.Group("baz"));
+        assertEquals("bbarrrrr", m.Group("foo"));
+        assertEquals("rrrrr", m.Group("another"));
         assertEquals(0, m.start("baz"));
         assertEquals(1, m.start("foo"));
         assertEquals(4, m.start("another"));
-        assertEquals(9, m.end("baz"));
-        assertEquals(9, m.end("foo"));
-        assertEquals("bag", m.group("bag"));
+        assertEquals(9, m.End("baz"));
+        assertEquals(9, m.End("foo"));
+        assertEquals("bag", m.Group("bag"));
         assertEquals(9, m.start("bag"));
-        assertEquals(12, m.end("bag"));
-        assertNull(m.group("nomatch"));
+        assertEquals(12, m.End("bag"));
+        assertNull(m.Group("nomatch"));
         assertEquals(-1, m.start("nomatch"));
-        assertEquals(-1, m.end("nomatch"));
+        assertEquals(-1, m.End("nomatch"));
         assertEquals("whatbbarrrrreverbag", appendReplacement(m, "what$2ever${bag}"));
 
         try
         {
-            m.group("nonexistent");
+            m.Group("nonexistent");
             fail("Should have thrown IllegalArgumentException");
         }
         catch (IllegalArgumentException expected)
@@ -538,7 +538,7 @@ public class MatcherTest
     private string appendReplacement(Matcher m, string replacement)
     {
         StringBuilder b = new StringBuilder();
-        m.appendReplacement(b, replacement);
+        m.AppendReplacement(b, replacement);
         return b.toString();
     }
 
@@ -556,8 +556,8 @@ public class MatcherTest
     public void testGroupZeroWidthAssertions()
     {
         Matcher m = Pattern.compile("(\\d{2} ?(\\d|[a-z])?)($|[^a-zA-Z])").matcher("22 bored");
-        Truth.assertThat(m.find()).isTrue();
-        Truth.assertThat(m.group(1)).isEqualTo("22");
+        Truth.assertThat(m.Find()).isTrue();
+        Truth.assertThat(m.Group(1)).isEqualTo("22");
     }
 
     [Test]
@@ -567,13 +567,13 @@ public class MatcherTest
         string text = "xxx aaa bbb yyy";
         {
             Matcher matcher = Pattern.compile(pattern).matcher(text);
-            assertTrue(matcher.find());
-            assertEquals("aaa", text.Substring(matcher.start(), matcher.end()));
+            assertTrue(matcher.Find());
+            assertEquals("aaa", text.Substring(matcher.Start(), matcher.End()));
         }
         {
             Matcher matcher = Pattern.compile(pattern, Pattern.LONGEST_MATCH).matcher(text);
-            assertTrue(matcher.find());
-            assertEquals("aaa bbb", text.Substring(matcher.start(), matcher.end()));
+            assertTrue(matcher.Find());
+            assertEquals("aaa bbb", text.Substring(matcher.Start(), matcher.End()));
         }
     }
 }

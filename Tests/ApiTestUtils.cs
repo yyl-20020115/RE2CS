@@ -71,10 +71,10 @@ public class ApiTestUtils
             p.matcher(match).matches());
         Pattern pr = Pattern.compile(regexp);
         assertTrue(
-            "Pattern with regexp: " + regexp + " doesn't match: " + match, pr.matcher(match).matches());
+            "Pattern with regexp: " + regexp + " doesn't match: " + match, pr.matcher(match).Matches());
         assertTrue(
             "Pattern with regexp: " + regexp + " doesn't match: " + match,
-            pr.matcher(getUtf8Bytes(match)).matches());
+            pr.matcher(getUtf8Bytes(match)).Matches());
     }
 
     public static void testMatcherNotMatches(string regexp, string nonMatch)
@@ -85,10 +85,10 @@ public class ApiTestUtils
             p.matcher(nonMatch).matches());
         Pattern pr = Pattern.compile(regexp);
         assertFalse(
-            "Pattern with regexp: " + regexp + " matches: " + nonMatch, pr.matcher(nonMatch).matches());
+            "Pattern with regexp: " + regexp + " matches: " + nonMatch, pr.matcher(nonMatch).Matches());
         assertFalse(
             "Pattern with regexp: " + regexp + " matches: " + nonMatch,
-            pr.matcher(getUtf8Bytes(nonMatch)).matches());
+            pr.matcher(getUtf8Bytes(nonMatch)).Matches());
     }
 
     /**
@@ -131,10 +131,10 @@ public class ApiTestUtils
     {
         Pattern p = Pattern.compile(regex);
         string replaced;
-        foreach (MatcherInput input in Arrays.asList(MatcherInput.utf16(orig), MatcherInput.utf8(orig)))
+        foreach (MatcherInput input in Arrays.asList(MatcherInput.Utf16(orig), MatcherInput.Utf8(orig)))
         {
             Matcher m = p.matcher(input);
-            replaced = m.replaceAll(repl);
+            replaced = m.ReplaceAll(repl);
             assertEquals(actual, replaced);
         }
 
@@ -150,10 +150,10 @@ public class ApiTestUtils
     {
         Pattern p = Pattern.compile(regex);
         string replaced;
-        foreach (MatcherInput input in Arrays.asList(MatcherInput.utf16(orig), MatcherInput.utf8(orig)))
+        foreach (MatcherInput input in Arrays.asList(MatcherInput.Utf16(orig), MatcherInput.Utf8(orig)))
         {
             Matcher m = p.matcher(orig);
-            replaced = m.replaceFirst(repl);
+            replaced = m.ReplaceFirst(repl);
             assertEquals(actual, replaced);
         }
 
@@ -173,8 +173,8 @@ public class ApiTestUtils
         Matcher m2 = p.matcher(getUtf8Bytes("x"));
         
         assertEquals(count, p.groupCount());
-        assertEquals(count, m.groupCount());
-        assertEquals(count, m2.groupCount());
+        assertEquals(count, m.GroupCount);
+        assertEquals(count, m2.GroupCount);
 
         // JDK
         java.util.regex.Pattern pj = java.util.regex.Pattern.compile(pattern);
@@ -196,16 +196,16 @@ public class ApiTestUtils
     {
         // RE2
         Pattern p = Pattern.compile(regexp);
-        foreach(MatcherInput input in Arrays.asList(MatcherInput.utf16(text), MatcherInput.utf8(text)))
+        foreach(MatcherInput input in Arrays.asList(MatcherInput.Utf16(text), MatcherInput.Utf8(text)))
         {
             Matcher matchString = p.matcher(input);
-            assertTrue(matchString.find());
-            assertEquals(output[0], matchString.group());
+            assertTrue(matchString.Find());
+            assertEquals(output[0], matchString.Group());
             for (int i = 0; i < output.Length; i++)
             {
-                assertEquals(output[i], matchString.group(i));
+                assertEquals(output[i], matchString.Group(i));
             }
-            assertEquals(output.Length - 1, matchString.groupCount());
+            assertEquals(output.Length - 1, matchString.GroupCount);
         }
 
         // JDK
@@ -228,13 +228,13 @@ public class ApiTestUtils
     {
         // RE2
         Pattern p = Pattern.compile(regexp);
-        foreach (MatcherInput input in Arrays.asList(MatcherInput.utf16(text), MatcherInput.utf8(text)))
+        foreach (MatcherInput input in Arrays.asList(MatcherInput.Utf16(text), MatcherInput.Utf8(text)))
         {
             Matcher matchString = p.matcher(input);
             // RE2Matcher matchBytes = p.matcher(text.getBytes(Charsets.UTF_8));
-            assertTrue(matchString.find(start));
+            assertTrue(matchString.Find(start));
             // assertTrue(matchBytes.find(start));
-            assertEquals(output, matchString.group());
+            assertEquals(output, matchString.Group());
             // assertEquals(output, matchBytes.group());
         }
 
@@ -249,11 +249,11 @@ public class ApiTestUtils
     {
         // RE2
         Pattern p = Pattern.compile(regexp);
-        foreach (MatcherInput input in Arrays.asList(MatcherInput.utf16(text), MatcherInput.utf8(text)))
+        foreach (MatcherInput input in Arrays.asList(MatcherInput.Utf16(text), MatcherInput.Utf8(text)))
         {
             Matcher matchString = p.matcher(input);
             // RE2Matcher matchBytes = p.matcher(text.getBytes(Charsets.UTF_8));
-            assertFalse(matchString.find(start));
+            assertFalse(matchString.Find(start));
             // assertFalse(matchBytes.find(start));
         }
 
@@ -267,15 +267,15 @@ public class ApiTestUtils
     {
         Pattern p = Pattern.compile(regexp);
         Matcher m = p.matcher(text);
-        m.find();
-        m.group(group);
+        m.Find();
+        m.Group(group);
         fail(); // supposed to have exception by now
     }
 
     public static void verifyLookingAt(string text, string regexp, bool output)
     {
-        assertEquals(output, Pattern.compile(regexp).matcher(text).lookingAt());
-        assertEquals(output, Pattern.compile(regexp).matcher(getUtf8Bytes(text)).lookingAt());
+        assertEquals(output, Pattern.compile(regexp).matcher(text).LookingAt());
+        assertEquals(output, Pattern.compile(regexp).matcher(getUtf8Bytes(text)).LookingAt());
         assertEquals(output, java.util.regex.Pattern.compile(regexp).matcher(text).lookingAt());
     }
 

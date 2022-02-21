@@ -19,25 +19,13 @@ public abstract class MachineInput
 {
     public const int EOF = (-1 << 3);
 
-    public static MachineInput fromUTF8(byte[] b)
-    {
-        return new UTF8Input(b);
-    }
+    public static MachineInput FromUTF8(byte[] b) => new UTF8Input(b);
 
-    public static MachineInput fromUTF8(byte[] b, int start, int end)
-    {
-        return new UTF8Input(b, start, end);
-    }
+    public static MachineInput FromUTF8(byte[] b, int start, int end) => new UTF8Input(b, start, end);
 
-    public static MachineInput fromUTF16(string s)
-    {
-        return new UTF16Input(s, 0, s.Length);
-    }
+    public static MachineInput FromUTF16(string s) => new UTF16Input(s);
 
-    public static MachineInput fromUTF16(string s, int start, int end)
-    {
-        return new UTF16Input(s, start, end);
-    }
+    public static MachineInput FromUTF16(string s, int start, int end) => new UTF16Input(s, start, end);
 
     //// Interface
 
@@ -47,20 +35,20 @@ public abstract class MachineInput
     // the lower 3 bits, and the rune (Unicode code point) in the high
     // bits.  Never negative, except for EOF which is represented as -1
     // << 3 | 0.
-    public abstract int step(int pos);
+    public abstract int Step(int pos);
 
     // can we look ahead without losing info?
-    public abstract bool canCheckPrefix();
+    public abstract bool CanCheckPrefix();
 
     // Returns the index relative to |pos| at which |re2.prefix| is found
     // in this input stream, or a negative value if not found.
-    public abstract int index(RE2 re2, int pos);
+    public abstract int Index(RE2 re2, int pos);
 
     // Returns a bitmask of EMPTY_* flags.
-    public abstract int context(int pos);
+    public abstract int Context(int pos);
 
     // Returns the end position in the same units as step().
-    public abstract int endPos();
+    public abstract int EndPos();
 
     //// Implementations
 
@@ -71,15 +59,10 @@ public abstract class MachineInput
         public readonly byte[] b;
         public readonly int start;
         public readonly int end;
-        public UTF8Input(byte[] b)
-        {
-            this.b = b;
-            start = 0;
-            end = b.Length;
-        }
 
-        public UTF8Input(byte[] b, int start, int end)
+        public UTF8Input(byte[] b, int start = 0, int end = -1)
         {
+            end = end < 0 ? b.Length : end;
             if (end > b.Length)
             {
                 throw new IndexOutOfRangeException(
@@ -90,13 +73,10 @@ public abstract class MachineInput
             this.end = end;
         }
 
-        public override int step(int i)
+        public override int Step(int i)
         {
             i += start;
-            if (i >= end)
-            {
-                return EOF;
-            }
+            if (i >= end) return EOF;
 
             // UTF-8.  RFC 3629 in five lines:
             //
@@ -145,19 +125,16 @@ public abstract class MachineInput
             }
         }
 
-        public override bool canCheckPrefix()
-        {
-            return true;
-        }
+        public override bool CanCheckPrefix() => true;
 
-        public override int index(RE2 re2, int pos)
+        public override int Index(RE2 re2, int pos)
         {
-            pos += start;
+            pos += this.start;
             int i = Utils.indexOf(b, re2.prefixUTF8, pos);
             return i < 0 ? i : i - pos;
         }
 
-        public override int context(int pos)
+        public override int Context(int pos)
         {
             pos += this.start;
             int r1 = -1;
@@ -181,17 +158,14 @@ public abstract class MachineInput
                     {
                         start = this.start;
                     }
-                    r1 = step(start) >> 3;
+                    r1 = Step(start) >> 3;
                 }
             }
-            int r2 = pos < this.end ? (step(pos) >> 3) : -1;
+            int r2 = pos < this.end ? (Step(pos) >> 3) : -1;
             return Utils.emptyOpContext(r1, r2);
         }
 
-        public override int endPos()
-        {
-            return end;
-        }
+        public override int EndPos() => this.end;
     }
 
     // |pos| and |width| are in Java "char" units.
@@ -201,21 +175,21 @@ public abstract class MachineInput
         public readonly int start;
         public readonly int end;
 
-        public UTF16Input(string str, int start, int end)
+        public UTF16Input(string str, int start = 0, int end = -1)
         {
+            end = end<0? str.Length : end;
             this.str = str;
             this.start = start;
             this.end = end;
         }
-        public override int step(int pos)
+        public override int Step(int pos)
         {
             pos += start;
             if (pos < end)
             {
-                int rune = char.ConvertToUtf32(str, pos);
-                //Character.codePointAt(str, pos);
+                var rune = char.ConvertToUtf32(str, pos);
 
-                return rune << 3 | new Rune(rune).ToString().Length;
+                return rune << 3 | new Rune(rune).Utf16SequenceLength;
             }
             else
             {
@@ -223,46 +197,31 @@ public abstract class MachineInput
             }
         }
 
-        public override bool canCheckPrefix()
-        {
-            return true;
-        }
-        public override int index(RE2 re2, int pos)
+        public override bool CanCheckPrefix() => true;
+        public override int Index(RE2 re2, int pos)
         {
             pos += start;
-            int i = indexOf(str, re2.prefix, pos);
+            int i = IndexOf(str, re2.prefix, pos);
             return i < 0 ? i : i - pos;
         }
-        public override int context(int pos)
+        public override int Context(int pos)
         {
             pos += start;
             int r1 = pos > 0 && pos <= str.Length ?
-                char.ConvertToUtf32(str, pos - 1) : -1;
-            //TODO:how?
-            //    Character.codePointBefore(str, pos) : -1;
+                str.CodePointBefore(pos) : -1;
             int r2 = pos < str.Length ? str[pos-1] : -1;
             return Utils.emptyOpContext(r1, r2);
         }
-        public override int endPos()
-        {
-            return end;
-        }
+        public override int EndPos() => this.end;
 
-        private int indexOf(string hayStack, string needle, int pos)
+        private int IndexOf(string hayStack, string needle, int pos)
         {
-            if (hayStack is string)
-            {
-                return ((string)hayStack).IndexOf(needle, pos);
-            }
-            //if (hayStack is StringBuilder)
-            //{
-            //    return ((StringBuilder)hayStack).IndexOf(needle, pos);
-            //}
-            return indexOfFallback(hayStack, needle, pos);
+            return hayStack.IndexOf(needle, pos);
+            //return indexOfFallback(hayStack, needle, pos);
         }
 
         // Modified version of {@link string#indexOf(string) that allows a CharSequence.
-        private int indexOfFallback(string hayStack, string needle, int fromIndex)
+        private int IndexOfFallback(string hayStack, string needle, int fromIndex)
         {
             if (fromIndex >= hayStack.Length)
             {

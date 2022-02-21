@@ -198,7 +198,7 @@ public class Regexp
                 }
                 foreach (int rune in runes)
                 {
-                    Utils.escapeRune(_out, rune);
+                    Utils.EscapeRune(_out, rune);
                 }
                 if ((flags & RE2.FOLD_CASE) != 0)
                 {
@@ -274,12 +274,12 @@ public class Regexp
                         int lo = runes[i] + 1;
                         int hi = runes[i + 1] - 1;
                         quoteIfHyphen(_out, lo);
-                        Utils.escapeRune(_out, lo);
+                        Utils.EscapeRune(_out, lo);
                         if (lo != hi)
                         {
                             _out.Append('-');
                             quoteIfHyphen(_out, hi);
-                            Utils.escapeRune(_out, hi);
+                            Utils.EscapeRune(_out, hi);
                         }
                     }
                 }
@@ -290,12 +290,12 @@ public class Regexp
                         int lo = runes[i];
                         int hi = runes[i + 1];
                         quoteIfHyphen(_out, lo);
-                        Utils.escapeRune(_out, lo);
+                        Utils.EscapeRune(_out, lo);
                         if (lo != hi)
                         {
                             _out.Append('-');
                             quoteIfHyphen(_out, hi);
-                            Utils.escapeRune(_out, hi);
+                            Utils.EscapeRune(_out, hi);
                         }
                     }
                 }

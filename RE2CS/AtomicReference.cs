@@ -11,40 +11,26 @@ namespace RE2CS;
 
 public class AtomicReference<V> where V : class
 {
-    private static long valueOffset;
-
-    private volatile V value;
+    private volatile V _value;
 
     public AtomicReference(V initialValue = default)
     {
-        value = initialValue;
+        _value = initialValue;
     }
 
-    public V get() {
-        return value;
-    }
-
-    public void set(V newValue)
-    {
-        value = newValue;
-    }
-
+    public V Value { get => _value; set => _value = value; }
+    
     public bool compareAndSet(V expect, V update) {
         lock (this)
         {
-            if(this.value == expect)
+            var same = false;
+            if(same = (this._value == expect))
             {
-                this.value = update;
-                return true;
+                this._value = update;
             }
-            return false;
+            return same;
         }
     }
 
-
-    public override string ToString()
-    {
-        return get().ToString();
-    }
-
+    public override string ToString() => Value?.ToString() ?? "";
 }

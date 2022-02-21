@@ -170,22 +170,22 @@ public class Pattern
      */
     public static bool matches(string regex, string input)
     {
-        return compile(regex).matcher(input).matches();
+        return compile(regex).matcher(input).Matches();
     }
 
     public static bool matches(string regex, byte[] input)
     {
-        return compile(regex).matcher(input).matches();
+        return compile(regex).matcher(input).Matches();
     }
 
     public bool matches(string input)
     {
-        return this.matcher(input).matches();
+        return this.matcher(input).Matches();
     }
 
     public bool matches(byte[] input)
     {
-        return this.matcher(input).matches();
+        return this.matcher(input).Matches();
     }
 
     /**
@@ -200,7 +200,7 @@ public class Pattern
 
     public Matcher matcher(byte[] input)
     {
-        return new Matcher(this, MatcherInput.utf8(input));
+        return new Matcher(this, MatcherInput.Utf8(input));
     }
 
     // This is visible for testing.
@@ -247,16 +247,16 @@ public class Pattern
         int matchCount = 0;
         int arraySize = 0;
         int last = 0;
-        while (m.find())
+        while (m.Find())
         {
             matchCount++;
-            if (limit != 0 || last < m.start())
+            if (limit != 0 || last < m.Start())
             {
                 arraySize = matchCount;
             }
-            last = m.end();
+            last = m.End();
         }
-        if (last < m.get_inputLength() || limit != 0)
+        if (last < m.InputLength || limit != 0)
         {
             matchCount++;
             arraySize = matchCount;
@@ -271,15 +271,15 @@ public class Pattern
         string[] array = new string[arraySize];
         int i = 0;
         last = 0;
-        m.reset();
-        while (m.find() && i < arraySize - trunc)
+        m.Reset();
+        while (m.Find() && i < arraySize - trunc)
         {
-            array[i++] = m.substring(last, m.start());
-            last = m.end();
+            array[i++] = m.Substring(last, m.Start());
+            last = m.End();
         }
         if (i < arraySize)
         {
-            array[i] = m.substring(last, m.get_inputLength());
+            array[i] = m.Substring(last, m.InputLength);
         }
         return array;
     }

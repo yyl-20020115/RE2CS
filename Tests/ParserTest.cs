@@ -533,10 +533,10 @@ public class ParserTest
         // Add 'A', 'a', 'B', 'b', etc.
         for (int i = 'A'; i <= 'Z'; i++)
         {
-            cc.appendRange(i, i);
-            cc.appendRange(i + 'a' - 'A', i + 'a' - 'A');
+            cc.AppendRange(i, i);
+            cc.AppendRange(i + 'a' - 'A', i + 'a' - 'A');
         }
-        assertEquals("AZaz", runesToString(cc.toArray()));
+        assertEquals("AZaz", runesToString(cc.ToArray()));
     }
 
     // Converts an array of Unicode runes to a Java UTF-16 string.
