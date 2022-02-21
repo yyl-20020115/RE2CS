@@ -65,9 +65,9 @@ public class ExecTest
     [Test]
     public void testExamplesInDocumentation()
     {
-        RE2 re = RE2.compile("(?i:co(.)a)");
-        assertEquals(Arrays.asList("Copa", "coba"), re.findAll("Copacobana", 10));
-        List<string[]> x = re.findAllSubmatch("Copacobana", 100);
+        RE2 re = RE2.Compile("(?i:co(.)a)");
+        assertEquals(Arrays.asList("Copa", "coba"), re.FindAll("Copacobana", 10));
+        List<string[]> x = re.FindAllSubmatch("Copacobana", 100);
         assertEquals(Arrays.asList("Copa", "p"), Arrays.asList(x.get(0)));
         assertEquals(Arrays.asList("coba", "b"), Arrays.asList(x.get(1)));
     }
@@ -162,7 +162,7 @@ public class ExecTest
                 re = refull = null;
                 try
                 {
-                    re = RE2.compile(q);
+                    re = RE2.Compile(q);
                 }
                 catch (Throwable e)
                 { // (handle compiler panic too)
@@ -181,7 +181,7 @@ public class ExecTest
                 string full = "\\A(?:" + q + ")\\z";
                 try
                 {
-                    refull = RE2.compile(full);
+                    refull = RE2.Compile(full);
                 }
                 catch (Exception e)
                 { // (handle compiler panic too)
@@ -224,7 +224,7 @@ public class ExecTest
                     RE2 regexp = partial ? re : refull;
 
                     regexp.longest = longest;
-                    int[] have = regexp.findSubmatchIndex(text); // UTF-16 indices
+                    int[] have = regexp.FindSubmatchIndex(text); // UTF-16 indices
                     if (multibyte && have != null)
                     {
                         // The testdata uses UTF-8 indices, but we're using the UTF-16 API.
@@ -252,7 +252,7 @@ public class ExecTest
                     }
 
                     regexp.longest = longest;
-                    bool b = regexp.match(text);
+                    bool b = regexp.Match(text);
                     if (b != (want != null))
                     {
                         System.err.format(
@@ -442,7 +442,7 @@ public class ExecTest
             {
                 continue;
             }
-            List<string> field = NOTAB.findAll(line, -1);
+            List<string> field = NOTAB.FindAll(line, -1);
             for (int i = 0; i < field.Count; ++i)
             {
                 if (field.get(i).Equals("NULL"))
@@ -645,7 +645,7 @@ public class ExecTest
                         break;
                     case 'L':
                         // literal
-                        pattern = RE2.quoteMeta(pattern);
+                        pattern = RE2.QuoteMeta(pattern);
                 }
 
                 if (flag.indexOf('i') >= 0)
@@ -656,7 +656,7 @@ public class ExecTest
                 RE2 re = null;
                 try
                 {
-                    re = RE2.compileImpl(pattern, flags, true);
+                    re = RE2.CompileImpl(pattern, flags, true);
                 }
                 catch (PatternSyntaxException e)
                 {
@@ -673,7 +673,7 @@ public class ExecTest
                     nerr++;
                     continue;
                 }
-                bool match = re.match(text);
+                bool match = re.Match(text);
                 if (match != shouldCompileMatch[1])
                 {
                     System.err.format(
@@ -681,7 +681,7 @@ public class ExecTest
                     nerr++;
                     continue;
                 }
-                int[] haveArray = re.findSubmatchIndex(text);
+                int[] haveArray = re.FindSubmatchIndex(text);
                 if (haveArray == null)
                 {
                     haveArray = Utils.EMPTY_INTS; // to make .Length and printing safe

@@ -56,11 +56,11 @@ public class Regexp
     public int flags; // bitmap of parse flags
     public Regexp[] subs; // subexpressions, if any.  Never null.
                           // subs[0] is used as the freelist.
-    public int[] runes; // matched runes, for LITERAL, CHAR_CLASS
+    public int[]? runes; // matched runes, for LITERAL, CHAR_CLASS
     public int min, max; // min, max for REPEAT
     public int cap; // capturing index, for CAPTURE
     public string name; // capturing name, for CAPTURE
-    public Dictionary<string, int> namedGroups; // map of group name -> capturing index
+    public Dictionary<string, int>? namedGroups; // map of group name -> capturing index
                                                 // Do update copy ctor when adding new fields!
 
     public Regexp(Op op)
@@ -82,7 +82,7 @@ public class Regexp
         this.namedGroups = that.namedGroups;
     }
 
-    public void reinit()
+    public void Reinit()
     {
         this.flags = 0;
         subs = EMPTY_SUBS;
@@ -93,74 +93,71 @@ public class Regexp
 
     public override string ToString()
     {
-        StringBuilder _out = new StringBuilder();
-        appendTo(_out);
-        return _out.ToString();
+        var builder = new StringBuilder();
+        AppendTo(builder);
+        return builder.ToString();
     }
 
-    private static void quoteIfHyphen(StringBuilder _out, int rune)
+    private static void QuoteIfHyphen(StringBuilder builder, int rune)
     {
-        if (rune == '-')
-        {
-            _out.Append('\\');
-        }
+        if (rune == '-') builder.Append('\\');
     }
 
     // appendTo() appends the Perl syntax for |this| regular expression to |_out|.
-    private void appendTo(StringBuilder _out)
+    private void AppendTo(StringBuilder builder)
     {
         switch (op)
         {
             case Op.NO_MATCH:
-                _out.Append("[^\\x00-\\x{10FFFF}]");
+                builder.Append("[^\\x00-\\x{10FFFF}]");
                 break;
             case Op.EMPTY_MATCH:
-                _out.Append("(?:)");
+                builder.Append("(?:)");
                 break;
             case Op.STAR:
             case Op.PLUS:
             case Op.QUEST:
             case Op.REPEAT:
                 {
-                    Regexp sub = subs[0];
+                    var sub = subs[0];
                     if (sub.op > Op.CAPTURE
                         || (sub.op == Op.LITERAL && sub.runes.Length > 1))
                     {
-                        _out.Append("(?:");
-                        sub.appendTo(_out);
-                        _out.Append(')');
+                        builder.Append("(?:");
+                        sub.AppendTo(builder);
+                        builder.Append(')');
                     }
                     else
                     {
-                        sub.appendTo(_out);
+                        sub.AppendTo(builder);
                     }
                     switch (op)
                     {
                         case Op.STAR:
-                            _out.Append('*');
+                            builder.Append('*');
                             break;
                         case Op.PLUS:
-                            _out.Append('+');
+                            builder.Append('+');
                             break;
                         case Op.QUEST:
-                            _out.Append('?');
+                            builder.Append('?');
                             break;
                         case Op.REPEAT:
-                            _out.Append('{').Append(min);
+                            builder.Append('{').Append(min);
                             if (min != max)
                             {
-                                _out.Append(',');
+                                builder.Append(',');
                                 if (max >= 0)
                                 {
-                                    _out.Append(max);
+                                    builder.Append(max);
                                 }
                             }
-                            _out.Append('}');
+                            builder.Append('}');
                             break;
                     }
                     if ((flags & RE2.NON_GREEDY) != 0)
                     {
-                        _out.Append('?');
+                        builder.Append('?');
                     }
                     break;
                 }
@@ -169,13 +166,13 @@ public class Regexp
                 {
                     if (sub.op == Op.ALTERNATE)
                     {
-                        _out.Append("(?:");
-                        sub.appendTo(_out);
-                        _out.Append(')');
+                        builder.Append("(?:");
+                        sub.AppendTo(builder);
+                        builder.Append(')');
                     }
                     else
                     {
-                        sub.appendTo(_out);
+                        sub.AppendTo(builder);
                     }
                 }
                 break;
@@ -184,101 +181,101 @@ public class Regexp
                     string sep = "";
                     foreach (Regexp sub in subs)
                     {
-                        _out.Append(sep);
+                        builder.Append(sep);
                         sep = "|";
-                        sub.appendTo(_out);
+                        sub.AppendTo(builder);
                     }
                     break;
                 }
             case Op.LITERAL:
                 if ((flags & RE2.FOLD_CASE) != 0)
                 {
-                    _out.Append("(?i:");
+                    builder.Append("(?i:");
                 }
                 foreach (int rune in runes)
                 {
-                    Utils.EscapeRune(_out, rune);
+                    Utils.EscapeRune(builder, rune);
                 }
                 if ((flags & RE2.FOLD_CASE) != 0)
                 {
-                    _out.Append(')');
+                    builder.Append(')');
                 }
                 break;
             case Op.ANY_CHAR_NOT_NL:
-                _out.Append("(?-s:.)");
+                builder.Append("(?-s:.)");
                 break;
             case Op.ANY_CHAR:
-                _out.Append("(?s:.)");
+                builder.Append("(?s:.)");
                 break;
             case Op.CAPTURE:
                 if (string.IsNullOrEmpty( name ))
                 {
-                    _out.Append('(');
+                    builder.Append('(');
                 }
                 else
                 {
-                    _out.Append("(?P<");
-                    _out.Append(name);
-                    _out.Append(">");
+                    builder.Append("(?P<");
+                    builder.Append(name);
+                    builder.Append(">");
                 }
                 if (subs[0].op != Op.EMPTY_MATCH)
                 {
-                    subs[0].appendTo(_out);
+                    subs[0].AppendTo(builder);
                 }
-                _out.Append(')');
+                builder.Append(')');
                 break;
             case Op.BEGIN_TEXT:
-                _out.Append("\\A");
+                builder.Append("\\A");
                 break;
             case Op.END_TEXT:
                 if ((flags & RE2.WAS_DOLLAR) != 0)
                 {
-                    _out.Append("(?-m:$)");
+                    builder.Append("(?-m:$)");
                 }
                 else
                 {
-                    _out.Append("\\z");
+                    builder.Append("\\z");
                 }
                 break;
             case Op.BEGIN_LINE:
-                _out.Append('^');
+                builder.Append('^');
                 break;
             case Op.END_LINE:
-                _out.Append('$');
+                builder.Append('$');
                 break;
             case Op.WORD_BOUNDARY:
-                _out.Append("\\b");
+                builder.Append("\\b");
                 break;
             case Op.NO_WORD_BOUNDARY:
-                _out.Append("\\B");
+                builder.Append("\\B");
                 break;
             case Op.CHAR_CLASS:
                 if (runes.Length % 2 != 0)
                 {
-                    _out.Append("[invalid char class]");
+                    builder.Append("[invalid char class]");
                     break;
                 }
-                _out.Append('[');
+                builder.Append('[');
                 if (runes.Length == 0)
                 {
-                    _out.Append("^\\x00-\\x{10FFFF}");
+                    builder.Append("^\\x00-\\x{10FFFF}");
                 }
                 else if (runes[0] == 0 && runes[runes.Length - 1] == Unicode.MAX_RUNE)
                 {
                     // Contains 0 and MAX_RUNE.  Probably a negated class.
                     // Print the gaps.
-                    _out.Append('^');
+                    builder.Append('^');
                     for (int i = 1; i < runes.Length - 1; i += 2)
                     {
                         int lo = runes[i] + 1;
                         int hi = runes[i + 1] - 1;
-                        quoteIfHyphen(_out, lo);
-                        Utils.EscapeRune(_out, lo);
+                        QuoteIfHyphen(builder, lo);
+                        Utils.EscapeRune(builder, lo);
                         if (lo != hi)
                         {
-                            _out.Append('-');
-                            quoteIfHyphen(_out, hi);
-                            Utils.EscapeRune(_out, hi);
+                            builder.Append('-');
+                            QuoteIfHyphen(builder, hi);
+                            Utils.EscapeRune(builder, hi);
                         }
                     }
                 }
@@ -288,26 +285,26 @@ public class Regexp
                     {
                         int lo = runes[i];
                         int hi = runes[i + 1];
-                        quoteIfHyphen(_out, lo);
-                        Utils.EscapeRune(_out, lo);
+                        QuoteIfHyphen(builder, lo);
+                        Utils.EscapeRune(builder, lo);
                         if (lo != hi)
                         {
-                            _out.Append('-');
-                            quoteIfHyphen(_out, hi);
-                            Utils.EscapeRune(_out, hi);
+                            builder.Append('-');
+                            QuoteIfHyphen(builder, hi);
+                            Utils.EscapeRune(builder, hi);
                         }
                     }
                 }
-                _out.Append(']');
+                builder.Append(']');
                 break;
             default: // incl. pseudos
-                _out.Append(op);
+                builder.Append(op);
                 break;
         }
     }
 
     // maxCap() walks the regexp to find the maximum capture index.
-    public int maxCap()
+    public int MaxCap()
     {
         int m = 0;
         if (op == Op.CAPTURE)
@@ -318,7 +315,7 @@ public class Regexp
         {
             foreach (Regexp sub in subs)
             {
-                int n = sub.maxCap();
+                int n = sub.MaxCap();
                 if (m < n)
                 {
                     m = n;
@@ -360,14 +357,13 @@ public class Regexp
     }
 
     // Equals() returns true if this and that have identical structure.
-    public override bool Equals(Object that)
+    public override bool Equals(object? that)
     {
-        if (!(that is Regexp))
+        if (!(that is Regexp y))
         {
             return false;
         }
-        Regexp x = this;
-        Regexp y = (Regexp)that;
+        var x = this;
         if (x.op != y.op)
         {
             return false;

@@ -18,12 +18,12 @@ public class RE2Test
     [Test]
     public void testFullMatch()
     {
-        assertTrue(new RE2("ab+c").match("abbbbbc", 0, 7, RE2.ANCHOR_BOTH, null, 0));
-        assertFalse(new RE2("ab+c").match("xabbbbbc", 0, 8, RE2.ANCHOR_BOTH, null, 0));
+        assertTrue(new RE2("ab+c").Match("abbbbbc", 0, 7, RE2.ANCHOR_BOTH, null, 0));
+        assertFalse(new RE2("ab+c").Match("xabbbbbc", 0, 8, RE2.ANCHOR_BOTH, null, 0));
 
-        assertTrue(new RE2("ab+c").match(MatcherInput.Utf8("abbbbbc"), 0, 7, RE2.ANCHOR_BOTH, null, 0));
+        assertTrue(new RE2("ab+c").Match(MatcherInput.Utf8("abbbbbc"), 0, 7, RE2.ANCHOR_BOTH, null, 0));
         assertFalse(
-            new RE2("ab+c").match(MatcherInput.Utf8("xabbbbbc"), 0, 8, RE2.ANCHOR_BOTH, null, 0));
+            new RE2("ab+c").Match(MatcherInput.Utf8("xabbbbbc"), 0, 8, RE2.ANCHOR_BOTH, null, 0));
     }
 
     [Test]
@@ -34,12 +34,12 @@ public class RE2Test
         foreach (MatcherInput input in new List<MatcherInput>()
             { MatcherInput.Utf8(s), MatcherInput.Utf16(s) })
         {
-            assertTrue(r.match(input, 0, 15, RE2.UNANCHORED, null, 0));
-            assertTrue(r.match(input, 0, 12, RE2.UNANCHORED, null, 0));
-            assertTrue(r.match(input, 3, 15, RE2.UNANCHORED, null, 0));
-            assertTrue(r.match(input, 3, 12, RE2.UNANCHORED, null, 0));
-            assertFalse(r.match(input, 4, 12, RE2.UNANCHORED, null, 0));
-            assertFalse(r.match(input, 3, 11, RE2.UNANCHORED, null, 0));
+            assertTrue(r.Match(input, 0, 15, RE2.UNANCHORED, null, 0));
+            assertTrue(r.Match(input, 0, 12, RE2.UNANCHORED, null, 0));
+            assertTrue(r.Match(input, 3, 15, RE2.UNANCHORED, null, 0));
+            assertTrue(r.Match(input, 3, 12, RE2.UNANCHORED, null, 0));
+            assertFalse(r.Match(input, 4, 12, RE2.UNANCHORED, null, 0));
+            assertFalse(r.Match(input, 3, 11, RE2.UNANCHORED, null, 0));
         }
     }
     public static void assertTrue(bool v)

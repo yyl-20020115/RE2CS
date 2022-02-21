@@ -55,13 +55,13 @@ public class RE2ReplaceAllFunctionTest
         RE2 re = null;
         try
         {
-            re = RE2.compile(pattern);
+            re = RE2.Compile(pattern);
         }
         catch (PatternSyntaxException e)
         {
             fail(string.Format("Unexpected error compiling {0}: {1}", pattern, e.Message));
         }
-        string actual = re.replaceAllFunc(input, REPLACE_XSY, input.Length);
+        string actual = re.ReplaceAllFunc(input, REPLACE_XSY, input.Length);
         if (!actual.Equals(expected))
         {
             fail(

@@ -49,7 +49,7 @@ public class RE2QuoteMetaTest
     public void testQuoteMeta()
     {
         // Verify that quoteMeta returns the expected string.
-        string quoted = RE2.quoteMeta(pattern);
+        string quoted = RE2.QuoteMeta(pattern);
         if (!quoted.Equals(output))
         {
             fail(string.format("RE2.quoteMeta(\"%s\") = \"%s\"; want \"%s\"", pattern, quoted, output));
@@ -62,7 +62,7 @@ public class RE2QuoteMetaTest
             RE2 re = null;
             try
             {
-                re = RE2.compile(quoted);
+                re = RE2.Compile(quoted);
             }
             catch (PatternSyntaxException e)
             {
@@ -72,7 +72,7 @@ public class RE2QuoteMetaTest
             }
             string src = "abc" + pattern + "def";
             string repl = "xyz";
-            string replaced = re.replaceAll(src, repl);
+            string replaced = re.ReplaceAll(src, repl);
             string expected = "abcxyzdef";
             if (!replaced.Equals(expected))
             {
@@ -92,7 +92,7 @@ public class RE2QuoteMetaTest
     public void testLiteralPrefix()
     {
         // Literal method needs to scan the pattern.
-        RE2 re = RE2.compile(pattern);
+        RE2 re = RE2.Compile(pattern);
         if (re.prefixComplete != isLiteral)
         {
             fail(

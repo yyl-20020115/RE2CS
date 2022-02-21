@@ -25,8 +25,8 @@ public class RE2MatchTest
     [Test]
     public void testMatch()
     {
-        RE2 re = RE2.compile(test.pat);
-        bool m = re.match(test.text);
+        RE2 re = RE2.Compile(test.pat);
+        bool m = re.Match(test.text);
         if (m != (test.matches.Length > 0))
         {
             fail(
@@ -34,7 +34,7 @@ public class RE2MatchTest
                     "RE2.match failure on %s: %s should be %s", test, m, test.matches.Length > 0));
         }
         // now try bytes
-        m = re.matchUTF8(test.textUTF8);
+        m = re.MatchUTF8(test.textUTF8);
         if (m != (test.matches.Length > 0))
         {
             fail(
@@ -51,7 +51,7 @@ public class RE2MatchTest
     [Test]
     public void testMatchFunction()
     {
-        bool m = RE2.match(test.pat, test.text);
+        bool m = RE2.Match(test.pat, test.text);
         if (m != (test.matches.Length > 0))
         {
             fail(

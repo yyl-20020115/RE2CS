@@ -134,7 +134,7 @@ public class Pattern
             re2Flags &= ~RE2.UNICODE_GROUPS;
         }
         return new Pattern(
-            regex, flags, RE2.compileImpl(flregex, re2Flags, (flags & LONGEST_MATCH) != 0));
+            regex, flags, RE2.CompileImpl(flregex, re2Flags, (flags & LONGEST_MATCH) != 0));
     }
 
     /**
@@ -245,7 +245,7 @@ public class Pattern
      * @param s The string to be literalized
      * @return A literal string replacement
      */
-    public static string Quote(string s) => RE2.quoteMeta(s);
+    public static string Quote(string s) => RE2.QuoteMeta(s);
 
 
     public override string ToString() => _pattern;
@@ -256,7 +256,7 @@ public class Pattern
      *
      * @return the number of capturing groups in this pattern
      */
-    public int GroupCount => _re2.numberOfCapturingGroups();
+    public int GroupCount => _re2.NumberOfCapturingGroups;
 
     /**
      * Return a map of the capturing groups in this matcher's pattern, where key is the name and value

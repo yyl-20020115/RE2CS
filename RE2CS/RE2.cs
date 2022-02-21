@@ -110,15 +110,14 @@ public class RE2
     public int prefixRune; // first rune _in prefix
 
     // Cache of machines for running regexp. Forms a Treiber stack.
-    private readonly AtomicReference<Machine> pooled 
-        = new();
+    private readonly AtomicReference<Machine> pooled  = new();
 
-    public Dictionary<string, int> namedGroups;
+    public Dictionary<string, int>? namedGroups;
 
     // This is visible for testing.
     public RE2(string expr)
     {
-        RE2 re2 = RE2.compile(expr);
+        var re2 = RE2.Compile(expr);
         // Copy everything.
         this.expr = re2.expr;
         this.prog = re2.prog;
@@ -151,10 +150,7 @@ public class RE2
      * and other implementations use, although this package implements it without the expense of
      * backtracking. For POSIX leftmost-longest matching, see {@link #compilePOSIX}.
      */
-    public static RE2 compile(string expr)
-    {
-        return compileImpl(expr, PERL, /*longest=*/ false);
-    }
+    public static RE2 Compile(string expr) => CompileImpl(expr, PERL, /*longest=*/ false);
 
     /**
      * {@code compilePOSIX} is like {@link #compile} but restricts the regular expression to POSIX ERE
@@ -174,16 +170,16 @@ public class RE2
      * second, and so on from left to right. The POSIX rule is computationally prohibitive and not
      * even well-defined. See http://swtch.com/~rsc/regexp/regexp2.html#posix
      */
-    static RE2 compilePOSIX(string expr)
+    static RE2 CompilePOSIX(string expr)
     {
-        return compileImpl(expr, POSIX, /*longest=*/ true);
+        return CompileImpl(expr, POSIX, /*longest=*/ true);
     }
 
     // Exposed to ExecTests.
-    public static RE2 compileImpl(string expr, int mode, bool longest)
+    public static RE2 CompileImpl(string expr, int mode, bool longest)
     {
-        Regexp re = Parser.parse(expr, mode);
-        int maxCap = re.maxCap(); // (may shrink during simplify)
+        var re = Parser.parse(expr, mode);
+        int maxCap = re.MaxCap(); // (may shrink during simplify)
         re = Simplifier.Simplify(re);
         Program prog = Compiler.CompileRegexp(re);
         RE2 re2 = new RE2(expr, prog, maxCap, longest);
@@ -209,22 +205,22 @@ public class RE2
     /**
      * Returns the number of parenthesized subexpressions _in this regular expression.
      */
-    public int numberOfCapturingGroups()
-    {
-        return numSubexp;
-    }
+    public int NumberOfCapturingGroups => numSubexp;
 
     // get() returns a machine to use for matching |this|.  It uses |this|'s
     // machine cache if possible, to avoid unnecessary allocation.
-    Machine get()
+    Machine? Machine
     {
-        // Pop a machine off the stack if available.
-        Machine head;
-        do
+        get
         {
-            head = pooled.Value;
-        } while (head != null && !pooled.compareAndSet(head, head.next));
-        return head;
+            // Pop a machine off the stack if available.
+            Machine? head = null;
+            do
+            {
+                head = pooled.Value;
+            } while (head != null && !pooled.compareAndSet(head, head.next));
+            return head;
+        }
     }
 
     // Clears the memory associated with this machine.
@@ -237,7 +233,7 @@ public class RE2
     // limit the size of the cache, so it will grow to the maximum number of
     // simultaneous matches run using |this|.  (The cache empties when |this|
     // gets garbage collected or reset is called.)
-    void put(Machine m, bool isNew)
+    void PutMachine(Machine m, bool isNew)
     {
         // To avoid allocation _in the single-thread or uncontended case, reuse a node only if
         // it was the only element _in the stack when it was popped, and it's the only element
@@ -261,17 +257,14 @@ public class RE2
     }
 
 
-    public override string ToString()
-    {
-        return expr;
-    }
+    public override string ToString() => expr;
 
     // doExecute() finds the leftmost match _in the input and returns
     // the position of its subexpressions.
     // Derived from exec.go.
-    private int[] doExecute(MachineInput _in, int pos, int anchor, int ncap)
+    private int[] DoExecute(MachineInput _in, int pos, int anchor, int ncap)
     {
-        Machine m = get();
+        Machine? m = Machine;
         // The Treiber stack cannot reuse nodes, unless the node to be reused has only ever been at
         // the bottom of the stack (i.e., next == null).
         bool isNew = false;
@@ -288,22 +281,16 @@ public class RE2
 
         m.Init(ncap);
         int[] cap = m.Match(_in, pos, anchor) ? m.Submatches() : null;
-        put(m, isNew);
+        PutMachine(m, isNew);
         return cap;
     }
 
     /**
      * Returns true iff this regexp matches the string {@code s}.
      */
-    public bool match(string s)
-    {
-        return doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 0) != null;
-    }
+    public bool Match(string s) => DoExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 0) != null;
 
-    public bool match(string input, int start, int end, int anchor, int[] group, int ngroup)
-    {
-        return match(MatcherInput.Utf16(input), start, end, anchor, group, ngroup);
-    }
+    public bool Match(string input, int start, int end, int anchor, int[] group, int ngroup) => Match(MatcherInput.Utf16(input), start, end, anchor, group, ngroup);
 
     /**
      * Matches the regular expression against input starting at position start and ending at position
@@ -319,7 +306,7 @@ public class RE2
      * @param ngroup the number of array pairs to fill _in
      * @return true if a match was found
      */
-    public bool match(MatcherInput input, int start, int end, int anchor, int[] group, int ngroup)
+    public bool Match(MatcherInput input, int start, int end, int anchor, int[] group, int ngroup)
     {
         if (start > end)
         {
@@ -336,7 +323,7 @@ public class RE2
             input.Encoding == Encodings.UTF_16
                 ? MachineInput.FromUTF16(input.AsCharSequence(), 0, end)
                 : MachineInput.FromUTF8(input.AsBytes(), 0, end);
-        int[] groupMatch = doExecute(machineInput, start, anchor, 2 * ngroup);
+        int[] groupMatch = DoExecute(machineInput, start, anchor, 2 * ngroup);
 
         if (groupMatch == null)
         {
@@ -354,10 +341,7 @@ public class RE2
      * Returns true iff this regexp matches the UTF-8 byte array {@code b}.
      */
     // This is visible for testing.
-    public bool matchUTF8(byte[] b)
-    {
-        return doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 0) != null;
-    }
+    public bool MatchUTF8(byte[] b) => DoExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 0) != null;
 
     /**
      * Returns true iff textual regular expression {@code pattern} matches string {@code s}.
@@ -366,9 +350,9 @@ public class RE2
      * More complicated queries need to use {@link #compile} and the full {@code RE2} interface.
      */
     // This is visible for testing.
-    public static bool match(string pattern, string s)
+    public static bool Match(string pattern, string s)
     {
-        return compile(pattern).match(s);
+        return Compile(pattern).Match(s);
     }
 
     // This is visible for testing.
@@ -383,7 +367,7 @@ public class RE2
      * replacement string.
      */
     // This is visible for testing.
-    public string replaceAll(string src, string repl)
+    public string ReplaceAll(string src, string repl)
     {
         //new ReplaceFunc()
         //{
@@ -393,7 +377,7 @@ public class RE2
         //    }
         //}
 
-        return replaceAllFunc(
+        return ReplaceAllFunc(
             src,null,
         2 * src.Length + 1);
         // TODO(afrozm): Is the reasoning correct, there can be at the most 2*len +1
@@ -407,7 +391,7 @@ public class RE2
      * replacement string.
      */
     // This is visible for testing.
-    public string replaceFirst(string src, string repl)
+    public string ReplaceFirst(string src, string repl)
     {
         //new ReplaceFunc()
         //{
@@ -418,7 +402,7 @@ public class RE2
         //    return repl;
         //    }
         //}
-        return replaceAllFunc(
+        return ReplaceAllFunc(
             src, null,
             1);
     }
@@ -430,23 +414,23 @@ public class RE2
      * replacement string.
      */
     // This is visible for testing.
-    public string replaceAllFunc(string src, ReplaceFunc repl, int maxReplaces)
+    public string ReplaceAllFunc(string src, ReplaceFunc repl, int maxReplaces)
     {
         int lastMatchEnd = 0; // end position of the most recent match
         int searchPos = 0; // position where we next look for a match
-        StringBuilder buf = new StringBuilder();
+        var builder = new StringBuilder();
         MachineInput input = MachineInput.FromUTF16(src);
         int numReplaces = 0;
         while (searchPos <= src.Length)
         {
-            int[] a = doExecute(input, searchPos, UNANCHORED, 2);
+            int[] a = DoExecute(input, searchPos, UNANCHORED, 2);
             if (a == null || a.Length == 0)
             {
                 break; // no more matches
             }
 
             // Copy the unmatched characters before this match.
-            buf.Append(src.Substring(lastMatchEnd, a[0]));
+            builder.Append(src.Substring(lastMatchEnd, a[0]));
 
             // Now insert a copy of the replacement string, but not for a
             // match of the empty string immediately after another match.
@@ -460,7 +444,7 @@ public class RE2
             // though).
             if (a[1] > lastMatchEnd || a[0] == 0)
             {
-                buf.Append(repl.replace(src.Substring(a[0], a[1])));
+                builder.Append(repl.replace(src.Substring(a[0], a[1])));
                 // Increment the replace count.
                 ++numReplaces;
             }
@@ -490,9 +474,9 @@ public class RE2
         }
 
         // Copy the unmatched characters after the last match.
-        buf.Append(src.Substring(lastMatchEnd));
+        builder.Append(src.Substring(lastMatchEnd));
 
-        return buf.ToString();
+        return builder.ToString();
     }
 
     /**
@@ -500,20 +484,20 @@ public class RE2
      * the returned string is a regular expression matching the literal text. For example,
      * {@code quoteMeta("[foo]").equals("\\[foo\\]")}.
      */
-    public static string quoteMeta(string s)
+    public static string QuoteMeta(string s)
     {
-        StringBuilder b = new StringBuilder(2 * s.Length);
+        var builder = new StringBuilder(2 * s.Length);
         // A char loop is correct because all metacharacters fit _in one UTF-16 code.
         for (int i = 0, len = s.Length; i < len; i++)
         {
             char c = s[i];
             if ("\\.+*?()|[]{}^$".IndexOf(c) >= 0)
             {
-                b.Append('\\');
+                builder.Append('\\');
             }
-            b.Append(c);
+            builder.Append(c);
         }
-        return b.ToString();
+        return builder.ToString();
     }
 
     // The number of capture values _in the program may correspond
@@ -522,7 +506,7 @@ public class RE2
     // maximum capture _in the program is 0 but we need to return
     // an expression for \1.  Pad returns a with -1s appended as needed;
     // the result may alias a.
-    private int[] pad(int[] a)
+    private int[] Pad(int[] a)
     {
         if (a == null)
         {
@@ -547,7 +531,7 @@ public class RE2
     }
 
     // Find matches _in input.
-    private void allMatches(MachineInput input, int n, DeliverFunc deliver)
+    private void AllMatches(MachineInput input, int n, DeliverFunc deliver)
     {
         int end = input.EndPos();
         if (n < 0)
@@ -556,7 +540,7 @@ public class RE2
         }
         for (int pos = 0, i = 0, prevMatchEnd = -1; i < n && pos <= end;)
         {
-            int[] matches = doExecute(input, pos, UNANCHORED, prog.numCap);
+            int[] matches = DoExecute(input, pos, UNANCHORED, prog.numCap);
             if (matches == null || matches.Length == 0)
             {
                 break;
@@ -590,7 +574,7 @@ public class RE2
 
             if (accept)
             {
-                deliver.deliver(pad(matches));
+                deliver.deliver(Pad(matches));
                 i++;
             }
         }
@@ -640,9 +624,9 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public byte[] findUTF8(byte[] b)
+    public byte[] FindUTF8(byte[] b)
     {
-        int[] a = doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 2);
+        int[] a = DoExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 2);
         if (a == null)
         {
             return null;
@@ -658,9 +642,9 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public int[] findUTF8Index(byte[] b)
+    public int[] FindUTF8Index(byte[] b)
     {
-        int[] a = doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 2);
+        int[] a = DoExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, 2);
         if (a == null)
         {
             return null;
@@ -678,9 +662,9 @@ public class RE2
      * {@link #findSubmatch} if it is necessary to distinguish these cases.
      */
     // This is visible for testing.
-    public string find(string s)
+    public string Find(string s)
     {
-        int[] a = doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 2);
+        int[] a = DoExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 2);
         if (a == null)
         {
             return "";
@@ -697,9 +681,9 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public int[] findIndex(string s)
+    public int[] FindIndex(string s)
     {
-        return doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 2);
+        return DoExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, 2);
     }
 
     /**
@@ -711,9 +695,9 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public byte[][] findUTF8Submatch(byte[] b)
+    public byte[][] FindUTF8Submatch(byte[] b)
     {
-        int[] a = doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, prog.numCap);
+        int[] a = DoExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, prog.numCap);
         if (a == null)
         {
             return null;
@@ -738,9 +722,9 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public int[] findUTF8SubmatchIndex(byte[] b)
+    public int[] FindUTF8SubmatchIndex(byte[] b)
     {
-        return pad(doExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, prog.numCap));
+        return Pad(DoExecute(MachineInput.FromUTF8(b), 0, UNANCHORED, prog.numCap));
     }
 
     /**
@@ -752,9 +736,9 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public string[] findSubmatch(string s)
+    public string[] FindSubmatch(string s)
     {
-        int[] a = doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, prog.numCap);
+        int[] a = DoExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, prog.numCap);
         if (a == null)
         {
             return null;
@@ -779,9 +763,9 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public int[] findSubmatchIndex(string s)
+    public int[] FindSubmatchIndex(string s)
     {
-        return pad(doExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, prog.numCap));
+        return Pad(DoExecute(MachineInput.FromUTF16(s), 0, UNANCHORED, prog.numCap));
     }
 
     /**
@@ -796,10 +780,10 @@ public class RE2
      * by |b|.
      */
     // This is visible for testing.
-    public List<byte[]> findAllUTF8(byte[] b, int n)
+    public List<byte[]> FindAllUTF8(byte[] b, int n)
     {
         List<byte[]> result = new();
-        allMatches(
+        AllMatches(
             MachineInput.FromUTF8(b),
             n, null
         //        new DeliverFunc() {
@@ -826,10 +810,10 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public List<int[]> findAllUTF8Index(byte[] b, int n)
+    public List<int[]> FindAllUTF8Index(byte[] b, int n)
     {
         List<int[]> result = new();
-        allMatches(
+        AllMatches(
             MachineInput.FromUTF8(b),
             n, null
         //new DeliverFunc() {
@@ -856,10 +840,10 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public List<string> findAll(string s, int n)
+    public List<string> FindAll(string s, int n)
     {
         List<string> result = new();
-        allMatches(
+        AllMatches(
             MachineInput.FromUTF16(s),
             n, null
         //new DeliverFunc() {
@@ -886,10 +870,10 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public List<int[]> findAllIndex(string s, int n)
+    public List<int[]> FindAllIndex(string s, int n)
     {
         List<int[]> result = new();
-        allMatches(
+        AllMatches(
             MachineInput.FromUTF16(s),
             n, null
         //new DeliverFunc() {
@@ -916,10 +900,10 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public List<byte[][]> findAllUTF8Submatch(byte[] b, int n)
+    public List<byte[][]> FindAllUTF8Submatch(byte[] b, int n)
     {
         List<byte[][]> result = new();
-        allMatches(
+        AllMatches(
             MachineInput.FromUTF8(b),
             n, null
         //new DeliverFunc() {
@@ -954,10 +938,10 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public List<int[]> findAllUTF8SubmatchIndex(byte[] b, int n)
+    public List<int[]> FindAllUTF8SubmatchIndex(byte[] b, int n)
     {
         List<int[]> result = new();
-        allMatches(
+        AllMatches(
             MachineInput.FromUTF8(b),
             n, null
         //new DeliverFunc() {
@@ -984,10 +968,10 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public List<string[]> findAllSubmatch(string s, int n)
+    public List<string[]> FindAllSubmatch(string s, int n)
     {
         List<string[]> result = new ();
-        allMatches(
+        AllMatches(
             MachineInput.FromUTF16(s),
             n, null
         //        new DeliverFunc() {
@@ -1022,10 +1006,10 @@ public class RE2
      * A return value of null indicates no match.
      */
     // This is visible for testing.
-    public List<int[]> findAllSubmatchIndex(string s, int n)
+    public List<int[]> FindAllSubmatchIndex(string s, int n)
     {
         List<int[]> result = new ();
-        allMatches(
+        AllMatches(
             MachineInput.FromUTF16(s),
             n, null
         //new DeliverFunc() {

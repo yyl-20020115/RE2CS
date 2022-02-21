@@ -44,7 +44,7 @@ public class RE2TestNumSubexps
         assertEquals(
         "numberOfCapturingGroups(" + input + ")",
         expected,
-        RE2.compile(input).numberOfCapturingGroups());
+        RE2.Compile(input).NumberOfCapturingGroups);
     }
     public static void assertEquals(string message,int v1, int v2)
     {

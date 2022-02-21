@@ -64,7 +64,7 @@ public class RE2CompileTest
     {
         try
         {
-            RE2.compile(input);
+            RE2.Compile(input);
             if (expectedError != null)
             {
                 fail("RE2.compile(" + input + ") was successful, expected " + expectedError);

@@ -63,7 +63,7 @@ public class Parser
         if (re != null && re.subs != null && re.subs.Length > 0)
         {
             free = re.subs[0];
-            re.reinit();
+            re.Reinit();
             re.op = op;
         }
         else

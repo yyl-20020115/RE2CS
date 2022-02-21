@@ -161,14 +161,14 @@ public class RE2ReplaceTest
         RE2 re = null;
         try
         {
-            re = RE2.compile(pattern);
+            re = RE2.Compile(pattern);
         }
         catch (PatternSyntaxException e)
         {
             fail(string.Format("Unexpected error compiling {0}: {1}", pattern, e.Message));
         }
         string actual =
-            replaceFirst ? re.replaceFirst(source, replacement) : re.replaceAll(source, replacement);
+            replaceFirst ? re.ReplaceFirst(source, replacement) : re.ReplaceAll(source, replacement);
         if (!actual.Equals(expected))
         {
             fail(
