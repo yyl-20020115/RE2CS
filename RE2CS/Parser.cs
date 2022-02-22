@@ -783,81 +783,6 @@ public class Parser
         return re;
     }
 
-    // Parsing.
-
-    // StringIterator: a stream of runes with an opaque cursor, permitting
-    // rewinding.  The units of the cursor are not specified beyond the
-    // fact that ASCII characters are single width.  (Cursor positions
-    // could be UTF-8 byte indices, UTF-16 code indices or rune indices.)
-    //
-    // In particular, be careful with:
-    // - skip(int): only use this to advance over ASCII characters
-    //   since these always have a width of 1.
-    // - skip(string): only use this to advance over strings which are
-    //   known to be at the current position, e.g. due to prior call to
-    //   lookingAt().
-    // Only use pop() to advance over possibly non-ASCII runes.
-    public class StringIterator
-    {
-        private readonly string str; // a stream of UTF-16 codes
-        private int _pos = 0; // current position in UTF-16 string
-
-        public StringIterator(string str)
-        {
-            this.str = str;
-        }
-
-        // Returns the cursor position.  Do not interpret the result!
-        public int Pos => _pos;
-
-        // Resets the cursor position to a previous value returned by pos().
-        public void RewindTo(int pos) => this._pos = pos;
-
-        // Returns true unless the stream is exhausted.
-        public bool HasMore => _pos < str.Length;
-
-        // Returns the rune at the cursor position.
-        // Precondition: |more()|.
-        public int Peek()
-        {
-            return char.ConvertToUtf32(str, _pos);// str[_pos];
-        }
-        // Advances the cursor by |n| positions, which must be ASCII runes.
-        //
-        // (In practise, this is only ever used to skip over regexp
-        // metacharacters that are ASCII, so there is no numeric difference
-        // between indices into  UTF-8 bytes, UTF-16 codes and runes.)
-        public void Skip(int n) => _pos += n;
-
-        // Advances the cursor by the number of cursor positions in |s|.
-        public void SkipString(string s) => _pos += s.Length;
-
-        // Returns the rune at the cursor position, and advances the cursor
-        // past it.  Precondition: |more()|.
-        public int Pop()
-        {
-            int r = char.ConvertToUtf32(str,_pos);// str.codePointAt(Pos);
-            _pos += (r > char.MaxValue ? 2 : 1);// new Rune(r).Utf16SequenceLength;//. Character.charCount(r);
-            return r;
-        }
-
-        // Equivalent to both peek() == c but more efficient because we
-        // don't support surrogates.  Precondition: |more()|.
-        public bool LookingAt(char c) => str[_pos] == c;
-
-        // Equivalent to rest().StartsWith(s).
-        public bool LookingAt(string s) => Rest().StartsWith(s);
-
-        // Returns the rest of the pattern as a Java UTF-16 string.
-        public string Rest() => str.Substring(_pos);
-
-        // Returns the Substring from |beforePos| to the current position.
-        // |beforePos| must have been previously returned by |pos()|.
-        public string From(int beforePos) => str.Substring(beforePos, _pos - beforePos);
-
-        public override string ToString() => Rest();
-    }
-
     /**
      * Parse regular expression pattern {@var pattern} with mode flags {@var flags}.
      */
@@ -873,36 +798,36 @@ public class Parser
 
         // Otherwise, must do real work.
         int lastRepeatPos = -1, min = -1, max = -1;
-        var t = new StringIterator(wholeRegexp);
-        while (t.HasMore)
+        var Reader = new StringIterator(wholeRegexp);
+        while (Reader.HasMore)
         {
             int repeatPos = -1;
-        bigswitch:
-            switch (t.Peek())
+        //bigswitch:
+            switch (Reader.Peek())
             {
                 default:
-                    Literal(t.Pop());
+                    Literal(Reader.Pop());
                     break;
 
                 case '(':
-                    if ((flags & RE2.PERL_X) != 0 && t.LookingAt("(?"))
+                    if ((flags & RE2.PERL_X) != 0 && Reader.LookingAt("(?"))
                     {
                         // Flag changes and non-capturing groups.
-                        ParsePerlFlags(t);
+                        ParsePerlFlags(Reader);
                         break;
                     }
                     Op(Regexp.Op.LEFT_PAREN).cap = ++numCap;
-                    t.Skip(1); // '('
+                    Reader.Skip(1); // '('
                     break;
 
                 case '|':
                     ParseVerticalBar();
-                    t.Skip(1); // '|'
+                    Reader.Skip(1); // '|'
                     break;
 
                 case ')':
                     ParseRightParen();
-                    t.Skip(1); // ')'
+                    Reader.Skip(1); // ')'
                     break;
 
                 case '^':
@@ -914,7 +839,7 @@ public class Parser
                     {
                         Op(Regexp.Op.BEGIN_LINE);
                     }
-                    t.Skip(1); // '^'
+                    Reader.Skip(1); // '^'
                     break;
 
                 case '$':
@@ -926,7 +851,7 @@ public class Parser
                     {
                         Op(Regexp.Op.END_LINE);
                     }
-                    t.Skip(1); // '$'
+                    Reader.Skip(1); // '$'
                     break;
 
                 case '.':
@@ -939,20 +864,20 @@ public class Parser
                     {
                         Op(Regexp.Op.ANY_CHAR_NOT_NL);
                     }
-                    t.Skip(1); // '.'
+                    Reader.Skip(1); // '.'
                     break;
 
                 case '[':
-                    ParseClass(t);
+                    ParseClass(Reader);
                     break;
 
                 case '*':
                 case '+':
                 case '?':
                     {
-                        repeatPos = t.Pos;
+                        repeatPos = Reader.Pos;
                         Regexp.Op op = Regexp.Op.ANY_CHAR;
-                        switch (t.Pop())
+                        switch (Reader.Pop())
                         {
                             case '*':
                                 op = Regexp.Op.STAR;
@@ -964,34 +889,34 @@ public class Parser
                                 op = Regexp.Op.QUEST;
                                 break;
                         }
-                        Repeat(op, min, max, repeatPos, t, lastRepeatPos);
+                        Repeat(op, min, max, repeatPos, Reader, lastRepeatPos);
                         // (min and max are now dead.)
                         break;
                     }
                 case '{':
                     {
-                        repeatPos = t.Pos;
-                        int minMax = ParseRepeat(t);
+                        repeatPos = Reader.Pos;
+                        int minMax = ParseRepeat(Reader);
                         if (minMax < 0)
                         {
                             // If the repeat cannot be parsed, { is a literal.
-                            t.RewindTo(repeatPos);
-                            Literal(t.Pop()); // '{'
+                            Reader.RewindTo(repeatPos);
+                            Literal(Reader.Pop()); // '{'
                             break;
                         }
                         min = minMax >> 16;
                         max = (short)(minMax & 0xffff); // sign extend
-                        Repeat(Regexp.Op.REPEAT, min, max, repeatPos, t, lastRepeatPos);
+                        Repeat(Regexp.Op.REPEAT, min, max, repeatPos, Reader, lastRepeatPos);
                         break;
                     }
 
                 case '\\':
                     {
-                        int savedPos = t.Pos;
-                        t.Skip(1); // '\\'
-                        if ((flags & RE2.PERL_X) != 0 && t.HasMore)
+                        int savedPos = Reader.Pos;
+                        Reader.Skip(1); // '\\'
+                        if ((flags & RE2.PERL_X) != 0 && Reader.HasMore)
                         {
-                            int c = t.Pop();
+                            int c = Reader.Pop();
                             switch (c)
                             {
                                 case 'A':
@@ -1012,14 +937,14 @@ public class Parser
                                 case 'Q':
                                     {
                                         // \Q ... \E: the ... is always literals
-                                        string lit = t.Rest();
+                                        string lit = Reader.Rest();
                                         int i = lit.IndexOf("\\E");
                                         if (i >= 0)
                                         {
                                             lit = lit.Substring(0, i - 0);
                                         }
-                                        t.SkipString(lit);
-                                        t.SkipString("\\E");
+                                        Reader.SkipString(lit);
+                                        Reader.SkipString("\\E");
                                         for (int j = 0; j < lit.Length;)
                                         {
                                             int codepoint = char.ConvertToUtf32(lit, j);// lit.codePointAt(j);
@@ -1032,7 +957,7 @@ public class Parser
                                     Op(Regexp.Op.END_TEXT);
                                     goto outswitch;
                                 default:
-                                    t.RewindTo(savedPos);
+                                    Reader.RewindTo(savedPos);
                                     break;
                             }
                         }
@@ -1041,10 +966,10 @@ public class Parser
                         re.flags = flags;
 
                         // Look for Unicode character group like \p{Han}
-                        if (t.LookingAt("\\p") || t.LookingAt("\\P"))
+                        if (Reader.LookingAt("\\p") || Reader.LookingAt("\\P"))
                         {
                             var cc2 = new CharClass();
-                            if (ParseUnicodeClass(t, cc2))
+                            if (ParseUnicodeClass(Reader, cc2))
                             {
                                 re.runes = cc2.ToArray();
                                 Push(re);
@@ -1054,18 +979,18 @@ public class Parser
 
                         // Perl character class escape.
                         var cc = new CharClass();
-                        if (ParsePerlClassEscape(t, cc))
+                        if (ParsePerlClassEscape(Reader, cc))
                         {
                             re.runes = cc.ToArray();
                             Push(re);
                             goto outswitch;
                         }
 
-                        t.RewindTo(savedPos);
+                        Reader.RewindTo(savedPos);
                         Reuse(re);
 
                         // Ordinary single-character escape.
-                        Literal(ParseEscape(t));
+                        Literal(ParseEscape(Reader));
                         break;
                     }
             }
@@ -1085,8 +1010,9 @@ public class Parser
         {
             throw new PatternSyntaxException(ERR_MISSING_PAREN, wholeRegexp);
         }
-        stack.Peek().namedGroups = namedGroups;
-        return stack.Peek();
+        var top = stack.Pop();
+        top.namedGroups = namedGroups;
+        return top;
     }
 
     // parseRepeat parses {min} (max=min) or {min,} (max=-1) or {min,max}.
